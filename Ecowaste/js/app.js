@@ -35,6 +35,7 @@
         // --- CONFIGURATION ---
         // UPDATE THIS URL after you deploy your backend to Render!
         const PRODUCTION_BACKEND_URL = 'https://ecowaste-node.onrender.com';
+        const PRODUCTION_PB_URL = 'https://ecowaste-pocketbase.onrender.com';
 
         function resolveApiBase() {
             const host = window.location.host.toLowerCase();
@@ -49,7 +50,7 @@
             if (window.location.protocol === 'file:' || host.includes('localhost') || host.includes('127.0.0.1')) {
                 return 'http://127.0.0.1:8090';
             }
-            return PRODUCTION_BACKEND_URL;
+            return PRODUCTION_PB_URL;
         }
 
         const API_BASE = resolveApiBase();
