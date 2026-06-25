@@ -164,7 +164,7 @@
 
             // Load the custom-trained local model instead of the generic internet one
             // We load it from the frontend-next folder where the converted model lives
-            modelLoadPromise = tf.loadLayersModel('/frontend-next/public/model/model.json')
+            modelLoadPromise = tf.loadLayersModel('/model/model.json')
                 .then((loadedModel) => {
                     // Create a wrapper that mimics the old MobileNet .classify() API
                     // so we don't have to rewrite the rest of the old frontend
