@@ -32,16 +32,28 @@
         // Auth State
         let currentUser = null;
         let authToken = null;
+        // --- CONFIGURATION ---
+        // UPDATE THIS URL after you deploy your backend to Render!
+        const PRODUCTION_BACKEND_URL = 'https://my-ecowaste-backend.onrender.com';
+
         function resolveApiBase() {
             const host = window.location.host.toLowerCase();
             if (window.location.protocol === 'file:' || host.includes('localhost') || host.includes('127.0.0.1')) {
                 return 'http://localhost:3002/api';
             }
-            return '/api';
+            return PRODUCTION_BACKEND_URL + '/api';
+        }
+
+        function resolvePbUrl() {
+            const host = window.location.host.toLowerCase();
+            if (window.location.protocol === 'file:' || host.includes('localhost') || host.includes('127.0.0.1')) {
+                return 'http://127.0.0.1:8090';
+            }
+            return PRODUCTION_BACKEND_URL;
         }
 
         const API_BASE = resolveApiBase();
-        const PB_URL = 'http://127.0.0.1:8090';
+        const PB_URL = resolvePbUrl();
 
         // Quiz State
         let quizAnswers = {};

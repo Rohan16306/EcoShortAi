@@ -1,0 +1,18 @@
+services:
+  # 1. PocketBase Database Service
+  - type: web
+    name: ecowaste-pocketbase
+    env: docker
+    dockerfilePath: backend-pb/Dockerfile
+    # NOTE: Render's free tier spins down after inactivity.
+    # Data is retained because we packaged pb_data in the Dockerfile.
+
+  # 2. Node.js Express Server
+  - type: web
+    name: ecowaste-node
+    env: node
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
