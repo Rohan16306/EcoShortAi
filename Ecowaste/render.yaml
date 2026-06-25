@@ -3,6 +3,7 @@ services:
   - type: web
     name: ecowaste-pocketbase
     env: docker
+    plan: free
     dockerfilePath: backend-pb/Dockerfile
     # NOTE: Render's free tier spins down after inactivity.
     # Data is retained because we packaged pb_data in the Dockerfile.
@@ -11,6 +12,7 @@ services:
   - type: web
     name: ecowaste-node
     env: node
+    plan: free
     buildCommand: npm install
     startCommand: node server.js
     envVars:
