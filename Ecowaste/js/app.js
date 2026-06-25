@@ -38,18 +38,10 @@
         const PRODUCTION_PB_URL = 'https://ecowaste-pocketbase.onrender.com';
 
         function resolveApiBase() {
-            const host = window.location.host.toLowerCase();
-            if (window.location.protocol === 'file:' || host.includes('localhost') || host.includes('127.0.0.1')) {
-                return 'http://localhost:3002/api';
-            }
             return PRODUCTION_BACKEND_URL + '/api';
         }
 
         function resolvePbUrl() {
-            const host = window.location.host.toLowerCase();
-            if (window.location.protocol === 'file:' || host.includes('localhost') || host.includes('127.0.0.1')) {
-                return 'http://127.0.0.1:8090';
-            }
             return PRODUCTION_PB_URL;
         }
 
