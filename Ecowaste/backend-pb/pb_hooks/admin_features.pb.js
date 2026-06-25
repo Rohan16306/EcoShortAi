@@ -1,29 +1,35 @@
 // Seed default admin user on startup if it doesn't exist
 onAfterBootstrap((e) => {
-    const adminEmail = "rohanipawar16@gmail.com";
     try {
-        const record = $app.dao().findAuthRecordByEmail("users", adminEmail);
-        record.set("role", "ROLE_ADMIN");
-        record.set("is_active", true);
-        $app.dao().saveRecord(record);
-        console.log("Updated existing user to admin: " + adminEmail);
-    } catch (err) {
-        // Record not found, create it
-        const collection = $app.dao().findCollectionByNameOrId("users");
-        const record = new Record(collection);
-        record.setUsername("admin_" + Date.now());
-        record.setEmail(adminEmail);
-        record.setPassword("12344321");
-        record.set("name", "Rohan Admin");
-        record.set("role", "ROLE_ADMIN");
-        record.set("is_active", true);
-        
+        const adminEmail = "rohanipawar16@gmail.com";
         try {
+            const record = $app.dao().findAuthRecordByEmail("users", adminEmail);
+            record.set("role", "ROLE_ADMIN");
+            record.set("is_active", true);
             $app.dao().saveRecord(record);
-            console.log("Seeded new admin user: " + adminEmail);
-        } catch (saveErr) {
-            console.error("Failed to seed admin:", saveErr);
+            console.log("Updated existing user to admin: " + adminEmail);
+        } catch (err) {
+            // Record not found, create it
+            const collection = $app.dao().findCollectionByNameOrId("users");
+            if (collection) {
+                const record = new Record(collection);
+                record.setUsername("admin_" + Date.now());
+                record.setEmail(adminEmail);
+                record.setPassword("12344321");
+                record.set("name", "Rohan Admin");
+                record.set("role", "ROLE_ADMIN");
+                record.set("is_active", true);
+                
+                try {
+                    $app.dao().saveRecord(record);
+                    console.log("Seeded new admin user: " + adminEmail);
+                } catch (saveErr) {
+                    console.error("Failed to seed admin:", saveErr);
+                }
+            }
         }
+    } catch (criticalErr) {
+        console.error("Skipped admin seeding (tables likely not created yet):", criticalErr.message);
     }
 });
 
