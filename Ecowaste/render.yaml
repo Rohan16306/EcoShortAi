@@ -16,5 +16,7 @@ services:
     buildCommand: npm install
     startCommand: node server.js
     envVars:
+      - key: PB_URL
+        sync: false
       - key: GEMINI_API_KEY
         sync: false

@@ -527,7 +527,8 @@ async function authMiddleware(req, res, next) {
   }
 
   try {
-    const pbRes = await fetch('http://127.0.0.1:8090/api/collections/users/auth-refresh', {
+    const pbBase = process.env.PB_URL || 'http://127.0.0.1:8090';
+    const pbRes = await fetch(`${pbBase}/api/collections/users/auth-refresh`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` }
     });
@@ -554,7 +555,8 @@ async function extractUserIdFromAuth(req) {
   if (isTokenBlacklisted(token)) return null;
 
   try {
-    const pbRes = await fetch('http://127.0.0.1:8090/api/collections/users/auth-refresh', {
+    const pbBase = process.env.PB_URL || 'http://127.0.0.1:8090';
+    const pbRes = await fetch(`${pbBase}/api/collections/users/auth-refresh`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` }
     });
