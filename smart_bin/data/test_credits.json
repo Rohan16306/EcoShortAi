@@ -1,0 +1,17 @@
+{
+  "transactions": [
+    {
+      "transaction_id": "TXN-000001",
+      "timestamp": "2026-06-07T23:14:28.733061",
+      "detected_class": "bottle",
+      "recycling_category": "plastic",
+      "confidence": 0.85,
+      "points_earned": 5,
+      "total_points": 5,
+      "action": "route_to_plastic"
+    }
+  ],
+  "total_points": 5,
+  "transaction_counter": 1,
+  "last_updated": "2026-06-07T23:14:28.734371"
+}

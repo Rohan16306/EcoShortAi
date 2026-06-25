@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+
+# Next.js
+.next/
+out/
+build/
+
+# Python / Environment
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+.env
+.env.local
+
+# Massive Backup Files & Zips (CRITICAL to ignore for GitHub)
+*.zip
+*.tar.gz
+*.rar
+Ecowaste_Merged_Backup*
+Phase 2 test backup*
+frontend-next-backup-UI*
+
+# Temporary AI / IDE Folders
+.qodo/
+.graphify/
+.vscode/
+
+# AI Training Models & Datasets
+ai_training/dataset/
+ai_training/*.whl
+ai_training/*.h5
+ai_training/*.keras
+
+# Database
+backend-pb/pb_data/
+backend/data/db.json
+backend/data/backups/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.mp4

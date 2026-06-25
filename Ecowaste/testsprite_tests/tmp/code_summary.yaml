@@ -1,0 +1,255 @@
+version: "2"
+type: frontend
+tech_stack:
+  - JavaScript
+  - Express.js (Node.js backend serving static HTML)
+  - TailwindCSS (CDN)
+  - TensorFlow.js MobileNet (AI waste classification)
+  - Chart.js (dashboard charts)
+  - FontAwesome (icons)
+  - bcryptjs (password hashing)
+  - jsonwebtoken (JWT auth)
+routes:
+  - path: /
+    file: index.html
+    auth_required: false
+    description: Main SPA landing page with home, detect, rewards, and dashboard views
+  - path: /goals-mission.html
+    file: goals-mission.html
+    auth_required: false
+    description: Goals and mission information page
+  - path: /gallery-contact.html
+    file: gallery-contact.html
+    auth_required: false
+    description: Gallery and contact form page
+  - path: /community.html
+    file: community.html
+    auth_required: false
+    description: Full community chat and story wall page
+  - path: /leaderboard.html
+    file: leaderboard.html
+    auth_required: false
+    description: User leaderboard rankings page
+  - path: /impact.html
+    file: impact.html
+    auth_required: false
+    description: Environmental impact statistics page
+features:
+  - name: User Authentication (Sign Up)
+    description: Users can create an account with name, email and password
+    files:
+      - index.html
+      - js/app.js
+      - server.js
+    entry_route: /
+    user_interactions:
+      - Click Sign Up button in navigation bar
+      - Fill in Full Name field
+      - Fill in Email Address field
+      - Fill in Password field (min 6 characters)
+      - Click Create Account button
+      - See success and get logged in automatically
+    api_calls:
+      - method: POST
+        endpoint: /api/auth/signup
+    auth_required: false
+  - name: User Authentication (Login)
+    description: Users can log in with email and password to access their account
+    files:
+      - index.html
+      - js/app.js
+      - server.js
+    entry_route: /
+    user_interactions:
+      - Click Log In button in navigation bar
+      - Fill in Email Address field
+      - Fill in Password field
+      - Click Log In button to submit
+      - See error message on invalid credentials
+    api_calls:
+      - method: POST
+        endpoint: /api/auth/login
+    auth_required: false
+  - name: AI Waste Scanner (Step 1)
+    description: Upload or capture an image of waste item for AI classification using TensorFlow MobileNet
+    files:
+      - index.html
+      - js/app.js
+    entry_route: /
+    user_interactions:
+      - Navigate to Scan & Earn section via navbar or bottom nav
+      - Click upload area to select an image file OR click Open Camera button
+      - If camera is opened, capture a photo using the camera modal
+      - Preview the uploaded/captured image
+      - Click Analyze & Earn Credits button
+      - View classification results showing material type, recyclability and credits
+    api_calls:
+      - method: POST
+        endpoint: /api/scan/verify/start
+    auth_required: false
+  - name: AI Waste Scanner (Step 2 - Smart Bin Verification)
+    description: Upload a second image of a smart bin to verify the waste was properly disposed, completing the two-step verification
+    files:
+      - index.html
+      - js/app.js
+    entry_route: /
+    user_interactions:
+      - After Step 1 analysis, click Continue to Step 2 button
+      - Upload a smart bin image
+      - Click Analyze Smart Bin Image button
+      - View verification results showing match status and credits awarded
+    api_calls:
+      - method: POST
+        endpoint: /api/scan/verify/complete
+    auth_required: false
+  - name: Rewards Marketplace
+    description: View and redeem eco-credits for badges and rewards with unique redeem codes
+    files:
+      - index.html
+      - js/app.js
+    entry_route: /
+    user_interactions:
+      - Navigate to Marketplace via navbar
+      - View available credits balance
+      - Browse achievement badges section
+      - Browse redeemable rewards with costs
+      - Click Claim button on a reward
+      - See reward claimed modal with redeem code
+      - Copy redeem code
+      - View claimed rewards history table
+    api_calls:
+      - method: PUT
+        endpoint: /api/data/me
+    auth_required: true
+  - name: Dashboard
+    description: User dashboard with scan history, statistics charts, and recycling analytics
+    files:
+      - index.html
+      - js/app.js
+    entry_route: /
+    user_interactions:
+      - Navigate to Dashboard/Profile via navbar or bottom nav
+      - View total credits, items scanned, and badges count
+      - View pie chart of material distribution
+      - View line chart of recycling activity over time
+      - Browse scan history table with item details
+    api_calls:
+      - method: GET
+        endpoint: /api/data/me
+    auth_required: true
+  - name: Community Chat and Story Wall
+    description: Post and view community messages, stories, and photos about recycling
+    files:
+      - index.html
+      - community.html
+      - js/app.js
+      - server.js
+    entry_route: /
+    user_interactions:
+      - View latest community posts feed
+      - Fill in Name field in Share Update form
+      - Select post Type (Chat or Story)
+      - Write a Message
+      - Optionally add a Photo URL
+      - Click Post to Community button
+      - See new post appear in feed
+    api_calls:
+      - method: GET
+        endpoint: /api/community/posts
+      - method: POST
+        endpoint: /api/community/posts
+    auth_required: false
+  - name: Contact Form
+    description: Users can send a message via the contact form on the gallery-contact page
+    files:
+      - gallery-contact.html
+      - server.js
+    entry_route: /gallery-contact.html
+    user_interactions:
+      - Navigate to gallery-contact.html page
+      - Fill in Name field
+      - Fill in Email field
+      - Fill in Message field (min 10 characters)
+      - Click Send/Submit button
+      - See success confirmation
+    api_calls:
+      - method: POST
+        endpoint: /api/contact
+    auth_required: false
+  - name: Leaderboard
+    description: View ranked list of top recycling users by credits and scan count
+    files:
+      - leaderboard.html
+      - server.js
+    entry_route: /leaderboard.html
+    user_interactions:
+      - Navigate to leaderboard.html page
+      - View ranked list of users with name, scans, credits, and badge
+    api_calls:
+      - method: GET
+        endpoint: /api/leaderboard
+    auth_required: false
+  - name: Environmental Impact Statistics
+    description: View global recycling statistics fetched from the backend
+    files:
+      - index.html
+      - impact.html
+      - js/app.js
+      - server.js
+    entry_route: /
+    user_interactions:
+      - Scroll down on home page to Our Collective Impact section
+      - View total eco-credits, items sorted, CO2 saved, rewards claimed
+    api_calls:
+      - method: GET
+        endpoint: /api/stats/global
+    auth_required: false
+  - name: Featured Media Showcase
+    description: Backend-driven media gallery showing recycling images and videos
+    files:
+      - index.html
+      - js/app.js
+      - server.js
+    entry_route: /
+    user_interactions:
+      - Scroll to media showcase section on home page
+      - View featured images and videos with descriptions
+    api_calls:
+      - method: GET
+        endpoint: /api/content/featured
+    auth_required: false
+  - name: Recycling Knowledge Quiz
+    description: Interactive 4-question quiz about recycling facts
+    files:
+      - index.html
+      - js/app.js
+    entry_route: /
+    user_interactions:
+      - Scroll to quiz section on home page
+      - Click answer options for each question
+      - See instant feedback for correct/incorrect answers
+      - View final quiz score
+    api_calls: []
+    auth_required: false
+  - name: Dark Mode Toggle
+    description: Toggle between light and dark themes site-wide
+    files:
+      - index.html
+      - js/app.js
+      - css/styles.css
+    entry_route: /
+    user_interactions:
+      - Click Dark mode toggle button in navigation bar
+      - See site theme switch between light and dark mode
+    api_calls: []
+    auth_required: false
+known_limitations:
+  - issue: Rewards and badges are stored client-side, redemption only updates user data via PUT /api/data/me
+    location: js/app.js
+    impact: Reward catalog is hardcoded in frontend JS, not managed server-side
+  - issue: TensorFlow MobileNet classification maps generic ImageNet labels to waste categories via a heuristic mapping
+    location: js/app.js
+    impact: Classification accuracy depends on keyword mapping, not a purpose-trained waste model
+  - issue: Duplicate image detection uses perceptual hashing stored per-user, not a global dedup system
+    location: js/app.js
+    impact: Different users can scan the same image and both earn credits

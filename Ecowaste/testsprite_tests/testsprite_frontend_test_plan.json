@@ -1,0 +1,1362 @@
+[
+  {
+    "id": "TC001",
+    "title": "Complete a waste scan and earn credits",
+    "description": "This verifies that an authenticated user can finish the two-step AI waste scanner flow and receive a successful credit reward.",
+    "category": "AI Waste Scanner step 1 + step 2 verification flow",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill in {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open the waste scanner"
+      },
+      {
+        "type": "action",
+        "description": "Start the scan step"
+      },
+      {
+        "type": "action",
+        "description": "Complete the verification step"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a successful scan confirmation is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify credits were awarded"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC002",
+    "title": "Create an account and access personalized features",
+    "description": "This verifies that a new visitor can create an account and is automatically logged in with access to authenticated content.",
+    "category": "User Authentication",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Choose to sign up"
+      },
+      {
+        "type": "action",
+        "description": "Fill in full name with a new user name"
+      },
+      {
+        "type": "action",
+        "description": "Fill in email address with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in password with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the account creation form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify authenticated access is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify personalized account state is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC003",
+    "title": "Claim a reward and review redemption history",
+    "description": "This verifies that an authenticated user can redeem a reward, copy the redeem code, and confirm the claim appears in history.",
+    "category": "authenticated rewards redemption / profile update via /api/data/me",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill in {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open the rewards marketplace"
+      },
+      {
+        "type": "action",
+        "description": "Claim a reward"
+      },
+      {
+        "type": "action",
+        "description": "Copy the redeem code"
+      },
+      {
+        "type": "action",
+        "description": "Open the claim history"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a redemption confirmation is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the claim history includes the new reward claim"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC004",
+    "title": "Sign up and reach the home experience",
+    "description": "This verifies that a new user can create an account from the homepage and end up logged in on the main experience.",
+    "category": "Homepage navigation and core account state",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click the sign up entry point"
+      },
+      {
+        "type": "action",
+        "description": "Fill in a new email address into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill in a new password into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the sign up form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the authenticated home experience is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify account-specific navigation is available"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC005",
+    "title": "Log in with valid credentials and reach account state",
+    "description": "This verifies that a returning user can log in and see authenticated personalized access.",
+    "category": "User Authentication",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Choose to log in"
+      },
+      {
+        "type": "action",
+        "description": "Fill in email address with {{LOGIN_USER}}"
+      },
+      {
+        "type": "action",
+        "description": "Fill in password with {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify authenticated access is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify personalized account state is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC006",
+    "title": "Log in and stay authenticated",
+    "description": "This verifies that a returning user can log in and reach the authenticated experience.",
+    "category": "Homepage navigation and core account state",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill in {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the authenticated home experience is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify account-specific navigation is available"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC007",
+    "title": "Scan a waste item and earn credits",
+    "description": "This verifies that an authenticated user can complete the first scan flow and receive a classification result with credits earned.",
+    "category": "AI Waste Scanner",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Log in with valid credentials"
+      },
+      {
+        "type": "action",
+        "description": "Open the AI waste scanner"
+      },
+      {
+        "type": "action",
+        "description": "Select or upload a waste image"
+      },
+      {
+        "type": "action",
+        "description": "Analyze the image"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a material classification result is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify credits earned are displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC008",
+    "title": "Complete the two-step waste verification flow",
+    "description": "This verifies that an authenticated user can finish the second scanner step and receive a final verification outcome with credits awarded.",
+    "category": "AI Waste Scanner",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Log in with valid credentials"
+      },
+      {
+        "type": "action",
+        "description": "Open the AI waste scanner"
+      },
+      {
+        "type": "action",
+        "description": "Select or upload a waste image"
+      },
+      {
+        "type": "action",
+        "description": "Analyze the image"
+      },
+      {
+        "type": "action",
+        "description": "Continue to step 2"
+      },
+      {
+        "type": "action",
+        "description": "Select or upload a smart bin image"
+      },
+      {
+        "type": "action",
+        "description": "Analyze the smart bin image"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a verification match status is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify final credits awarded are displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC009",
+    "title": "Claim a reward and review redeem code history",
+    "description": "This verifies that an authenticated user can claim a reward, view the redeem code, copy it, and see the claim recorded in history.",
+    "category": "Rewards Marketplace",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Log in with valid credentials"
+      },
+      {
+        "type": "action",
+        "description": "Open the rewards marketplace"
+      },
+      {
+        "type": "action",
+        "description": "Claim a reward"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a claimed reward modal is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a redeem code is displayed"
+      },
+      {
+        "type": "action",
+        "description": "Copy the redeem code"
+      },
+      {
+        "type": "action",
+        "description": "Close the modal"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify claimed rewards history is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC010",
+    "title": "Update profile details successfully",
+    "description": "This verifies that an authenticated user can save updated profile information and see the change reflected in their account view.",
+    "category": "authenticated rewards redemption / profile update via /api/data/me",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill in {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open the profile settings"
+      },
+      {
+        "type": "action",
+        "description": "Update editable profile details with valid values"
+      },
+      {
+        "type": "action",
+        "description": "Save the profile changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a profile update confirmation is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the updated profile details are displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC011",
+    "title": "View dashboard analytics",
+    "description": "This verifies that an authenticated user can open the dashboard and see their credits, scanned items, badges, charts, and scan history.",
+    "category": "Dashboard analytics",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill in {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open the dashboard"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify dashboard analytics are displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify credits, items scanned, badge count, charts, and scan history are displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC012",
+    "title": "See dashboard progress after scanning",
+    "description": "This verifies that an authenticated user can open the dashboard and see updated progress indicators after completing a scan.",
+    "category": "AI Waste Scanner",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Log in with valid credentials"
+      },
+      {
+        "type": "action",
+        "description": "Open the AI waste scanner"
+      },
+      {
+        "type": "action",
+        "description": "Select or upload a waste image"
+      },
+      {
+        "type": "action",
+        "description": "Analyze the image"
+      },
+      {
+        "type": "action",
+        "description": "Open the dashboard"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify dashboard credits are displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify scan history is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC013",
+    "title": "View community feed and post an update",
+    "description": "This verifies that an authenticated community user can submit a chat or story update and see it appear in the feed.",
+    "category": "Community chat/story wall posting and feed refresh",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill in {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open the community page"
+      },
+      {
+        "type": "action",
+        "description": "Create a new community post with a message"
+      },
+      {
+        "type": "action",
+        "description": "Submit the community post"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new post appears in the community feed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC014",
+    "title": "Publish a community update with a photo link",
+    "description": "A community user can submit a post with a name, post type, message, and optional photo URL and see it appear in the feed.",
+    "category": "Community Chat and Story Wall",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /community.html"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the name field with a unique display name"
+      },
+      {
+        "type": "action",
+        "description": "Select a post type"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the message field with a community update"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the photo URL field with a valid image link"
+      },
+      {
+        "type": "action",
+        "description": "Submit the community post"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new community post appears in the feed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the submitted photo is associated with the new post"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC015",
+    "title": "View leaderboard rankings",
+    "description": "This verifies that a visitor can open the leaderboard page and see ranked contributors with their activity and rewards metrics.",
+    "category": "Leaderboard",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /leaderboard.html"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the ranked user list is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify contributor names, scan counts, credits, and badge counts are displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC016",
+    "title": "View public impact statistics",
+    "description": "This verifies that a visitor can open the impact page and see the global recycling impact summary.",
+    "category": "Environmental Impact Statistics",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /impact.html"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify global impact statistics are displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify totals for eco-credits, items sorted, carbon savings, and rewards claimed are displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC017",
+    "title": "Post a community update with a photo link and see it in the feed",
+    "description": "This verifies that a community contributor can publish a chat or story update with an optional photo URL and confirm it appears in the community feed.",
+    "category": "Community Contribution",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /community.html"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the community message with a new update"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the optional photo URL with a valid image URL"
+      },
+      {
+        "type": "action",
+        "description": "Submit the community post"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new community post is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the community feed is updated"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC018",
+    "title": "Open dashboard from the main navigation",
+    "description": "An authenticated user can reach the dashboard from the homepage navigation and see their personal progress summary.",
+    "category": "Dashboard",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Log in with {{LOGIN_USER}} and {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Click the dashboard navigation entry"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the dashboard view is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the user’s personal progress summary is displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC019",
+    "title": "View community posts feed",
+    "description": "A visitor can open the community page and browse the latest recycling posts in the feed.",
+    "category": "Community Chat and Story Wall",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /community.html"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the community feed is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify existing community posts are displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC020",
+    "title": "View contact page and send a message",
+    "description": "A visitor can open the gallery and contact page, submit the form successfully, and see confirmation.",
+    "category": "Contact Form",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /gallery-contact.html"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the name field with a visitor name"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with a valid email address"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the message field with a contact request"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a success confirmation is visible"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC021",
+    "title": "View homepage impact summary",
+    "description": "This verifies that a visitor can scroll to the homepage impact section and see the same public environmental summary without leaving the home page.",
+    "category": "Environmental Impact Statistics",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Scroll to the impact section on the homepage"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the collective impact statistics are displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify totals for eco-credits, items sorted, carbon savings, and rewards claimed are displayed"
+      }
+    ],
+    "priority": "High"
+  },
+  {
+    "id": "TC022",
+    "title": "Review dashboard scan history details",
+    "description": "An authenticated user can inspect their dashboard scan history and see the list of previous scans.",
+    "category": "Dashboard",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Log in with {{LOGIN_USER}} and {{LOGIN_PASSWORD}}"
+      },
+      {
+        "type": "action",
+        "description": "Open the dashboard view"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the scan history table is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify previous scan entries are displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC023",
+    "title": "Answer the recycling quiz and see the final score",
+    "description": "A visitor can complete the recycling quiz and receive an immediate final score at the end.",
+    "category": "Recycling Knowledge Quiz",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Scroll to the quiz section"
+      },
+      {
+        "type": "action",
+        "description": "Select answers for each quiz question"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify instant answer feedback is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the final quiz score is displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC024",
+    "title": "View the leaderboard from public navigation",
+    "description": "A visitor can open the leaderboard page and see ranked community users.",
+    "category": "Leaderboard viewing",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to the leaderboard"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the leaderboard is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify ranked user entries are displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC025",
+    "title": "Post a community update with an image URL",
+    "description": "This verifies that an authenticated community user can include an optional image URL in a post and see the complete post in the feed.",
+    "category": "Community chat/story wall posting and feed refresh",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill in {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open the community page"
+      },
+      {
+        "type": "action",
+        "description": "Create a new community post with a message and a valid image URL"
+      },
+      {
+        "type": "action",
+        "description": "Submit the community post"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new post appears in the community feed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the post includes the attached image"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC026",
+    "title": "Browse public mission and impact pages from the homepage",
+    "description": "This verifies that a visitor can explore the public mission, impact, leaderboard, and media pages from the homepage.",
+    "category": "Visitor Exploration",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Open the goals and mission page"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify mission content is displayed"
+      },
+      {
+        "type": "action",
+        "description": "Open the environmental impact page"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify impact statistics are displayed"
+      },
+      {
+        "type": "action",
+        "description": "Open the leaderboard page"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify leaderboard rankings are displayed"
+      },
+      {
+        "type": "action",
+        "description": "Open the gallery and contact page"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify featured media content is displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC027",
+    "title": "Browse featured media on the homepage",
+    "description": "This verifies that a visitor can scroll to the featured media section and view the showcased recycling content.",
+    "category": "Featured Media Showcase",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Scroll to the featured media section on the homepage"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify featured media content is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify featured images and videos with descriptions are displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC028",
+    "title": "Switch the site to dark mode",
+    "description": "A visitor can toggle the site theme and see the interface switch to dark mode.",
+    "category": "Dark Mode Toggle",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Toggle dark mode"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the site is in dark mode"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the theme remains applied after the toggle"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC029",
+    "title": "See feedback when changing quiz answers",
+    "description": "A visitor can select quiz answers and receive immediate correct or incorrect feedback for each response.",
+    "category": "Recycling Knowledge Quiz",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Scroll to the quiz section"
+      },
+      {
+        "type": "action",
+        "description": "Select an answer for a quiz question"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify answer feedback is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the quiz remains interactive for the remaining questions"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC030",
+    "title": "Switch the site back to light mode",
+    "description": "A visitor can toggle the site theme from dark mode back to light mode and see the interface update accordingly.",
+    "category": "Dark Mode Toggle",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Toggle dark mode"
+      },
+      {
+        "type": "action",
+        "description": "Toggle dark mode again"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the site is in light mode"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the theme switch is reflected across the page"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC031",
+    "title": "Open the mission page from the public site",
+    "description": "This verifies that a visitor can access the goals and mission content page from the public site.",
+    "category": "Goals and mission page",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to the goals and mission page"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the mission content page is displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC032",
+    "title": "Read the mission and goals content",
+    "description": "A visitor can open the goals and mission page and read the organization’s mission content.",
+    "category": "Goals and Mission",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /goals-mission.html"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the mission content is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the goals content is displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC033",
+    "title": "Open the featured media showcase",
+    "description": "A visitor can browse the featured media showcase from the homepage and see highlighted content.",
+    "category": "Featured media showcase",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to the featured media showcase"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the featured media showcase is displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC034",
+    "title": "View the homepage sections used for engagement content",
+    "description": "A visitor can use the homepage to access the mission, leaderboard, impact, and featured media content areas.",
+    "category": "Goals and Mission",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to view the goals and mission page"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to view the environmental impact page"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to view the leaderboard page"
+      },
+      {
+        "type": "action",
+        "description": "Click the link to view the gallery and contact page"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the linked content pages are available from the homepage"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the public browsing areas are displayed"
+      }
+    ],
+    "priority": "Medium"
+  },
+  {
+    "id": "TC035",
+    "title": "See scan progress mismatch guidance",
+    "description": "This verifies that an authenticated user receives clear feedback when the verification step does not match the initial scan result.",
+    "category": "AI Waste Scanner step 1 + step 2 verification flow",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill in {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open the waste scanner"
+      },
+      {
+        "type": "action",
+        "description": "Start the scan step"
+      },
+      {
+        "type": "action",
+        "description": "Complete the verification step with a different valid item type"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a scan verification warning is visible"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "TC036",
+    "title": "Reject invalid login credentials",
+    "description": "This verifies that a visitor entering incorrect credentials sees an invalid credentials message and cannot access authenticated content.",
+    "category": "User Authentication",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /"
+      },
+      {
+        "type": "action",
+        "description": "Choose to log in"
+      },
+      {
+        "type": "action",
+        "description": "Fill in email address with an invalid email"
+      },
+      {
+        "type": "action",
+        "description": "Fill in password with an incorrect password"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify an invalid credentials message is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify authenticated access is not visible"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "TC037",
+    "title": "Reject an empty community message",
+    "description": "A community user sees validation when trying to post without the required message content.",
+    "category": "Community Chat and Story Wall",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /community.html"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the name field with a unique display name"
+      },
+      {
+        "type": "action",
+        "description": "Select a post type"
+      },
+      {
+        "type": "action",
+        "description": "Leave the message field empty"
+      },
+      {
+        "type": "action",
+        "description": "Submit the community post"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a validation error is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the post is not added to the feed"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "TC038",
+    "title": "Reject an invalid community photo link",
+    "description": "This verifies that a community contributor entering an invalid photo URL sees validation feedback and does not publish the post.",
+    "category": "Community Contribution",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /community.html"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the community message with a new update"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the optional photo URL with an invalid URL"
+      },
+      {
+        "type": "action",
+        "description": "Submit the community post"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a photo URL validation error is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the new community post is not displayed"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "TC039",
+    "title": "Reject a too-short contact message",
+    "description": "A visitor sees validation when the contact message does not meet the minimum length requirement.",
+    "category": "Contact Form",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /gallery-contact.html"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the name field with a visitor name"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the email field with a valid email address"
+      },
+      {
+        "type": "action",
+        "description": "Fill in the message field with a short message"
+      },
+      {
+        "type": "action",
+        "description": "Submit the form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a validation error is visible"
+      }
+    ],
+    "priority": "Low"
+  },
+  {
+    "id": "TC040",
+    "title": "See validation when community content is incomplete",
+    "description": "This verifies that an authenticated community user is prevented from posting when the required content is missing or invalid.",
+    "category": "Community chat/story wall posting and feed refresh",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Fill in {{LOGIN_USER}} into the email field"
+      },
+      {
+        "type": "action",
+        "description": "Fill in {{LOGIN_PASSWORD}} into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Submit the login form"
+      },
+      {
+        "type": "action",
+        "description": "Open the community page"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to submit an empty or invalid community post"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify a post validation error is visible"
+      }
+    ],
+    "priority": "Low"
+  }
+]

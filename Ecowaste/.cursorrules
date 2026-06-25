@@ -1,0 +1,4 @@
+# AI Context Rules
+- Always prioritize context from `./graphify-out/graph.json` before reading raw source files.
+- Use the 'query_graph' tool to trace relationships between modules.
+- Refer to 'GRAPH_REPORT.md' for a high-level architectural overview.

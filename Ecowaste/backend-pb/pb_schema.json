@@ -1,0 +1,210 @@
+[
+  {
+    "name": "users",
+    "type": "auth",
+    "system": false,
+    "schema": [
+      { "name": "name", "type": "text", "required": true, "options": { "min": 1, "max": 100 } },
+      { "name": "total_points", "type": "number", "required": false, "options": { "min": 0 } },
+      { "name": "current_streak", "type": "number", "required": false, "options": { "min": 0 } },
+      { "name": "badges", "type": "json", "required": false },
+      { "name": "avatar", "type": "file", "required": false, "options": { "maxSelect": 1, "maxSize": 2097152, "mimeTypes": ["image/jpeg", "image/png", "image/webp"] } },
+      { "name": "last_quiz_time", "type": "date", "required": false },
+      { "name": "role", "type": "text", "required": false, "options": { "min": 1, "max": 20 } },
+      { "name": "is_active", "type": "bool", "required": false }
+    ],
+    "listRule": "",
+    "viewRule": "",
+    "createRule": "",
+    "updateRule": "@request.auth.id = id || @request.auth.role = 'ROLE_ADMIN'",
+    "deleteRule": null
+  },
+  {
+    "name": "scans",
+    "type": "base",
+    "system": false,
+    "schema": [
+      { "name": "user", "type": "relation", "required": true, "options": { "collectionId": "_pb_users_auth_", "maxSelect": 1 } },
+      { "name": "material", "type": "text", "required": true, "options": { "min": 1, "max": 40 } },
+      { "name": "label", "type": "text", "required": false, "options": { "max": 120 } },
+      { "name": "points_awarded", "type": "number", "required": true, "options": { "min": 0 } },
+      { "name": "image", "type": "file", "required": false, "options": { "maxSelect": 1, "maxSize": 5242880, "mimeTypes": ["image/jpeg", "image/png", "image/webp"] } },
+      { "name": "is_duplicate", "type": "bool", "required": false },
+      { "name": "file_hash", "type": "text", "required": false, "options": { "max": 128 } },
+      { "name": "geo_lat", "type": "number", "required": false },
+      { "name": "geo_lng", "type": "number", "required": false },
+      { "name": "geo_accuracy", "type": "number", "required": false },
+      { "name": "deleted_at", "type": "date", "required": false }
+    ],
+    "listRule": "@request.auth.id = user && deleted_at = ''",
+    "viewRule": "@request.auth.id = user && deleted_at = ''",
+    "createRule": "@request.auth.id != ''",
+    "updateRule": "@request.auth.id = user",
+    "deleteRule": "@request.auth.id = user"
+  },
+  {
+    "name": "scan_sessions",
+    "type": "base",
+    "system": false,
+    "schema": [
+      { "name": "user", "type": "relation", "required": false, "options": { "collectionId": "_pb_users_auth_", "maxSelect": 1 } },
+      { "name": "photo_label", "type": "text", "required": false, "options": { "max": 120 } },
+      { "name": "photo_material", "type": "text", "required": false, "options": { "max": 40 } },
+      { "name": "is_recyclable", "type": "bool", "required": false },
+      { "name": "predicted_credits", "type": "number", "required": false, "options": { "min": 0 } },
+      { "name": "duplicate_blocked", "type": "bool", "required": false },
+      { "name": "geo_lat", "type": "number", "required": false },
+      { "name": "geo_lng", "type": "number", "required": false },
+      { "name": "geo_accuracy", "type": "number", "required": false },
+      { "name": "status", "type": "select", "required": true, "options": { "values": ["pending", "completed", "expired"] } }
+    ],
+    "listRule": "@request.auth.id = user",
+    "viewRule": "@request.auth.id = user",
+    "createRule": "",
+    "updateRule": "@request.auth.id = user",
+    "deleteRule": null
+  },
+  {
+    "name": "community_posts",
+    "type": "base",
+    "system": false,
+    "schema": [
+      { "name": "type", "type": "select", "required": true, "options": { "values": ["chat", "story"] } },
+      { "name": "author", "type": "text", "required": true, "options": { "min": 1, "max": 40 } },
+      { "name": "author_user", "type": "relation", "required": false, "options": { "collectionId": "_pb_users_auth_", "maxSelect": 1 } },
+      { "name": "text", "type": "text", "required": true, "options": { "min": 3, "max": 500 } },
+      { "name": "image", "type": "file", "required": false, "options": { "maxSelect": 1, "maxSize": 5242880, "mimeTypes": ["image/jpeg", "image/png", "image/webp"] } },
+      { "name": "deleted_at", "type": "date", "required": false }
+    ],
+    "listRule": "deleted_at = ''",
+    "viewRule": "deleted_at = ''",
+    "createRule": "",
+    "updateRule": "@request.auth.role = 'admin' || @request.auth.role = 'moderator' || @request.auth.id = author_user",
+    "deleteRule": "@request.auth.role = 'admin' || @request.auth.role = 'moderator' || @request.auth.id = author_user"
+  },
+  {
+    "name": "featured_media",
+    "type": "base",
+    "system": false,
+    "schema": [
+      { "name": "type", "type": "select", "required": true, "options": { "values": ["image", "video"] } },
+      { "name": "title", "type": "text", "required": true, "options": { "max": 200 } },
+      { "name": "description", "type": "text", "required": false, "options": { "max": 500 } },
+      { "name": "src", "type": "text", "required": true },
+      { "name": "media_file", "type": "file", "required": false, "options": { "maxSelect": 1, "maxSize": 52428800 } }
+    ],
+    "listRule": "",
+    "viewRule": "",
+    "createRule": null,
+    "updateRule": null,
+    "deleteRule": null
+  },
+  {
+    "name": "contacts",
+    "type": "base",
+    "system": false,
+    "schema": [
+      { "name": "name", "type": "text", "required": true, "options": { "min": 1, "max": 100 } },
+      { "name": "email", "type": "email", "required": true },
+      { "name": "message", "type": "text", "required": true, "options": { "min": 10, "max": 2000 } }
+    ],
+    "listRule": null,
+    "viewRule": null,
+    "createRule": "",
+    "updateRule": null,
+    "deleteRule": null
+  },
+  {
+    "name": "trivia_questions",
+    "type": "base",
+    "system": false,
+    "schema": [
+      { "name": "question", "type": "text", "required": true, "options": { "max": 500 } },
+      { "name": "options", "type": "json", "required": true },
+      { "name": "correct_index", "type": "number", "required": true, "options": { "min": 0, "max": 5 } }
+    ],
+    "listRule": "",
+    "viewRule": "",
+    "createRule": null,
+    "updateRule": null,
+    "deleteRule": null
+  },
+  {
+    "name": "smart_bins",
+    "type": "base",
+    "system": false,
+    "schema": [
+      { "name": "name", "type": "text", "required": true, "options": { "max": 100 } },
+      { "name": "latitude", "type": "number", "required": true },
+      { "name": "longitude", "type": "number", "required": true },
+      { "name": "status", "type": "select", "required": true, "options": { "values": ["active", "inactive", "maintenance"] } }
+    ],
+    "listRule": "",
+    "viewRule": "",
+    "createRule": "@request.auth.role = 'admin'",
+    "updateRule": "@request.auth.role = 'admin'",
+    "deleteRule": "@request.auth.role = 'admin'"
+  },
+  {
+    "name": "global_stats",
+    "type": "base",
+    "system": false,
+    "schema": [
+      { "name": "total_co2_saved", "type": "number", "required": true }
+    ],
+    "listRule": "",
+    "viewRule": "",
+    "createRule": "@request.auth.role = 'admin'",
+    "updateRule": null,
+    "deleteRule": null
+  },
+  {
+    "name": "quiz_attempts",
+    "type": "base",
+    "system": false,
+    "schema": [
+      { "name": "user", "type": "relation", "required": true, "options": { "collectionId": "_pb_users_auth_", "maxSelect": 1 } },
+      { "name": "score", "type": "number", "required": true }
+    ],
+    "listRule": "@request.auth.id = user",
+    "viewRule": "@request.auth.id = user",
+    "createRule": "@request.auth.id != ''",
+    "updateRule": null,
+    "deleteRule": null
+  },
+  {
+    "name": "audit_logs",
+    "type": "base",
+    "system": false,
+    "schema": [
+      { "name": "admin_id", "type": "relation", "required": true, "options": { "collectionId": "_pb_users_auth_", "maxSelect": 1 } },
+      { "name": "action", "type": "text", "required": true, "options": { "max": 50 } },
+      { "name": "target_id", "type": "text", "required": true, "options": { "max": 100 } },
+      { "name": "details", "type": "json", "required": false }
+    ],
+    "listRule": "@request.auth.role = 'ROLE_ADMIN'",
+    "viewRule": "@request.auth.role = 'ROLE_ADMIN'",
+    "createRule": null,
+    "updateRule": null,
+    "deleteRule": null
+  },
+  {
+    "name": "collection_requests",
+    "type": "base",
+    "system": false,
+    "schema": [
+      { "name": "requester_id", "type": "relation", "required": true, "options": { "collectionId": "_pb_users_auth_", "maxSelect": 1 } },
+      { "name": "receiver_id", "type": "relation", "required": false, "options": { "collectionId": "_pb_users_auth_", "maxSelect": 1 } },
+      { "name": "location_address", "type": "text", "required": true, "options": { "max": 255 } },
+      { "name": "status", "type": "text", "required": true, "options": { "max": 20 } },
+      { "name": "material", "type": "text", "required": true, "options": { "max": 40 } },
+      { "name": "weight", "type": "number", "required": true },
+      { "name": "notes", "type": "text", "required": false, "options": { "max": 255 } }
+    ],
+    "listRule": "@request.auth.id != ''",
+    "viewRule": "@request.auth.id != ''",
+    "createRule": "@request.auth.id != '' && @request.auth.id = requester_id",
+    "updateRule": "@request.auth.role = 'ROLE_ADMIN' || @request.auth.role = 'ROLE_RECEIVER' || @request.auth.id = requester_id",
+    "deleteRule": "@request.auth.role = 'ROLE_ADMIN'"
+  }
+]

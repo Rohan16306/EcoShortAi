@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="View our real-world recycling moments and get in touch with EcoSort AI.">
+    <title>EcoSort AI - Gallery</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+
+    <!-- Open Graph Tags -->
+    <meta property="og:title" content="EcoSort AI - Recycle, Earn, & Shop Sustainably">
+    <meta property="og:description" content="Transform your waste into rewards. Scan, recycle, and earn points toward exclusive eco-friendly products. Join the circular economy today.">
+    <meta property="og:image" content="https://placehold.co/1200x630/22c55e/white?text=EcoSort+AI">
+    <meta property="og:type" content="website">
+</head>
+<body class="text-gray-800">
+    <nav class="site-nav fixed w-full z-50 glass-panel shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="site-nav__row flex justify-between items-center">
+                <a class="nav-brand flex items-center cursor-pointer" href="javascript:void(0)" onclick="if(window.parent && window.parent.router) { window.parent.router('home'); } else { window.location.href='index.html'; }">
+                    <i class="brand-icon fa-solid fa-leaf text-green-600 text-2xl"></i>
+                    <span class="brand-text font-bold text-xl tracking-tight text-gray-900">EcoSort<span class="text-green-600">AI</span></span>
+                </a>
+                <div class="nav-links hidden md:flex">
+                    <a href="javascript:void(0)" onclick="if(window.parent && window.parent.router) { window.parent.router('home'); } else { window.location.href='index.html'; }" class="nav-btn text-gray-600 hover:text-green-600 font-medium transition">Home</a>
+                    <a href="goals-mission.html" class="nav-btn text-gray-600 hover:text-green-600 font-medium transition">Goal</a>
+                    <a href="gallery-contact.html" class="nav-btn text-green-700 font-semibold transition">Gallery</a>
+                    <a href="eco-community.html" class="nav-btn text-gray-600 hover:text-green-600 font-medium transition">Community</a>
+                    <a href="leaderboard.html" class="nav-btn text-gray-600 hover:text-green-600 font-medium transition">Leaderboard</a>
+                    <a href="impact.html" class="nav-btn text-gray-600 hover:text-green-600 font-medium transition">Impact</a>
+                </div>
+                <div class="site-nav__actions flex items-center space-x-4">
+                    <button aria-label="Toggle dark mode" id="theme-toggle" type="button" class="inline-flex px-3 py-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100 transition">
+                        <i class="fa-solid fa-moon mr-1"></i> Dark
+                    </button>
+                    <a href="index.html#auth-modal" class="hidden md:inline-flex px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition shadow-sm">Log In</a>
+                    <button aria-label="Toggle mobile menu" class="md:hidden text-gray-600 text-xl" onclick="toggleMobileMenu()">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t p-4 space-y-2">
+            <a href="goals-mission.html" class="block w-full text-left py-2 text-gray-600">Goal</a>
+            <a href="gallery-contact.html" class="block w-full text-left py-2 text-gray-600">Gallery</a>
+            <a href="eco-community.html" class="block w-full text-left py-2 text-gray-600">Community</a>
+            <a href="leaderboard.html" class="block w-full text-left py-2 text-gray-600">Leaderboard</a>
+            <a href="impact.html" class="block w-full text-left py-2 text-gray-600">Impact</a>
+        </div>
+    </nav>
+
+    <header class="pt-24 pb-8">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <div class="glass-panel inline-block p-8 rounded-3xl">
+                <p class="uppercase tracking-widest text-xs text-green-600 mb-3 font-bold">Gallery</p>
+                <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900">Real-world recycling moments</h1>
+                <p class="mt-4 text-gray-600 max-w-2xl mx-auto">
+                    Our community captures the process from scanning to sorting. Browse field moments, facility footage, and campaigns.
+                </p>
+            </div>
+        </div>
+    </header>
+
+    <section class="max-w-7xl mx-auto px-6 pb-12">
+        <div class="grid md:grid-cols-3 gap-6">
+            <div class="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100">
+                <img src="assets/images/cleanup-forest.jpg" alt="Community cleanup" class="w-full h-52 object-cover">
+                <div class="p-5">
+                    <p class="font-semibold text-gray-900">Community Cleanup Day</p>
+                    <p class="text-sm text-gray-500 mt-2">Volunteer-led cleanup and sorting event.</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100">
+                <img src="assets/images/recycling-conveyor.jpg" alt="Recycling facility" class="w-full h-52 object-cover">
+                <div class="p-5">
+                    <p class="font-semibold text-gray-900">Sorting Facility</p>
+                    <p class="text-sm text-gray-500 mt-2">AI-assisted sorting line in action.</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100">
+                <img src="assets/images/ewaste-boards.jpg" alt="Electronic waste" class="w-full h-52 object-cover">
+                <div class="p-5">
+                    <p class="font-semibold text-gray-900">E-waste Recovery</p>
+                    <p class="text-sm text-gray-500 mt-2">Capturing reusable materials from electronics.</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100">
+                <img src="assets/images/recycling-bins.jpg" alt="Recycling bins" class="w-full h-52 object-cover">
+                <div class="p-5">
+                    <p class="font-semibold text-gray-900">Smart Drop-off</p>
+                    <p class="text-sm text-gray-500 mt-2">Color-coded recycling stations in the city.</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100">
+                <video controls class="w-full h-52 object-cover">
+                    <source src="assets/videos/recycling-facility.webm" type="video/webm">
+                </video>
+                <div class="p-5">
+                    <p class="font-semibold text-gray-900">Recycling Facility Footage</p>
+                    <p class="text-sm text-gray-500 mt-2">Material separation and recovery in motion.</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100">
+                <video controls class="w-full h-52 object-cover">
+                    <source src="assets/videos/water-recycling-iss.webm" type="video/webm">
+                </video>
+                <div class="p-5">
+                    <p class="font-semibold text-gray-900">Water Recycling Demo</p>
+                    <p class="text-sm text-gray-500 mt-2">Closed-loop recycling inspiration from space.</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100">
+                <video controls class="w-full h-52 object-cover">
+                    <source src="assets/videos/recycling-aerial.mp4" type="video/mp4">
+                </video>
+                <div class="p-5">
+                    <p class="font-semibold text-gray-900">Aerial Plant View</p>
+                    <p class="text-sm text-gray-500 mt-2">Macro view of operations in a modern recycling center.</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100">
+                <img src="https://images.unsplash.com/photo-1528323273322-d81458248d40?auto=format&fit=crop&w=900&q=80" alt="Plastic sorting" class="w-full h-52 object-cover">
+                <div class="p-5">
+                    <p class="font-semibold text-gray-900">Plastic Sorting</p>
+                    <p class="text-sm text-gray-500 mt-2">Manual and AI-assisted segregation for better recovery rates.</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100">
+                <img src="https://images.unsplash.com/photo-1621451537084-482c73073a0f?auto=format&fit=crop&w=900&q=80" alt="Waste management logistics" class="w-full h-52 object-cover">
+                <div class="p-5">
+                    <p class="font-semibold text-gray-900">Collection Logistics</p>
+                    <p class="text-sm text-gray-500 mt-2">Route optimization reduces fuel use and carbon emissions.</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100">
+                <img src="https://images.unsplash.com/photo-1595278069441-2cf29f8005a4?auto=format&fit=crop&w=900&q=80" alt="Bottle recovery process" class="w-full h-52 object-cover">
+                <div class="p-5">
+                    <p class="font-semibold text-gray-900">Bottle Recovery Process</p>
+                    <p class="text-sm text-gray-500 mt-2">Collected plastic is sorted, cleaned, and prepared for reuse.</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100">
+                <img src="https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=900&q=80" alt="Community recycling action" class="w-full h-52 object-cover">
+                <div class="p-5">
+                    <p class="font-semibold text-gray-900">Community Recycling Action</p>
+                    <p class="text-sm text-gray-500 mt-2">Neighborhood collection drives improve local recycling rates.</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100">
+                <img src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=900&q=80" alt="Sustainability team sorting waste" class="w-full h-52 object-cover">
+                <div class="p-5">
+                    <p class="font-semibold text-gray-900">Sorting Team Operations</p>
+                    <p class="text-sm text-gray-500 mt-2">Workers and automation combine for cleaner material streams.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="max-w-7xl mx-auto px-6 pb-12 mt-8">
+        <div class="glass-panel rounded-3xl p-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">Waste Management Information</h2>
+            <div class="grid md:grid-cols-3 gap-6 text-sm text-gray-600">
+                <div>
+                    <h3 class="font-semibold text-gray-900 mb-2"><i class="fa-solid fa-recycle text-green-600 mr-2"></i>Segregation at Source</h3>
+                    <p>Separate wet, dry, e-waste, and hazardous waste at home or office for cleaner recycling streams.</p>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-gray-900 mb-2"><i class="fa-solid fa-industry text-blue-600 mr-2"></i>Material Recovery</h3>
+                    <p>Recyclables are sorted, baled, and sent to processors where they become raw material again.</p>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-gray-900 mb-2"><i class="fa-solid fa-battery-empty text-red-600 mr-2"></i>Responsible Disposal</h3>
+                    <p>Never mix batteries, bulbs, or medical waste with household trash. Use authorized centers.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="max-w-7xl mx-auto px-6 py-14">
+        <div class="glass-panel rounded-3xl p-8">
+            <div class="grid md:grid-cols-2 gap-10 items-start">
+                <div>
+                    <p class="uppercase tracking-widest text-xs text-green-600 mb-3">Contact</p>
+                    <h2 class="text-3xl font-bold text-gray-900">Get in touch</h2>
+                    <p class="text-gray-600 mt-4">
+                        Interested in partnering, running a local challenge, or featuring EcoSort AI in your community?
+                        Send a note and our team will reply within two business days.
+                    </p>
+                    <div class="mt-6 space-y-3 text-sm text-gray-600">
+                        <p><i class="fa-solid fa-location-dot text-green-600 mr-2"></i> EcoSort AI HQ, Green District, Austin</p>
+                        <p><i class="fa-solid fa-envelope text-green-600 mr-2"></i> hello@ecosort.ai</p>
+                        <p><i class="fa-solid fa-phone text-green-600 mr-2"></i> +1 (512) 555-0147</p>
+                    </div>
+                </div>
+                <form id="contact-form" class="bg-white/50 border border-emerald-100 rounded-2xl p-6 shadow-sm">
+                    <div class="grid gap-4">
+                        <div>
+                            <label class="text-sm font-medium text-gray-700">Name</label>
+                            <input id="contact-name" type="text" required class="w-full mt-1 px-4 py-2 rounded-lg border border-emerald-200 focus:ring-2 focus:ring-green-500 outline-none bg-white/80" placeholder="Your full name">
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-700">Email</label>
+                            <input id="contact-email" type="email" required class="w-full mt-1 px-4 py-2 rounded-lg border border-emerald-200 focus:ring-2 focus:ring-green-500 outline-none bg-white/80" placeholder="you@example.com">
+                        </div>
+                        <div>
+                            <label class="text-sm font-medium text-gray-700">Message</label>
+                            <textarea id="contact-message" rows="5" required minlength="10" class="w-full mt-1 px-4 py-2 rounded-lg border border-emerald-200 focus:ring-2 focus:ring-green-500 outline-none bg-white/80" placeholder="Tell us what you need (min 10 chars)"></textarea>
+                        </div>
+                        <button id="contact-submit" type="submit" class="w-full bg-emerald-600 text-white py-3 rounded-lg font-semibold hover:bg-emerald-700 transition">Send Message</button>
+                        <p id="contact-feedback" class="hidden text-sm"></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-gray-900 text-gray-300">
+        <div class="max-w-7xl mx-auto px-6 py-10">
+            <div class="flex flex-col md:flex-row justify-between gap-6">
+                <div>
+                    <p class="text-lg font-semibold text-white">EcoSort AI</p>
+                    <p class="text-sm text-gray-400 mt-2">Smart recycling, measurable impact, community rewards.</p>
+                </div>
+                <div class="flex flex-wrap gap-4 text-sm">
+                    <a href="javascript:void(0)" onclick="if(window.parent && window.parent.router) { window.parent.router('home'); } else { window.location.href='index.html'; }" class="hover:text-white">Home</a>
+                    <a href="goals-mission.html" class="hover:text-white">Goal</a>
+                    <a href="eco-community.html" class="hover:text-white">Community</a>
+                    <a href="leaderboard.html" class="hover:text-white">Leaderboard</a>
+                    <a href="impact.html" class="hover:text-white">Impact</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <script>
+        function resolveApiBase() {
+            if (window.location.protocol === 'file:') return 'http://localhost:3002/api';
+            const host = window.location.host.toLowerCase();
+            if (host === 'localhost:3002' || host === '127.0.0.1:3002') return '/api';
+            return 'http://localhost:3002/api';
+        }
+
+        const API_BASE = resolveApiBase();
+
+        function setContactFeedback(message, type) {
+            const feedback = document.getElementById('contact-feedback');
+            feedback.textContent = message;
+            feedback.className = 'text-sm';
+            feedback.classList.remove('hidden');
+            feedback.classList.add(type === 'success' ? 'text-green-700' : 'text-red-600');
+        }
+
+        function setSubmitState(isLoading) {
+            const button = document.getElementById('contact-submit');
+            button.disabled = isLoading;
+            button.textContent = isLoading ? 'Sending...' : 'Send Message';
+            button.classList.toggle('opacity-70', isLoading);
+            button.classList.toggle('cursor-not-allowed', isLoading);
+        }
+
+        async function handleContactSubmit(event) {
+            event.preventDefault();
+            setSubmitState(true);
+
+            const message = document.getElementById('contact-message').value.trim();
+
+            if (message.length < 10) {
+                setContactFeedback('Message must be at least 10 characters long.', 'error');
+                setSubmitState(false);
+                return;
+            }
+
+            const payload = {
+                name: document.getElementById('contact-name').value.trim(),
+                email: document.getElementById('contact-email').value.trim(),
+                message: message
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/contact`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json().catch(() => ({}));
+                if (!response.ok) {
+                    throw new Error(result.error || `Request failed (${response.status})`);
+                }
+
+                document.getElementById('contact-form').reset();
+                setContactFeedback('Message sent successfully. We will get back to you soon.', 'success');
+                if(typeof throwLeaves === 'function') throwLeaves();
+            } catch (error) {
+                setContactFeedback(error.message || 'Could not send message. Start backend with "npm start".', 'error');
+            } finally {
+                setSubmitState(false);
+            }
+        }
+
+        function initThemeToggle() {
+            const button = document.getElementById('theme-toggle');
+            if (!button) return;
+            const saved = localStorage.getItem('ecoSortTheme') || 'light';
+            applyTheme(saved);
+            button.addEventListener('click', () => {
+                const next = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
+                localStorage.setItem('ecoSortTheme', next);
+                applyTheme(next);
+            });
+        }
+
+        function applyTheme(mode) {
+            const dark = mode === 'dark';
+            document.body.classList.toggle('dark-mode', dark);
+            const button = document.getElementById('theme-toggle');
+            if (button) {
+                button.innerHTML = dark
+                    ? '<i class="fa-solid fa-sun mr-1"></i> Light'
+                    : '<i class="fa-solid fa-moon mr-1"></i> Dark';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initThemeToggle();
+            document.getElementById('contact-form').addEventListener('submit', handleContactSubmit);
+        });
+    </script>
+    <script src="js/ui-animations.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const storedUser = localStorage.getItem('ecoSortUser');
+            if (storedUser) {
+                try {
+                    const parsedUser = JSON.parse(storedUser);
+                    if (parsedUser && parsedUser.id) {
+                        const authBtns = document.querySelectorAll('a[href="index.html#auth-modal"]');
+                        authBtns.forEach(btn => {
+                            btn.innerHTML = '<i class="fa-solid fa-user mr-2"></i> ' + (parsedUser.name || 'Dashboard');
+                            btn.href = 'index.html';
+                            btn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                            btn.classList.add('bg-emerald-800', 'hover:bg-emerald-900');
+                        });
+                    }
+                } catch(e) {}
+            }
+        });
+    </script>
+</body>
+
+</html>
+
+

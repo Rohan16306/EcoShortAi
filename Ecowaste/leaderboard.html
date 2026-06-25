@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="View the top contributors and highest EcoSort scores on our leaderboard.">
+    <title>EcoSort AI - Leaderboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+
+    <!-- Open Graph Tags -->
+    <meta property="og:title" content="EcoSort AI - Recycle, Earn, & Shop Sustainably">
+    <meta property="og:description" content="Transform your waste into rewards. Scan, recycle, and earn points toward exclusive eco-friendly products. Join the circular economy today.">
+    <meta property="og:image" content="https://placehold.co/1200x630/22c55e/white?text=EcoSort+AI">
+    <meta property="og:type" content="website">
+</head>
+<body class="text-gray-800">
+    <nav class="site-nav fixed w-full z-50 glass-panel shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="site-nav__row flex justify-between items-center">
+                <a class="nav-brand flex items-center cursor-pointer" href="javascript:void(0)" onclick="if(window.parent && window.parent.router) { window.parent.router('home'); } else { window.location.href='index.html'; }">
+                    <i class="brand-icon fa-solid fa-leaf text-green-600 text-2xl"></i>
+                    <span class="brand-text font-bold text-xl tracking-tight text-gray-900">EcoSort<span class="text-green-600">AI</span></span>
+                </a>
+                <div class="nav-links hidden md:flex">
+                    <a href="javascript:void(0)" onclick="if(window.parent && window.parent.router) { window.parent.router('home'); } else { window.location.href='index.html'; }" class="nav-btn text-gray-600 hover:text-green-600 font-medium transition">Home</a>
+                    <a href="goals-mission.html" class="nav-btn text-gray-600 hover:text-green-600 font-medium transition">Goal</a>
+                    <a href="gallery-contact.html" class="nav-btn text-gray-600 hover:text-green-600 font-medium transition">Gallery</a>
+                    <a href="eco-community.html" class="nav-btn text-gray-600 hover:text-green-600 font-medium transition">Community</a>
+                    <a href="leaderboard.html" class="nav-btn text-green-700 font-semibold transition">Leaderboard</a>
+                    <a href="impact.html" class="nav-btn text-gray-600 hover:text-green-600 font-medium transition">Impact</a>
+                </div>
+                <div class="site-nav__actions flex items-center space-x-4">
+                    <button aria-label="Toggle dark mode" id="theme-toggle" type="button" class="inline-flex px-3 py-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100 transition">
+                        <i class="fa-solid fa-moon mr-1"></i> Dark
+                    </button>
+                    <a href="index.html#auth-modal" class="hidden md:inline-flex px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition shadow-sm">Log In</a>
+                    <button aria-label="Toggle mobile menu" class="md:hidden text-gray-600 text-xl" onclick="toggleMobileMenu()">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t p-4 space-y-2">
+            <a href="goals-mission.html" class="block w-full text-left py-2 text-gray-600">Goal</a>
+            <a href="gallery-contact.html" class="block w-full text-left py-2 text-gray-600">Gallery</a>
+            <a href="eco-community.html" class="block w-full text-left py-2 text-gray-600">Community</a>
+            <a href="leaderboard.html" class="block w-full text-left py-2 text-gray-600">Leaderboard</a>
+            <a href="impact.html" class="block w-full text-left py-2 text-gray-600">Impact</a>
+        </div>
+    </nav>
+
+    <header class="pt-24 pb-8">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <div class="glass-panel inline-block p-8 rounded-3xl">
+                <p class="uppercase tracking-widest text-xs text-green-600 mb-3 font-bold">Community</p>
+                <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900">Leaderboard</h1>
+                <p class="mt-4 text-gray-600 max-w-2xl mx-auto">
+                    Top contributors keep the ecosystem moving. Earn points by scanning, sharing verified recycling actions,
+                    and completing weekly challenges.
+                </p>
+            </div>
+        </div>
+    </header>
+
+    <section class="max-w-7xl mx-auto px-6 pb-12">
+        <div class="grid lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2 glass-panel rounded-3xl overflow-hidden">
+                <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-gray-900">Top 10 This Month</h2>
+                    <span id="leaderboard-updated" class="text-sm text-gray-500">Loading...</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-gray-600">
+                        <thead class="bg-gray-50 text-gray-800 uppercase font-semibold text-xs">
+                            <tr>
+                                <th class="px-6 py-3">Rank</th>
+                                <th class="px-6 py-3">Member</th>
+                                <th class="px-6 py-3">Scans</th>
+                                <th class="px-6 py-3">Credits</th>
+                                <th class="px-6 py-3">Badge</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboard-body" class="divide-y divide-gray-100">
+                            <tr>
+                                <td colspan="5" class="px-6 py-10 text-center text-gray-400">Loading leaderboard...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="space-y-6">
+                <div class="glass-panel rounded-3xl p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-3">How to earn points</h3>
+                    <ul class="space-y-3 text-gray-600 text-sm">
+                        <li class="flex gap-3"><span class="h-2 w-2 rounded-full bg-green-500 mt-2"></span><span>+10 points for every verified scan.</span></li>
+                        <li class="flex gap-3"><span class="h-2 w-2 rounded-full bg-blue-500 mt-2"></span><span>+50 points for weekly challenges.</span></li>
+                        <li class="flex gap-3"><span class="h-2 w-2 rounded-full bg-yellow-500 mt-2"></span><span>+100 points for hosting community events.</span></li>
+                        <li class="flex gap-3"><span class="h-2 w-2 rounded-full bg-emerald-500 mt-2"></span><span>Bonus points for clean streaks.</span></li>
+                    </ul>
+                </div>
+                <div class="glass-panel rounded-3xl p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-3">Weekly Challenge</h3>
+                    <p class="text-gray-600 text-sm">Scan 30 aluminum cans and log a facility drop-off to earn a bonus badge.</p>
+                    <div class="mt-4 bg-green-50/50 border border-green-100/50 rounded-xl p-4">
+                        <p class="text-xs uppercase text-green-700">Time left</p>
+                        <p class="text-2xl font-bold text-green-700">4 days</p>
+                    </div>
+                </div>
+                <div class="glass-panel rounded-3xl p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-3">Spotlight Team</h3>
+                    <p class="text-gray-600 text-sm">Eastside High School logged 2,400 scans in a single month.</p>
+                    <a href="impact.html" class="inline-flex items-center mt-4 text-green-700 font-semibold">See impact <i class="fa-solid fa-arrow-right ml-2 text-sm"></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-gray-900 text-gray-300">
+        <div class="max-w-7xl mx-auto px-6 py-10">
+            <div class="flex flex-col md:flex-row justify-between gap-6">
+                <div>
+                    <p class="text-lg font-semibold text-white">EcoSort AI</p>
+                    <p class="text-sm text-gray-400 mt-2">Smart recycling, measurable impact, community rewards.</p>
+                </div>
+                <div class="flex flex-wrap gap-4 text-sm">
+                    <a href="javascript:void(0)" onclick="if(window.parent && window.parent.router) { window.parent.router('home'); } else { window.location.href='index.html'; }" class="hover:text-white">Home</a>
+                    <a href="goals-mission.html" class="hover:text-white">Goal</a>
+                    <a href="gallery-contact.html" class="hover:text-white">Gallery</a>
+                    <a href="eco-community.html" class="hover:text-white">Community</a>
+                    <a href="impact.html" class="hover:text-white">Impact</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function resolveApiBase() {
+            if (window.location.protocol === 'file:') return 'http://localhost:3002/api';
+
+            const host = window.location.host.toLowerCase();
+            if (host === 'localhost:3002' || host === '127.0.0.1:3002') return '/api';
+
+            return 'http://localhost:3002/api';
+        }
+
+        const API_BASE = resolveApiBase();
+
+        function formatNumber(value) {
+            return new Intl.NumberFormat().format(Number(value) || 0);
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function getRankClass(rank) {
+            if (rank === 1) return 'font-bold text-green-700';
+            if (rank <= 3) return 'font-bold text-gray-800';
+            return 'font-bold text-gray-700';
+        }
+
+        function renderRows(rows) {
+            const body = document.getElementById('leaderboard-body');
+            if (!rows.length) {
+                body.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center text-gray-400">No leaderboard data yet. Start scanning to appear here.</td></tr>';
+                return;
+            }
+
+            body.innerHTML = rows.map((row) => {
+                const rowClass = row.rank === 1 ? 'bg-green-50/60' : '';
+                return `
+                    <tr class="${rowClass}">
+                        <td class="px-6 py-4 ${getRankClass(row.rank)}">${row.rank}</td>
+                        <td class="px-6 py-4 font-semibold text-gray-900">${escapeHtml(row.name)}</td>
+                        <td class="px-6 py-4">${formatNumber(row.scans)}</td>
+                        <td class="px-6 py-4 text-green-600 font-semibold">${formatNumber(row.credits)}</td>
+                        <td class="px-6 py-4">${escapeHtml(row.badge || 'Eco Starter')}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        async function loadLeaderboard() {
+            const updated = document.getElementById('leaderboard-updated');
+            try {
+                const response = await fetch(`${API_BASE}/leaderboard?limit=10`);
+                if (!response.ok) {
+                    throw new Error(`Request failed (${response.status})`);
+                }
+
+                const payload = await response.json();
+                renderRows(Array.isArray(payload.leaderboard) ? payload.leaderboard : []);
+
+                const updatedAt = payload.updatedAt ? new Date(payload.updatedAt) : new Date();
+                updated.textContent = `Updated ${updatedAt.toLocaleDateString()} ${updatedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+            } catch (_error) {
+                const body = document.getElementById('leaderboard-body');
+                body.innerHTML = '<tr><td colspan="5" class="px-6 py-10 text-center text-red-500">Could not load leaderboard. Start backend with "npm start".</td></tr>';
+                updated.textContent = 'Backend offline';
+            }
+        }
+
+        function initThemeToggle() {
+            const button = document.getElementById('theme-toggle');
+            if (!button) return;
+            const saved = localStorage.getItem('ecoSortTheme') || 'light';
+            applyTheme(saved);
+            button.addEventListener('click', () => {
+                const next = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
+                localStorage.setItem('ecoSortTheme', next);
+                applyTheme(next);
+            });
+        }
+
+        function applyTheme(mode) {
+            const dark = mode === 'dark';
+            document.body.classList.toggle('dark-mode', dark);
+            const button = document.getElementById('theme-toggle');
+            if (button) {
+                button.innerHTML = dark
+                    ? '<i class="fa-solid fa-sun mr-1"></i> Light'
+                    : '<i class="fa-solid fa-moon mr-1"></i> Dark';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initThemeToggle();
+            loadLeaderboard();
+        });
+    </script>
+    <script src="js/ui-animations.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const storedUser = localStorage.getItem('ecoSortUser');
+            if (storedUser) {
+                try {
+                    const parsedUser = JSON.parse(storedUser);
+                    if (parsedUser && parsedUser.id) {
+                        const authBtns = document.querySelectorAll('a[href="index.html#auth-modal"]');
+                        authBtns.forEach(btn => {
+                            btn.innerHTML = '<i class="fa-solid fa-user mr-2"></i> ' + (parsedUser.name || 'Dashboard');
+                            btn.href = 'index.html';
+                            btn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                            btn.classList.add('bg-emerald-800', 'hover:bg-emerald-900');
+                        });
+                    }
+                } catch(e) {}
+            }
+        });
+    </script>
+</body>
+
+</html>
+
+

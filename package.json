@@ -1,0 +1,15 @@
+{
+  "name": "ecowaste-root",
+  "version": "1.0.0",
+  "description": "Root package to start the EcoSort Next.js and PocketBase stack",
+  "scripts": {
+    "start": "node Ecowaste/start.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "http-proxy-middleware": "^4.1.1"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.3"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "ecosort-ai",
+  "version": "1.0.0",
+  "private": true,
+  "description": "EcoSort AI full-stack app",
+  "main": "server.js",
+  "scripts": {
+    "start": "node start.js",
+    "dev": "node start.js"
+  },
+  "dependencies": {
+    "@google/genai": "^2.8.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
+    "express": "^4.21.2",
+    "http-proxy-middleware": "^4.1.1",
+    "jsonwebtoken": "^9.0.2",
+    "pocketbase": "^0.22.0"
+  }
+}

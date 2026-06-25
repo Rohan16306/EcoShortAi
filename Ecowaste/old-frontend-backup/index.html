@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoSort AI - Smart Recycling & Rewards</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- TensorFlow.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@latest"></script>
+    <!-- Chart.js for Dashboard -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="text-gray-800">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass-panel shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center cursor-pointer" onclick="router('home')">
+                    <i class="fa-solid fa-leaf text-green-600 text-2xl mr-2"></i>
+                    <span class="font-bold text-xl tracking-tight text-gray-900">EcoSort<span class="text-green-600">AI</span></span>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <button onclick="router('home')" class="nav-btn text-gray-600 hover:text-green-600 font-medium transition">Home</button>
+                    <button onclick="router('dashboard')" class="nav-btn text-gray-600 hover:text-green-600 font-medium transition">Dashboard</button>
+                    <button onclick="router('detect')" class="nav-btn text-gray-600 hover:text-green-600 font-medium transition">Detect</button>
+                    <button onclick="router('rewards')" class="nav-btn text-gray-600 hover:text-green-600 font-medium transition">Rewards</button>
+                    <a href="goals-mission.html" class="nav-btn text-gray-600 hover:text-green-600 font-medium transition">Goal</a>
+                    <a href="gallery-contact.html" class="nav-btn text-gray-600 hover:text-green-600 font-medium transition">Gallery</a>
+                    <a href="community.html" class="nav-btn text-gray-600 hover:text-green-600 font-medium transition">Community</a>
+                    <a href="leaderboard.html" class="nav-btn text-gray-600 hover:text-green-600 font-medium transition">Leaderboard</a>
+                    <a href="impact.html" class="nav-btn text-gray-600 hover:text-green-600 font-medium transition">Impact</a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="theme-toggle" type="button" class="px-3 py-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100 transition">
+                        <i class="fa-solid fa-moon mr-1"></i> Dark
+                    </button>
+                    <!-- Credit Display with Animation -->
+                    <div class="bg-yellow-100 px-3 py-1 rounded-full flex items-center space-x-2 border border-yellow-300 transition-all cursor-pointer hover:bg-yellow-200" id="credit-badge" onclick="router('rewards')">
+                        <i class="fa-solid fa-coins text-yellow-600"></i>
+                        <span id="global-credits" class="font-bold text-yellow-800">0</span>
+                    </div>
+                    
+                    <!-- Auth Buttons -->
+                    <div id="auth-buttons" class="flex space-x-2">
+                        <button onclick="openAuthModal('login')" class="px-4 py-2 text-green-600 font-medium hover:text-green-800 transition">Log In</button>
+                        <button onclick="openAuthModal('signup')" class="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition shadow-sm">Sign Up</button>
+                    </div>
+                    
+                    <!-- User Menu -->
+                    <div id="user-menu" class="hidden relative">
+                        <button onclick="toggleUserMenu()" class="flex items-center space-x-2 focus:outline-none">
+                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600">
+                                <i class="fa-solid fa-user"></i>
+                            </div>
+                            <span id="user-name" class="hidden md:block font-medium text-gray-700">User</span>
+                            <i class="fa-solid fa-chevron-down text-xs text-gray-500"></i>
+                        </button>
+                        <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 border border-gray-100">
+                            <div class="px-4 py-2 border-b border-gray-100">
+                                <p class="text-sm text-gray-500">Signed in as</p>
+                                <p id="dropdown-email" class="text-sm font-medium text-gray-900 truncate">user@example.com</p>
+                            </div>
+                            <button onclick="router('dashboard')" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <i class="fa-solid fa-chart-pie mr-2"></i> Dashboard
+                            </button>
+                            <button onclick="router('rewards')" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                                <i class="fa-solid fa-gift mr-2"></i> Rewards
+                            </button>
+                            <button onclick="logout()" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                <i class="fa-solid fa-sign-out-alt mr-2"></i> Log Out
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button class="md:hidden text-gray-600 text-xl" onclick="toggleMobileMenu()">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t p-4 space-y-2">
+            <button onclick="router('home')" class="block w-full text-left py-2 text-gray-600">Home</button>
+            <button onclick="router('dashboard')" class="block w-full text-left py-2 text-gray-600">Dashboard</button>
+            <button onclick="router('detect')" class="block w-full text-left py-2 text-gray-600">Detect</button>
+            <button onclick="router('rewards')" class="block w-full text-left py-2 text-gray-600">Rewards</button>
+            <a href="goals-mission.html" class="block w-full text-left py-2 text-gray-600">Goal</a>
+            <a href="gallery-contact.html" class="block w-full text-left py-2 text-gray-600">Gallery</a>
+            <a href="community.html" class="block w-full text-left py-2 text-gray-600">Community</a>
+            <a href="leaderboard.html" class="block w-full text-left py-2 text-gray-600">Leaderboard</a>
+            <a href="impact.html" class="block w-full text-left py-2 text-gray-600">Impact</a>
+        </div>
+    </nav>
+
+    <!-- VIEW: HOME PAGE -->
+    <section id="view-home" class="view-section active pt-16">
+        <!-- Hero Section -->
+        <div class="hero-section relative overflow-hidden bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
+            <div class="blob bg-green-300 w-96 h-96 rounded-full top-0 left-0 mix-blend-multiply"></div>
+            <div class="blob bg-yellow-200 w-96 h-96 rounded-full top-0 right-0 mix-blend-multiply animation-delay-2000"></div>
+            <div class="blob bg-blue-200 w-72 h-72 rounded-full bottom-0 left-1/3 mix-blend-multiply animation-delay-4000"></div>
+            
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 text-center relative z-10">
+                <div class="hero-badge inline-flex items-center bg-green-100 px-4 py-2 rounded-full mb-6 border border-green-200">
+                    <i class="fa-solid fa-earth-americas text-green-600 mr-2"></i>
+                    <span class="text-green-800 font-medium text-sm">Join 50,000+ Eco-Warriors Worldwide</span>
+                </div>
+                
+                <h1 class="hero-title text-5xl md:text-7xl font-extrabold tracking-tight mb-6">
+                    Turn Waste Into <span class="gradient-text">Worth</span>.<br>
+                    Save Our <span class="text-blue-600">Planet</span>.
+                </h1>
+                
+                <p class="hero-subtitle mt-4 max-w-3xl mx-auto text-xl leading-relaxed">
+                    Every piece of plastic you recycle saves 2.5 metric tons of CO₂ emissions compared to incineration. 
+                    Join the revolution that's already diverted <strong>40 billion waste objects</strong> from landfills and oceans using AI-powered sorting.
+                </p>
+                
+                <div class="mt-10 flex justify-center gap-4 flex-wrap">
+                    <button onclick="checkAuthAndRoute('detect')" class="hero-primary-btn px-8 py-4 bg-green-600 text-white rounded-full font-bold text-lg shadow-lg hover:bg-green-700 hover:scale-105 transition transform flex items-center">
+                        <i class="fa-solid fa-camera mr-2"></i> Start Scanning
+                    </button>
+                    <button onclick="scrollToSection('impact-section')" class="hero-secondary-btn px-8 py-4 bg-white text-green-600 border-2 border-green-600 rounded-full font-bold text-lg shadow-lg hover:bg-green-50 transition transform flex items-center">
+                        <i class="fa-solid fa-play mr-2"></i> Learn More
+                    </button>
+                </div>
+                
+                <div id="guest-notice" class="mt-6 hidden">
+                    <p class="text-sm text-gray-500">
+                        <i class="fa-solid fa-info-circle mr-1"></i>
+                        You're browsing as a guest. <button onclick="openAuthModal('signup')" class="text-green-600 font-medium hover:underline">Sign up</button> to save your progress!
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Environmental Impact Statistics -->
+        <div id="impact-section" class="bg-green-900 text-white py-16 relative overflow-hidden">
+            <div class="absolute inset-0 opacity-10">
+                <i class="fa-solid fa-recycle absolute text-9xl top-10 left-10"></i>
+                <i class="fa-solid fa-leaf absolute text-9xl bottom-10 right-10"></i>
+            </div>
+            <div class="max-w-7xl mx-auto px-4 relative z-10">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold mb-4">Our Collective Impact</h2>
+                    <p class="text-green-100 max-w-2xl mx-auto">Every scan you make contributes to a cleaner planet. Here's what our community has achieved together:</p>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                    <div class="impact-stat scroll-reveal">
+                        <div class="text-5xl font-bold text-yellow-400 mb-2" id="home-total-credits">0</div>
+                        <div class="text-sm opacity-80">Eco-Credits Earned</div>
+                        <div class="text-xs text-green-300 mt-1">Rewarding sustainable choices</div>
+                    </div>
+                    <div class="impact-stat scroll-reveal">
+                        <div class="text-5xl font-bold text-blue-400 mb-2" id="home-total-items">0</div>
+                        <div class="text-sm opacity-80">Items Properly Sorted</div>
+                        <div class="text-xs text-green-300 mt-1">Diverting from landfills</div>
+                    </div>
+                    <div class="impact-stat scroll-reveal">
+                        <div class="text-5xl font-bold text-green-400 mb-2" id="home-co2-saved">0</div>
+                        <div class="text-sm opacity-80">kg CO₂ Saved</div>
+                        <div class="text-xs text-green-300 mt-1">Equivalent to planting trees</div>
+                    </div>
+                    <div class="impact-stat scroll-reveal">
+                        <div class="text-5xl font-bold text-purple-400 mb-2" id="home-rewards">0</div>
+                        <div class="text-sm opacity-80">Rewards Claimed</div>
+                        <div class="text-xs text-green-300 mt-1">Real-world incentives</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Backend-Driven Media Showcase -->
+        <div class="bg-gradient-to-b from-emerald-50 to-white py-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid lg:grid-cols-2 gap-10 items-center mb-12">
+                    <div>
+                        <p class="uppercase tracking-[0.25em] text-xs text-emerald-700 font-semibold mb-3">Visual Story</p>
+                        <h2 class="text-4xl font-extrabold text-gray-900 mb-4">How EcoSort Works in the Real World</h2>
+                        <p class="text-gray-600 text-lg leading-relaxed">
+                            This section is powered by backend media data and shows the journey from community cleanup to smart facility sorting.
+                            Each photo and video explains what EcoSort AI does and why it matters.
+                        </p>
+                        <p id="featured-media-status" class="text-sm text-emerald-700 mt-4 font-medium">Loading media stories...</p>
+                    </div>
+                    <div class="scroll-reveal bg-white rounded-2xl border border-emerald-100 shadow-sm overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1528323273322-d81458248d40?auto=format&fit=crop&w=1200&q=80" alt="Recycling line showcase" class="w-full h-[300px] object-cover" loading="lazy">
+                    </div>
+                </div>
+
+                <div id="featured-media-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <article class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+                        <div class="h-56 bg-gray-100 animate-pulse"></div>
+                        <div class="p-5 space-y-2">
+                            <div class="h-4 bg-gray-100 rounded animate-pulse"></div>
+                            <div class="h-4 bg-gray-100 rounded animate-pulse"></div>
+                        </div>
+                    </article>
+                    <article class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+                        <div class="h-56 bg-gray-100 animate-pulse"></div>
+                        <div class="p-5 space-y-2">
+                            <div class="h-4 bg-gray-100 rounded animate-pulse"></div>
+                            <div class="h-4 bg-gray-100 rounded animate-pulse"></div>
+                        </div>
+                    </article>
+                    <article class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+                        <div class="h-56 bg-gray-100 animate-pulse"></div>
+                        <div class="p-5 space-y-2">
+                            <div class="h-4 bg-gray-100 rounded animate-pulse"></div>
+                            <div class="h-4 bg-gray-100 rounded animate-pulse"></div>
+                        </div>
+                    </article>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Types of Dustbins -->
+        <div class="bg-slate-50 py-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <p class="uppercase tracking-[0.2em] text-xs text-emerald-700 font-semibold mb-3">Waste Management Basics</p>
+                    <h2 class="text-4xl font-extrabold text-gray-900 mb-3">Types of Dustbins and What Goes Inside</h2>
+                    <p class="text-gray-600 max-w-3xl mx-auto">
+                        Correct bin selection is the first step in smart waste management and cleaner cities.
+                    </p>
+                </div>
+                <div class="grid md:grid-cols-2 xl:grid-cols-4 gap-6">
+                    <article class="bg-white rounded-2xl overflow-hidden border border-blue-100 shadow-sm scroll-reveal">
+                        <img src="https://images.unsplash.com/photo-1582408921715-18e7806365c1?auto=format&fit=crop&w=900&q=80" onerror="this.src='assets/images/recycling-bins.jpg'" alt="Blue recycling bin" class="w-full h-48 object-cover">
+                        <div class="p-5">
+                            <h3 class="text-lg font-bold text-blue-700 mb-2">Blue Bin</h3>
+                            <p class="text-sm text-gray-600">Paper, cardboard, magazines, and clean cartons.</p>
+                        </div>
+                    </article>
+                    <article class="bg-white rounded-2xl overflow-hidden border border-green-100 shadow-sm scroll-reveal">
+                        <img src="https://images.unsplash.com/photo-1591193686104-fddba4f0d9a8?auto=format&fit=crop&w=900&q=80" onerror="this.src='assets/images/recycling-bins.jpg'" alt="Green organic bin" class="w-full h-48 object-cover">
+                        <div class="p-5">
+                            <h3 class="text-lg font-bold text-green-700 mb-2">Green Bin</h3>
+                            <p class="text-sm text-gray-600">Food scraps, fruit peels, leaves, and garden waste.</p>
+                        </div>
+                    </article>
+                    <article class="bg-white rounded-2xl overflow-hidden border border-yellow-100 shadow-sm scroll-reveal">
+                        <img src="https://images.unsplash.com/photo-1611284446314-60a58ac0deb9?auto=format&fit=crop&w=900&q=80" onerror="this.src='assets/images/recycling-bins.jpg'" alt="Yellow dry waste bin" class="w-full h-48 object-cover">
+                        <div class="p-5">
+                            <h3 class="text-lg font-bold text-yellow-700 mb-2">Yellow Bin</h3>
+                            <p class="text-sm text-gray-600">Plastic bottles, cans, wrappers, and dry mixed recyclables.</p>
+                        </div>
+                    </article>
+                    <article class="bg-white rounded-2xl overflow-hidden border border-red-100 shadow-sm scroll-reveal">
+                        <img src="https://images.unsplash.com/photo-1624593893658-2f66173a0bd7?auto=format&fit=crop&w=900&q=80" onerror="this.src='assets/images/ewaste-boards.jpg'" alt="Red hazardous waste bin" class="w-full h-48 object-cover">
+                        <div class="p-5">
+                            <h3 class="text-lg font-bold text-red-700 mb-2">Red Bin</h3>
+                            <p class="text-sm text-gray-600">Hazardous waste: batteries, sanitary waste, medical disposables.</p>
+                        </div>
+                    </article>
+                </div>
+                <div class="grid md:grid-cols-2 gap-6 mt-10">
+                    <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm scroll-reveal">
+                        <h4 class="text-xl font-bold text-gray-900 mb-3">Waste Management Tips</h4>
+                        <ul class="space-y-2 text-gray-600 text-sm">
+                            <li><i class="fa-solid fa-check text-emerald-600 mr-2"></i>Rinse food containers before recycling.</li>
+                            <li><i class="fa-solid fa-check text-emerald-600 mr-2"></i>Do not mix wet and dry waste together.</li>
+                            <li><i class="fa-solid fa-check text-emerald-600 mr-2"></i>Flatten cartons to save collection space.</li>
+                            <li><i class="fa-solid fa-check text-emerald-600 mr-2"></i>Store e-waste separately for pickup.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm scroll-reveal">
+                        <video class="w-full h-full min-h-[240px] object-cover" controls autoplay muted loop playsinline>
+                            <source src="assets/videos/recycling-aerial.mp4" type="video/mp4">
+                            <source src="assets/videos/recycling-facility.webm" type="video/webm">
+                        </video>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Community Chat + Story Wall -->
+        <div class="bg-white py-20 border-t border-gray-100">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-10">
+                    <p class="uppercase tracking-[0.2em] text-xs text-blue-700 font-semibold mb-3">Community</p>
+                    <h2 class="text-4xl font-extrabold text-gray-900 mb-3">Community Chat and Story Wall</h2>
+                    <p class="text-gray-600 max-w-3xl mx-auto">
+                        Talk with other eco-warriors, share photos, and post your cleanup stories.
+                    </p>
+                    <a href="community.html" class="inline-flex mt-4 px-5 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition">
+                        Open Full Community Page
+                    </a>
+                </div>
+
+                <div class="grid lg:grid-cols-3 gap-8 items-start">
+                    <form id="community-form" class="bg-slate-50 border border-gray-200 rounded-2xl p-6 shadow-sm scroll-reveal">
+                        <h3 class="text-xl font-bold text-gray-900 mb-4">Share Update</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                                <input id="community-author" type="text" maxlength="40" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="Your name">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                                <select id="community-type" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 outline-none">
+                                    <option value="chat">Chat</option>
+                                    <option value="story">Story</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Message</label>
+                                <textarea id="community-text" rows="4" maxlength="500" required class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="Share your recycling idea or story..."></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Photo URL (optional)</label>
+                                <input id="community-image" type="url" maxlength="500" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="https://...">
+                            </div>
+                            <button id="community-submit" type="submit" class="w-full bg-emerald-600 text-white font-semibold py-3 rounded-lg hover:bg-emerald-700 transition">
+                                Post to Community
+                            </button>
+                            <p id="community-feedback" class="hidden text-sm"></p>
+                        </div>
+                    </form>
+
+                    <div class="lg:col-span-2">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-2xl font-bold text-gray-900">Latest Posts</h3>
+                            <span id="community-updated" class="text-xs text-gray-500">Loading...</span>
+                        </div>
+                        <div id="community-feed" class="space-y-4">
+                            <article class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+                                <div class="h-4 bg-gray-100 rounded w-1/3 mb-3 animate-pulse"></div>
+                                <div class="h-4 bg-gray-100 rounded mb-2 animate-pulse"></div>
+                                <div class="h-4 bg-gray-100 rounded w-4/5 animate-pulse"></div>
+                            </article>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Why Plastic Recycling Matters Section -->
+        <div class="bg-white py-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <span class="text-green-600 font-semibold tracking-wide uppercase text-sm">The Crisis</span>
+                    <h2 class="text-4xl font-bold text-gray-900 mt-2 mb-4">Why Your Actions Matter</h2>
+                    <p class="mt-4 text-xl text-gray-600 max-w-3xl mx-auto">
+                        Over <strong>220 million tonnes</strong> of plastic waste are generated globally each year, 
+                        yet only <strong>9%</strong> gets recycled. The rest ends up in our oceans, landfills, and ecosystems.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+                    <div class="bg-red-50 p-8 rounded-2xl border border-red-100 hover:shadow-xl transition duration-300 scroll-reveal">
+                        <div class="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mb-6 text-red-600 text-2xl">
+                            <i class="fa-solid fa-water"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3 text-red-900">Ocean Crisis</h3>
+                        <p class="text-gray-700 mb-4">
+                            11 million metric tons of plastic enter our oceans annually, killing 300,000 marine mammals yearly through ingestion and entanglement.
+                        </p>
+                        <div class="text-sm text-red-600 font-semibold">
+                            <i class="fa-solid fa-circle-exclamation mr-1"></i> 171 trillion plastic particles in ocean
+                        </div>
+                    </div>
+                    
+                    <div class="bg-orange-50 p-8 rounded-2xl border border-orange-100 hover:shadow-xl transition duration-300 scroll-reveal">
+                        <div class="w-14 h-14 bg-orange-100 rounded-full flex items-center justify-center mb-6 text-orange-600 text-2xl">
+                            <i class="fa-solid fa-smog"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3 text-orange-900">Climate Impact</h3>
+                        <p class="text-gray-700 mb-4">
+                            Plastic production generates emissions equal to 615 coal-fired power stations. Recycling plastic reduces energy use by 66% compared to virgin production.
+                        </p>
+                        <div class="text-sm text-orange-600 font-semibold">
+                            <i class="fa-solid fa-temperature-high mr-1"></i> 2.5 tons CO₂ saved per ton recycled
+                        </div>
+                    </div>
+                    
+                    <div class="bg-green-50 p-8 rounded-2xl border border-green-100 hover:shadow-xl transition duration-300 scroll-reveal">
+                        <div class="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mb-6 text-green-600 text-2xl">
+                            <i class="fa-solid fa-oil-well"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3 text-green-900">Resource Conservation</h3>
+                        <p class="text-gray-700 mb-4">
+                            Recycling 1 ton of plastic saves 7.4 cubic yards of landfill space and 3.8 barrels of oil. It takes 75% less energy than making new plastic.
+                        </p>
+                        <div class="text-sm text-green-600 font-semibold">
+                            <i class="fa-solid fa-battery-full mr-1"></i> Powers a home for 7 months
+                        </div>
+                    </div>
+                </div>
+
+                <!-- How EcoSort Helps -->
+                <div class="bg-gradient-to-r from-green-600 to-teal-600 rounded-3xl p-8 md:p-12 text-white mb-16">
+                    <div class="grid md:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <h3 class="text-3xl font-bold mb-4">How EcoSort AI Makes a Difference</h3>
+                            <p class="text-green-100 mb-6 text-lg">
+                                Our AI-powered recognition system uses MobileNet technology to instantly identify recyclable materials with 95%+ accuracy, 
+                                ensuring proper sorting and maximum recovery rates.
+                            </p>
+                            <ul class="space-y-3">
+                                <li class="flex items-start">
+                                    <i class="fa-solid fa-check-circle text-yellow-300 mt-1 mr-3"></i>
+                                    <span>Instant identification prevents contamination of recycling streams</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fa-solid fa-check-circle text-yellow-300 mt-1 mr-3"></i>
+                                    <span>Gamification rewards motivate consistent recycling habits</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fa-solid fa-check-circle text-yellow-300 mt-1 mr-3"></i>
+                                    <span>Community challenges multiply individual impact</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="bg-white/10 backdrop-blur rounded-2xl p-6 border border-white/20">
+                            <div class="text-center mb-4">
+                                <i class="fa-solid fa-robot text-6xl text-yellow-300 mb-2"></i>
+                                <h4 class="text-xl font-bold">AI Recognition Rate</h4>
+                            </div>
+                            <div class="space-y-4">
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span>PET Bottles</span>
+                                        <span>98%</span>
+                                    </div>
+                                    <div class="bg-white/20 rounded-full h-2">
+                                        <div class="bg-yellow-300 h-2 rounded-full" style="width: 98%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span>Aluminum Cans</span>
+                                        <span>96%</span>
+                                    </div>
+                                    <div class="bg-white/20 rounded-full h-2">
+                                        <div class="bg-yellow-300 h-2 rounded-full" style="width: 96%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span>Glass Containers</span>
+                                        <span>94%</span>
+                                    </div>
+                                    <div class="bg-white/20 rounded-full h-2">
+                                        <div class="bg-yellow-300 h-2 rounded-full" style="width: 94%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- The Credit System -->
+                <div class="mb-16">
+                    <div class="text-center mb-12">
+                        <h2 class="text-3xl font-bold text-gray-900">The Credit System</h2>
+                        <p class="mt-4 text-gray-500">Earn points for every item you correctly identify and commit to recycle.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                        <div class="bg-green-50 p-8 rounded-2xl border border-green-100 hover:shadow-xl transition duration-300 text-center">
+                            <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6 text-green-600 text-3xl mx-auto">
+                                <i class="fa-solid fa-camera"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-3">1. Scan</h3>
+                            <p class="text-gray-600">Use your camera to snap a photo of your waste item. Our AI identifies it instantly with machine learning precision.</p>
+                        </div>
+                        <div class="bg-yellow-50 p-8 rounded-2xl border border-yellow-100 hover:shadow-xl transition duration-300 text-center">
+                            <div class="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mb-6 text-yellow-600 text-3xl mx-auto">
+                                <i class="fa-solid fa-brain"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-3">2. Identify</h3>
+                            <p class="text-gray-600">The AI classifies the material (Plastic, Metal, Glass, Paper) and calculates recyclability using our proprietary algorithm.</p>
+                        </div>
+                        <div class="bg-blue-50 p-8 rounded-2xl border border-blue-100 hover:shadow-xl transition duration-300 text-center">
+                            <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mb-6 text-blue-600 text-3xl mx-auto">
+                                <i class="fa-solid fa-coins"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-3">3. Earn & Redeem</h3>
+                            <p class="text-gray-600">Gain credits and redeem them for exclusive rewards, badges, and discount codes from eco-friendly brands!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Quiz Section -->
+                <div class="bg-gray-50 rounded-3xl p-8 md:p-12 mb-16">
+                    <div class="text-center mb-8">
+                        <span class="text-green-600 font-semibold tracking-wide uppercase text-sm">Test Your Knowledge</span>
+                        <h2 class="text-3xl font-bold text-gray-900 mt-2">Are You a Recycling Champion?</h2>
+                        <p class="text-gray-600 mt-2">Answer these questions to see how much you know about saving our environment through recycling.</p>
+                    </div>
+
+                    <div id="quiz-container" class="max-w-3xl mx-auto space-y-6">
+                        <!-- Question 1 -->
+                        <div class="quiz-question bg-white rounded-xl p-6 shadow-sm border border-gray-200" data-question="1">
+                            <h3 class="font-bold text-lg mb-4 flex items-center">
+                                <span class="bg-green-100 text-green-600 w-8 h-8 rounded-full flex items-center justify-center text-sm mr-3">1</span>
+                                How much of the plastic ever produced has been recycled globally?
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div class="quiz-option border-2 border-gray-200 rounded-lg p-4 text-center" data-answer="a">
+                                    <span class="font-semibold">9%</span>
+                                    <p class="text-sm text-gray-500 mt-1">Only a small fraction</p>
+                                </div>
+                                <div class="quiz-option border-2 border-gray-200 rounded-lg p-4 text-center" data-answer="b">
+                                    <span class="font-semibold">50%</span>
+                                    <p class="text-sm text-gray-500 mt-1">About half</p>
+                                </div>
+                                <div class="quiz-option border-2 border-gray-200 rounded-lg p-4 text-center" data-answer="c">
+                                    <span class="font-semibold">75%</span>
+                                    <p class="text-sm text-gray-500 mt-1">Most of it</p>
+                                </div>
+                                <div class="quiz-option border-2 border-gray-200 rounded-lg p-4 text-center" data-answer="d">
+                                    <span class="font-semibold">25%</span>
+                                    <p class="text-sm text-gray-500 mt-1">A quarter</p>
+                                </div>
+                            </div>
+                            <div class="quiz-feedback mt-4 hidden p-4 rounded-lg"></div>
+                        </div>
+
+                        <!-- Question 2 -->
+                        <div class="quiz-question bg-white rounded-xl p-6 shadow-sm border border-gray-200" data-question="2">
+                            <h3 class="font-bold text-lg mb-4 flex items-center">
+                                <span class="bg-green-100 text-green-600 w-8 h-8 rounded-full flex items-center justify-center text-sm mr-3">2</span>
+                                Recycling plastic saves what percentage of energy compared to making new plastic?
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div class="quiz-option border-2 border-gray-200 rounded-lg p-4 text-center" data-answer="a">
+                                    <span class="font-semibold">33%</span>
+                                </div>
+                                <div class="quiz-option border-2 border-gray-200 rounded-lg p-4 text-center" data-answer="b">
+                                    <span class="font-semibold">50%</span>
+                                </div>
+                                <div class="quiz-option border-2 border-gray-200 rounded-lg p-4 text-center" data-answer="c">
+                                    <span class="font-semibold">66%</span>
+                                </div>
+                                <div class="quiz-option border-2 border-gray-200 rounded-lg p-4 text-center" data-answer="d">
+                                    <span class="font-semibold">75%</span>
+                                </div>
+                            </div>
+                            <div class="quiz-feedback mt-4 hidden p-4 rounded-lg"></div>
+                        </div>
+
+                        <!-- Question 3 -->
+                        <div class="quiz-question bg-white rounded-xl p-6 shadow-sm border border-gray-200" data-question="3">
+                            <h3 class="font-bold text-lg mb-4 flex items-center">
+                                <span class="bg-green-100 text-green-600 w-8 h-8 rounded-full flex items-center justify-center text-sm mr-3">3</span>
+                                How many marine animals die annually from plastic pollution?
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div class="quiz-option border-2 border-gray-200 rounded-lg p-4 text-center" data-answer="a">
+                                    <span class="font-semibold">10,000</span>
+                                </div>
+                                <div class="quiz-option border-2 border-gray-200 rounded-lg p-4 text-center" data-answer="b">
+                                    <span class="font-semibold">100,000</span>
+                                </div>
+                                <div class="quiz-option border-2 border-gray-200 rounded-lg p-4 text-center" data-answer="c">
+                                    <span class="font-semibold">300,000</span>
+                                </div>
+                                <div class="quiz-option border-2 border-gray-200 rounded-lg p-4 text-center" data-answer="d">
+                                    <span class="font-semibold">1,000,000</span>
+                                </div>
+                            </div>
+                            <div class="quiz-feedback mt-4 hidden p-4 rounded-lg"></div>
+                        </div>
+
+                        <!-- Question 4 -->
+                        <div class="quiz-question bg-white rounded-xl p-6 shadow-sm border border-gray-200" data-question="4">
+                            <h3 class="font-bold text-lg mb-4 flex items-center">
+                                <span class="bg-green-100 text-green-600 w-8 h-8 rounded-full flex items-center justify-center text-sm mr-3">4</span>
+                                What is the biggest threat to marine ecosystems from plastic?
+                            </h3>
+                            <div class="grid grid-cols-1 gap-3">
+                                <div class="quiz-option border-2 border-gray-200 rounded-lg p-4" data-answer="a">
+                                    <span class="font-semibold">Visual pollution on beaches</span>
+                                </div>
+                                <div class="quiz-option border-2 border-gray-200 rounded-lg p-4" data-answer="b">
+                                    <span class="font-semibold">Ingestion and entanglement by wildlife</span>
+                                </div>
+                                <div class="quiz-option border-2 border-gray-200 rounded-lg p-4" data-answer="c">
+                                    <span class="font-semibold">Increased water temperature</span>
+                                </div>
+                                <div class="quiz-option border-2 border-gray-200 rounded-lg p-4" data-answer="d">
+                                    <span class="font-semibold">Noise pollution</span>
+                                </div>
+                            </div>
+                            <div class="quiz-feedback mt-4 hidden p-4 rounded-lg"></div>
+                        </div>
+                    </div>
+
+                    <div id="quiz-results" class="hidden mt-8 text-center">
+                        <div class="bg-green-100 border border-green-300 rounded-xl p-6 inline-block">
+                            <i class="fa-solid fa-trophy text-4xl text-yellow-500 mb-2"></i>
+                            <h3 class="text-xl font-bold text-green-800">Quiz Complete!</h3>
+                            <p class="text-green-700 mt-2">You scored <span id="quiz-score" class="font-bold text-2xl">0</span>/4</p>
+                            <p id="quiz-message" class="text-green-600 mt-1"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Testimonials -->
+                <div class="mb-16">
+                    <div class="text-center mb-12">
+                        <span class="text-green-600 font-semibold tracking-wide uppercase text-sm">Community Voices</span>
+                        <h2 class="text-3xl font-bold text-gray-900 mt-2">What Our Users Say</h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div class="testimonial-card bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-xl mr-4">SJ</div>
+                                <div>
+                                    <h4 class="font-bold text-gray-900">Sarah Johnson</h4>
+                                    <p class="text-sm text-gray-500">Eco Warrior • 1,240 credits</p>
+                                </div>
+                            </div>
+                            <div class="text-yellow-400 mb-3">
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                            </div>
+                            <p class="text-gray-600 italic">
+                                "EcoSort completely changed how my family handles waste. My kids are actually excited to recycle now because they can see their credits add up! We've saved over 200kg of CO₂ in just 3 months."
+                            </p>
+                            <div class="mt-4 flex items-center text-sm text-green-600">
+                                <i class="fa-solid fa-check-circle mr-2"></i>
+                                <span>Verified User</span>
+                            </div>
+                        </div>
+
+                        <div class="testimonial-card bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold text-xl mr-4">MC</div>
+                                <div>
+                                    <h4 class="font-bold text-gray-900">Michael Chen</h4>
+                                    <p class="text-sm text-gray-500">Sustainability Lead • 3,580 credits</p>
+                                </div>
+                            </div>
+                            <div class="text-yellow-400 mb-3">
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                            </div>
+                            <p class="text-gray-600 italic">
+                                "As an office manager, I implemented EcoSort across our 50-person team. The AI accuracy is incredible - it's helped us achieve zero-waste certification! The rewards are a great bonus for the team."
+                            </p>
+                            <div class="mt-4 flex items-center text-sm text-green-600">
+                                <i class="fa-solid fa-check-circle mr-2"></i>
+                                <span>Business User</span>
+                            </div>
+                        </div>
+
+                        <div class="testimonial-card bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold text-xl mr-4">EP</div>
+                                <div>
+                                    <h4 class="font-bold text-gray-900">Emma Rodriguez</h4>
+                                    <p class="text-sm text-gray-500">Student • 890 credits</p>
+                                </div>
+                            </div>
+                            <div class="text-yellow-400 mb-3">
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star-half-stroke"></i>
+                            </div>
+                            <p class="text-gray-600 italic">
+                                "I love that I can scan items and instantly know if they're recyclable. The educational aspect is fantastic - I learned that recycling one ton of plastic saves 7.4 cubic yards of landfill space!"
+                            </p>
+                            <div class="mt-4 flex items-center text-sm text-green-600">
+                                <i class="fa-solid fa-check-circle mr-2"></i>
+                                <span>Student Ambassador</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Call to Action -->
+                <div class="text-center bg-gradient-to-r from-green-600 to-teal-600 rounded-3xl p-12 text-white">
+                    <h2 class="text-3xl font-bold mb-4">Ready to Make a Difference?</h2>
+                    <p class="text-xl text-green-100 mb-8 max-w-2xl mx-auto">
+                        Join thousands of users who are turning waste into worth. Every scan helps reduce plastic pollution and combat climate change.
+                    </p>
+                    <div class="flex justify-center gap-4 flex-wrap">
+                        <button onclick="checkAuthAndRoute('detect')" class="px-8 py-4 bg-white text-green-600 rounded-full font-bold text-lg shadow-lg hover:bg-gray-100 transition transform hover:scale-105">
+                            <i class="fa-solid fa-camera mr-2"></i> Start Scanning Now
+                        </button>
+                        <button onclick="openAuthModal('signup')" class="px-8 py-4 bg-transparent border-2 border-white text-white rounded-full font-bold text-lg hover:bg-white/10 transition">
+                            Create Free Account
+                        </button>
+                    </div>
+                    <p class="mt-6 text-sm text-green-200">
+                        <i class="fa-solid fa-shield-halved mr-2"></i>
+                        Free forever • No credit card required • Cancel anytime
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- VIEW: DASHBOARD -->
+    <section id="view-dashboard" class="view-section pt-20 pb-10 min-h-screen bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-end mb-8">
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-900">Your Impact Dashboard</h2>
+                    <p class="text-gray-500">Track your recycling journey and credit earnings.</p>
+                </div>
+                <button onclick="router('detect')" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition shadow">
+                    <i class="fa-solid fa-plus mr-2"></i> New Scan
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-yellow-500">
+                    <div class="text-gray-500 text-sm font-medium uppercase">Total Credits</div>
+                    <div class="text-3xl font-bold text-gray-800 mt-1" id="dash-credits">0</div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-blue-500">
+                    <div class="text-gray-500 text-sm font-medium uppercase">Items Scanned</div>
+                    <div class="text-3xl font-bold text-gray-800 mt-1" id="dash-items">0</div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-green-500">
+                    <div class="text-gray-500 text-sm font-medium uppercase">Recyclable Rate</div>
+                    <div class="text-3xl font-bold text-gray-800 mt-1" id="dash-rate">0%</div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-purple-500">
+                    <div class="text-gray-500 text-sm font-medium uppercase">Rewards Claimed</div>
+                    <div class="text-3xl font-bold text-gray-800 mt-1" id="dash-rewards">0</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <h3 class="text-lg font-bold mb-4 text-gray-800">Material Distribution</h3>
+                    <div class="h-64">
+                        <canvas id="materialChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm">
+                    <h3 class="text-lg font-bold mb-4 text-gray-800">Credits Earned (Last 7 Days)</h3>
+                    <div class="h-64">
+                        <canvas id="creditsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                    <h3 class="text-lg font-bold text-gray-800">Recent Activity</h3>
+                    <button onclick="clearHistory()" class="text-red-500 text-sm hover:underline">Clear History</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-gray-600">
+                        <thead class="bg-gray-50 text-gray-800 uppercase font-semibold">
+                            <tr>
+                                <th class="px-6 py-3">Item</th>
+                                <th class="px-6 py-3">Material</th>
+                                <th class="px-6 py-3">Date</th>
+                                <th class="px-6 py-3 text-right">Credits</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-table-body" class="divide-y divide-gray-100">
+                            <tr>
+                                <td colspan="4" class="px-6 py-8 text-center text-gray-400">No activity yet. Start scanning!</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- VIEW: DETECT / SCANNER -->
+    <section id="view-detect" class="view-section pt-20 pb-10 min-h-screen bg-gray-100">
+        <div class="max-w-4xl mx-auto px-4">
+            <div id="scanner-interface" class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div class="p-6 bg-green-600 text-white text-center relative">
+                    <h2 class="text-2xl font-bold">AI Scanner</h2>
+                    <p class="text-green-100 text-sm">Powered by TensorFlow.js MobileNet</p>
+                    <div class="absolute top-4 right-4">
+                        <span class="bg-white/20 px-3 py-1 rounded-full text-xs backdrop-blur">
+                            <i class="fa-solid fa-shield-halved mr-1"></i> Duplicate Protection Active
+                        </span>
+                    </div>
+                </div>
+
+                <div class="p-8">
+                    <!-- Duplicate Warning Banner -->
+                    <div id="duplicate-warning" class="hidden duplicate-warning rounded-xl p-4 mb-6">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="duplicate-badge w-12 h-12 rounded-full flex items-center justify-center mr-4">
+                                    <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-amber-900 text-lg">Duplicate Image Detected!</h3>
+                                    <p class="text-amber-800 text-sm">This image has already been scanned. No credits will be awarded.</p>
+                                </div>
+                            </div>
+                            <button onclick="dismissDuplicateWarning()" class="text-amber-700 hover:text-amber-900">
+                                <i class="fa-solid fa-times text-xl"></i>
+                            </button>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-amber-300/50">
+                            <p class="text-xs text-amber-700">
+                                <i class="fa-solid fa-clock mr-1"></i>
+                                Previously scanned: <span id="duplicate-date" class="font-semibold"></span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Input Area -->
+                    <div id="input-area" class="text-center">
+                        <div class="border-4 border-dashed border-gray-300 rounded-2xl p-10 hover:border-green-500 hover:bg-green-50 transition cursor-pointer relative" onclick="document.getElementById('file-upload').click()">
+                            <input type="file" id="file-upload" class="hidden" accept="image/*" onchange="handleImageUpload(event)">
+                            <input type="file" id="video-upload" class="hidden" accept="video/*" onchange="handleVideoUpload(event)">
+                            <i class="fa-solid fa-cloud-arrow-up text-5xl text-gray-400 mb-4"></i>
+                            <h3 class="text-xl font-semibold text-gray-700">Step 1: Upload or Drop Image</h3>
+                            <p class="text-gray-500 mt-2">or use your camera below</p>
+                            <p class="text-xs text-gray-400 mt-4">
+                                <i class="fa-solid fa-fingerprint mr-1"></i> Each unique image earns credits only once
+                            </p>
+                        </div>
+
+                        <div class="mt-6 flex justify-center gap-3 flex-wrap">
+                            <button onclick="startCamera()" class="flex items-center px-6 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition shadow-lg">
+                                <i class="fa-solid fa-camera mr-2"></i> Open Camera
+                            </button>
+                            <button id="open-video-step-btn" onclick="document.getElementById('video-upload').click()" class="hidden flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition shadow-lg">
+                                <i class="fa-solid fa-video mr-2"></i> Step 2: Video Detection
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Preview Area -->
+                    <div id="preview-area" class="hidden text-center">
+                        <div class="relative inline-block">
+                            <img id="preview-image" class="max-h-96 rounded-lg shadow-md border border-gray-200" src="" alt="Preview">
+                            <div id="duplicate-overlay" class="hidden absolute inset-0 bg-red-500/20 rounded-lg border-4 border-red-500 flex items-center justify-center">
+                                <div class="bg-white px-4 py-2 rounded-lg shadow-lg transform -rotate-12">
+                                    <span class="text-red-600 font-bold text-xl tracking-wider">DUPLICATE</span>
+                                </div>
+                            </div>
+                            <button onclick="resetScan()" class="absolute -top-3 -right-3 bg-red-500 text-white w-8 h-8 rounded-full hover:bg-red-600 shadow flex items-center justify-center">
+                                <i class="fa-solid fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="mt-6">
+                            <button id="analyze-btn" onclick="analyzeImage()" class="w-full md:w-auto px-8 py-3 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition shadow-lg flex items-center justify-center mx-auto">
+                                <i class="fa-solid fa-wand-magic-sparkles mr-2"></i> Analyze & Earn Credits
+                            </button>
+                            <p id="geo-status" class="mt-3 text-xs text-gray-500">
+                                Geotag status: waiting for scan.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Video Preview Area -->
+                    <div id="video-preview-area" class="hidden text-center">
+                        <div class="relative inline-block w-full max-w-3xl">
+                            <video id="preview-video" class="w-full max-h-96 rounded-lg shadow-md border border-gray-200 bg-black" controls></video>
+                            <button onclick="resetScan()" class="absolute -top-3 -right-3 bg-red-500 text-white w-8 h-8 rounded-full hover:bg-red-600 shadow flex items-center justify-center">
+                                <i class="fa-solid fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="mt-6">
+                            <button id="analyze-video-btn" onclick="analyzeVideo()" class="w-full md:w-auto px-8 py-3 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700 transition shadow-lg flex items-center justify-center mx-auto">
+                                <i class="fa-solid fa-clapperboard mr-2"></i> Analyze Video (Step 2)
+                            </button>
+                            <p class="mt-3 text-xs text-gray-500">
+                                Step 2 verifies the same item from your photo. Credits are awarded only if both match.
+                            </p>
+                            <p id="video-geo-status" class="mt-1 text-xs text-gray-500">
+                                Geotag status: waiting for scan.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Loading Area -->
+                    <div id="loading-area" class="hidden text-center py-10">
+                        <div class="loader mx-auto mb-4"></div>
+                        <p class="text-gray-600 font-medium">AI is analyzing the image...</p>
+                        <p class="text-xs text-gray-400 mt-2">Checking for duplicates...</p>
+                    </div>
+
+                    <!-- Results Area -->
+                    <div id="result-area" class="hidden mt-6 border-t pt-6">
+                        <div id="verification-status-banner" class="hidden mb-6 rounded-xl p-4 border"></div>
+
+                        <div id="duplicate-result-banner" class="hidden bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+                            <div class="flex items-center text-red-800">
+                                <i class="fa-solid fa-circle-exclamation mr-3 text-xl"></i>
+                                <div>
+                                    <p class="font-bold">No Credits Awarded</p>
+                                    <p class="text-sm">This image was previously scanned on <span id="result-duplicate-date"></span></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col md:flex-row gap-6">
+                            <!-- Left: Classification -->
+                            <div class="flex-1">
+                                <h3 class="text-lg font-bold text-gray-800 mb-3">Top Prediction</h3>
+                                <div id="result-card" class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <span id="res-name" class="text-xl font-bold text-gray-900">Object Name</span>
+                                        <span id="res-confidence" class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-bold">0%</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 mb-4">
+                                        <span id="res-material-badge" class="px-3 py-1 rounded-full text-xs font-bold uppercase bg-gray-200 text-gray-700">Material</span>
+                                        <span id="res-recyclable-badge" class="px-3 py-1 rounded-full text-xs font-bold uppercase bg-gray-200 text-gray-700">Status</span>
+                                    </div>
+                                    <p id="res-desc" class="text-sm text-gray-600">Description goes here.</p>
+                                </div>
+                                
+                                <h4 class="text-sm font-bold text-gray-500 uppercase mt-6 mb-2">Other Guesses</h4>
+                                <ul id="other-predictions" class="space-y-2 text-sm text-gray-600"></ul>
+                            </div>
+
+                            <!-- Right: Credits -->
+                            <div class="w-full md:w-1/3">
+                                <div id="credits-box" class="bg-gradient-to-br from-yellow-50 to-orange-50 p-6 rounded-xl border border-yellow-200 text-center shadow-inner">
+                                    <div class="text-yellow-600 mb-2"><i class="fa-solid fa-coins text-3xl"></i></div>
+                                    <h3 class="text-gray-500 text-sm font-bold uppercase">Credits Earned</h3>
+                                    <div id="earned-credits" class="text-5xl font-bold text-yellow-600 my-2">0</div>
+                                    <p id="credit-reason" class="text-xs text-gray-500">Scan a recyclable item to earn!</p>
+                                </div>
+                                <div id="location-credit-info" class="hidden"></div>
+                                <div id="duplicate-credits-box" class="hidden bg-gray-100 p-6 rounded-xl border border-gray-200 text-center">
+                                    <div class="text-gray-400 mb-2"><i class="fa-solid fa-ban text-3xl"></i></div>
+                                    <h3 class="text-gray-500 text-sm font-bold uppercase">Credits</h3>
+                                    <div class="text-5xl font-bold text-gray-400 my-2">0</div>
+                                    <p class="text-xs text-red-500 font-medium">Duplicate image - no credits</p>
+                                </div>
+                                <button onclick="router('rewards')" class="w-full mt-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition text-sm">
+                                    <i class="fa-solid fa-gift mr-2"></i> Redeem Rewards
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="verification-actions" class="hidden mt-6 text-center">
+                            <button onclick="document.getElementById('video-upload').click()" class="px-8 py-3 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700 transition shadow-lg">
+                                <i class="fa-solid fa-video mr-2"></i> Continue to Step 2: Video Detection
+                            </button>
+                            <p class="text-xs text-gray-500 mt-2">Credits will be awarded only after video result matches this photo result.</p>
+                        </div>
+                        
+                        <!-- Scan Again Section -->
+                        <div class="mt-8 pt-6 border-t border-gray-200">
+                            <div class="text-center">
+                                <p class="text-gray-600 mb-4">Want to scan another item?</p>
+                                <button onclick="resetToNewScan()" class="scan-again-btn px-8 py-3 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 transition shadow-lg flex items-center justify-center mx-auto">
+                                    <i class="fa-solid fa-rotate-right mr-2"></i> Scan Another Item
+                                </button>
+                                <p class="text-xs text-gray-400 mt-2">Your credits are saved automatically</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Camera Modal -->
+            <div id="camera-modal" class="fixed inset-0 bg-black bg-opacity-90 z-50 hidden flex items-center justify-center p-4">
+                <div class="bg-black rounded-lg overflow-hidden max-w-2xl w-full relative">
+                    <video id="camera-video" autoplay playsinline class="w-full h-auto"></video>
+                    <canvas id="camera-canvas" class="hidden"></canvas>
+                    
+                    <div class="absolute bottom-0 left-0 right-0 p-6 flex justify-center gap-4 bg-gradient-to-t from-black to-transparent">
+                        <button onclick="closeCamera()" class="w-12 h-12 rounded-full bg-gray-600 text-white flex items-center justify-center hover:bg-gray-500">
+                            <i class="fa-solid fa-times"></i>
+                        </button>
+                        <button onclick="capturePhoto()" class="w-16 h-16 rounded-full border-4 border-white bg-white bg-opacity-20 flex items-center justify-center hover:bg-opacity-40 transition">
+                            <div class="w-12 h-12 bg-white rounded-full"></div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- VIEW: REWARDS -->
+    <section id="view-rewards" class="view-section pt-20 pb-10 min-h-screen bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Header -->
+            <div class="text-center mb-10">
+                <h2 class="text-4xl font-bold text-gray-900 mb-2">Rewards Center</h2>
+                <p class="text-gray-600">Redeem your Eco-Credits for exclusive rewards!</p>
+                <div class="mt-4 inline-flex items-center bg-yellow-100 px-6 py-3 rounded-full border border-yellow-300">
+                    <i class="fa-solid fa-coins text-yellow-600 text-xl mr-3"></i>
+                    <span class="text-lg font-bold text-yellow-800">Available Credits: <span id="rewards-credits">0</span></span>
+                </div>
+            </div>
+
+            <!-- Badges Section -->
+            <div class="mb-12">
+                <h3 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                    <i class="fa-solid fa-medal text-yellow-500 mr-3"></i> Achievement Badges
+                </h3>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6" id="badges-container">
+                    <!-- Badges will be generated by JS -->
+                </div>
+            </div>
+
+            <!-- Redeemable Rewards -->
+            <div class="mb-12">
+                <h3 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                    <i class="fa-solid fa-gift text-green-500 mr-3"></i> Redeemable Rewards
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="rewards-container">
+                    <!-- Rewards will be generated by JS -->
+                </div>
+            </div>
+
+            <!-- Claimed Rewards History -->
+            <div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                    <i class="fa-solid fa-clock-rotate-left text-blue-500 mr-3"></i> Your Claimed Rewards
+                </h3>
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-gray-600">
+                            <thead class="bg-gray-50 text-gray-800 uppercase font-semibold">
+                                <tr>
+                                    <th class="px-6 py-3">Reward</th>
+                                    <th class="px-6 py-3">Type</th>
+                                    <th class="px-6 py-3">Date Claimed</th>
+                                    <th class="px-6 py-3">Status</th>
+                                    <th class="px-6 py-3 text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="claimed-rewards-table" class="divide-y divide-gray-100">
+                                <tr>
+                                    <td colspan="5" class="px-6 py-8 text-center text-gray-400">No rewards claimed yet. Start earning credits!</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Reward Claim Modal -->
+    <div id="reward-modal" class="fixed inset-0 z-50 hidden">
+        <div class="modal-overlay absolute inset-0" onclick="closeRewardModal()"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md">
+            <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+                <div class="bg-gradient-to-r from-green-600 to-green-700 p-6 text-center relative">
+                    <h2 class="text-2xl font-bold text-white">🎉 Reward Claimed!</h2>
+                    <button onclick="closeRewardModal()" class="absolute top-4 right-4 text-white hover:text-green-200 transition">
+                        <i class="fa-solid fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="p-8 text-center">
+                    <div id="reward-icon" class="text-6xl mb-4"></div>
+                    <h3 id="reward-name" class="text-xl font-bold text-gray-900 mb-2"></h3>
+                    <p id="reward-description" class="text-gray-600 mb-6"></p>
+                    
+                    <div id="redeem-code-section" class="hidden mb-6">
+                        <p class="text-sm text-gray-500 mb-2">Your Redeem Code:</p>
+                        <div class="bg-gray-100 p-4 rounded-lg border-2 border-dashed border-gray-300">
+                            <span id="redeem-code-display" class="redeem-code text-2xl"></span>
+                        </div>
+                        <button onclick="copyRedeemCode()" class="mt-2 text-green-600 hover:text-green-800 text-sm font-medium">
+                            <i class="fa-solid fa-copy mr-1"></i> Copy Code
+                        </button>
+                    </div>
+
+                    <div id="badge-section" class="hidden mb-6">
+                        <div id="badge-display" class="badge-icon text-5xl"></div>
+                        <p class="text-sm text-gray-500 mt-2">Added to your collection!</p>
+                    </div>
+                    
+                    <button onclick="closeRewardModal()" class="w-full bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700 transition">
+                        Awesome!
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AUTH MODAL -->
+    <div id="auth-modal" class="fixed inset-0 z-50 hidden">
+        <div class="modal-overlay absolute inset-0" onclick="closeAuthModal()"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md">
+            <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+                <div class="bg-green-600 p-6 text-center relative">
+                    <h2 id="auth-title" class="text-2xl font-bold text-white">Welcome Back</h2>
+                    <p id="auth-subtitle" class="text-green-100 text-sm mt-1">Log in to continue your eco journey</p>
+                    <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-white hover:text-green-200 transition">
+                        <i class="fa-solid fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="p-8">
+                    <div class="flex mb-6 bg-gray-100 rounded-lg p-1">
+                        <button onclick="switchAuthTab('login')" id="tab-login" class="flex-1 py-2 rounded-md text-sm font-medium transition bg-white text-green-600 shadow-sm">Log In</button>
+                        <button onclick="switchAuthTab('signup')" id="tab-signup" class="flex-1 py-2 rounded-md text-sm font-medium transition text-gray-500 hover:text-gray-700">Sign Up</button>
+                    </div>
+                    
+                    <form id="login-form" onsubmit="handleLogin(event)">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                                <div class="relative">
+                                    <i class="fa-solid fa-envelope absolute left-3 top-3 text-gray-400"></i>
+                                    <input type="email" id="login-email" required class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition" placeholder="you@example.com">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                                <div class="relative">
+                                    <i class="fa-solid fa-lock absolute left-3 top-3 text-gray-400"></i>
+                                    <input type="password" id="login-password" required class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition" placeholder="••••••••">
+                                </div>
+                            </div>
+                            <button type="submit" class="w-full bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700 transition shadow-lg flex items-center justify-center">
+                                <i class="fa-solid fa-sign-in-alt mr-2"></i> Log In
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <form id="signup-form" onsubmit="handleSignup(event)" class="hidden">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                                <div class="relative">
+                                    <i class="fa-solid fa-user absolute left-3 top-3 text-gray-400"></i>
+                                    <input type="text" id="signup-name" required class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition" placeholder="John Doe">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                                <div class="relative">
+                                    <i class="fa-solid fa-envelope absolute left-3 top-3 text-gray-400"></i>
+                                    <input type="email" id="signup-email" required class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition" placeholder="you@example.com">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                                <div class="relative">
+                                    <i class="fa-solid fa-lock absolute left-3 top-3 text-gray-400"></i>
+                                    <input type="password" id="signup-password" required minlength="6" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition" placeholder="••••••••">
+                                </div>
+                            </div>
+                            <button type="submit" class="w-full bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700 transition shadow-lg flex items-center justify-center">
+                                <i class="fa-solid fa-user-plus mr-2"></i> Create Account
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom JavaScript -->
+    <script src="js/app.js"></script>
+</body>
+</html>
+
