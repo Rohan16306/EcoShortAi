@@ -17,6 +17,6 @@ services:
     startCommand: node server.js
     envVars:
       - key: PB_URL
-        sync: false
+        value: https://ecowaste-pocketbase.onrender.com
       - key: GEMINI_API_KEY
         sync: false

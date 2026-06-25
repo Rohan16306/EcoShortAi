@@ -34,7 +34,7 @@
         let authToken = null;
         // --- CONFIGURATION ---
         // UPDATE THIS URL after you deploy your backend to Render!
-        const PRODUCTION_BACKEND_URL = 'https://my-ecowaste-backend.onrender.com';
+        const PRODUCTION_BACKEND_URL = 'https://ecowaste-node.onrender.com';
 
         function resolveApiBase() {
             const host = window.location.host.toLowerCase();
