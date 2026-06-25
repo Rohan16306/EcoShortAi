@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/Ecowaste/index.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/Ecowaste/$1"
+    }
+  ]
+}
