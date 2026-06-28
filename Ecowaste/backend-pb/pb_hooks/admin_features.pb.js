@@ -1,6 +1,10 @@
 // Seed default admin user on startup if it doesn't exist
 onAfterBootstrap((e) => {
     try {
+        if (!$app.dao().hasTable("_collections")) {
+            console.log("Skipping admin seeding (tables not created yet)");
+            return;
+        }
         const adminEmail = "rohanipawar16@gmail.com";
         try {
             const record = $app.dao().findAuthRecordByEmail("users", adminEmail);

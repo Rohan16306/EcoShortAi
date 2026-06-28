@@ -1,5 +1,9 @@
 onAfterBootstrap((e) => {
     try {
+        if (!$app.dao().hasTable("_collections")) {
+            console.log("Skipping API rules update (tables not created yet)");
+            return;
+        }
         // Update scans collection
         const scans = $app.dao().findCollectionByNameOrId("scans");
         // original listRule: "@request.auth.id = user && deleted_at = ''"
