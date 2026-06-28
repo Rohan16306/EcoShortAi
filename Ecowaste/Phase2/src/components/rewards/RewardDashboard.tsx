@@ -4,11 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { Gift, Coins, AlertCircle, CheckCircle, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getRewardsCatalog, getUserCredits, claimReward, getUserClaimedRewards, Reward, ClaimedReward } from '@/lib/requestStore';
-import { useSession } from 'next-auth/react';
-
 
 export default function RewardDashboard({ roleName }: { roleName: string }) {
-  const { data: session } = useSession();
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [history, setHistory] = useState<ClaimedReward[]>([]);
   const [credits, setCredits] = useState<number>(0);
@@ -25,8 +22,10 @@ export default function RewardDashboard({ roleName }: { roleName: string }) {
 
   const loadData = () => {
     try {
-      const auth = session?.user as any;
-      const userId = auth?.email || auth?.id || 'current';
+      // In Admin Dashboard, we are an admin. 
+      // The reward dashboard is mostly for viewing what rewards exist, 
+      // but if the admin redeems, it's just recorded against 'admin' ID.
+      const userId = 'admin_user';
       const role = roleName.toLowerCase() === 'collector' ? 'collector' : 'user';
 
       setRewards(getRewardsCatalog(role));
@@ -43,8 +42,7 @@ export default function RewardDashboard({ roleName }: { roleName: string }) {
     try {
       setError(null);
       setSuccessMsg(null);
-      const auth = session?.user as any;
-      const userId = auth?.email || auth?.id || 'current';
+      const userId = 'admin_user';
 
       const success = claimReward(userId, rewardId);
       if (success) {

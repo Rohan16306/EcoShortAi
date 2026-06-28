@@ -1,15 +1,10 @@
 "use client";
-import { useSession } from 'next-auth/react';
-
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Coins, Star } from 'lucide-react';
 import { subscribeToBroadcast } from '@/lib/requestStore';
 
-
-
 export default function CreditAnimation() {
-  const { data: session } = useSession();
   const [show, setShow] = useState(false);
   const [credits, setCredits] = useState(0);
 
@@ -17,15 +12,9 @@ export default function CreditAnimation() {
     // Listen for broadcast events from requestStore
     const unsubscribe = subscribeToBroadcast((msg) => {
       if (msg.type === 'STATUS_CHANGED' && msg.request.status === 'completed') {
-        // Determine credits for current user based on role
-        let role = (session?.user as any)?.role || '';
-
+        // Since Phase 2 is an admin portal, no credits are awarded to the admin
+        // but we'll leave this structure in case we ever want to broadcast fake events for testing
         let awarded = 0;
-        if (role === 'collector' || role === 'ROLE_RECEIVER') {
-          awarded = msg.request.collectorCreditsAwarded ?? 0;
-        } else {
-          awarded = msg.request.creditsAwarded ?? 0;
-        }
 
         if (awarded > 0) {
           setCredits(awarded);
