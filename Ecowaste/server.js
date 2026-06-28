@@ -1091,6 +1091,112 @@ app.post('/api/chat', optionalAuthMiddleware, chatRateLimit, async (req, res) =>
   }
 });
 
+// ============================================================
+// Admin Portal API Endpoints
+// ============================================================
+
+// Admin role check middleware — verifies the authenticated user has ROLE_ADMIN in PocketBase
+async function adminGuard(req, res, next) {
+  try {
+    const authHeader = req.headers.authorization || '';
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+    if (!token) return res.status(403).json({ error: 'Admin access required' });
+
+    const pbBase = process.env.PB_URL || 'http://127.0.0.1:8090';
+    const pbRes = await fetch(`${pbBase}/api/collections/users/auth-refresh`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    if (pbRes.ok) {
+      const pbData = await pbRes.json();
+      const role = pbData.record?.role;
+      if (role !== 'ROLE_ADMIN') {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+      req.adminPbRecord = pbData.record;
+      return next();
+    }
+
+    // Fallback: check JWT for admin email
+    const payload = jwt.verify(token, JWT_SECRET);
+    const db = readDb();
+    const user = db.users.find(u => u.id === payload.sub);
+    if (!user || user.email !== 'rohanipawar16@gmail.com') {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+    return next();
+  } catch (err) {
+    return res.status(403).json({ error: 'Admin access required' });
+  }
+}
+
+// GET /api/admin/users — Returns all users combined with their userData (credits, history)
+app.get('/api/admin/users', authMiddleware, adminGuard, (req, res) => {
+  const db = readDb();
+  const users = (db.users || []).map(user => {
+    const data = db.userData[user.id] || defaultUserData();
+    const history = Array.isArray(data.history) ? data.history : [];
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      createdAt: user.createdAt,
+      credits: Number(data.credits) || 0,
+      totalScans: history.length,
+      badges: Array.isArray(data.badges) ? data.badges : [],
+      history: history.slice(0, 50), // Limit history items sent to client
+    };
+  });
+  res.json({ users, total: users.length });
+});
+
+// DELETE /api/admin/users/:id — Removes a user and their data from db.json
+app.delete('/api/admin/users/:id', authMiddleware, adminGuard, (req, res) => {
+  const db = readDb();
+  const userId = req.params.id;
+  const userIndex = db.users.findIndex(u => u.id === userId);
+  if (userIndex < 0) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+  const deletedUser = db.users.splice(userIndex, 1)[0];
+  delete db.userData[userId];
+  writeDb(db);
+  res.json({ ok: true, message: `User ${deletedUser.name} (${deletedUser.email}) deleted.` });
+});
+
+// GET /api/admin/stats — Returns aggregated platform stats for the admin dashboard
+app.get('/api/admin/stats', authMiddleware, adminGuard, (req, res) => {
+  const db = readDb();
+  const allUserData = Object.values(db.userData || {});
+
+  const totalUsers = (db.users || []).length;
+  const totalCredits = allUserData.reduce((sum, d) => sum + (Number(d.credits) || 0), 0);
+  const totalItems = allUserData.reduce((sum, d) => sum + (Array.isArray(d.history) ? d.history.length : 0), 0);
+  const totalRewards = allUserData.reduce((sum, d) => sum + (Array.isArray(d.claimedRewards) ? d.claimedRewards.length : 0), 0);
+  const co2Saved = Math.round(totalItems * 0.5);
+
+  // Material breakdown
+  const materialMap = {};
+  allUserData.forEach(d => {
+    if (Array.isArray(d.history)) {
+      d.history.forEach(item => {
+        const mat = item.material || 'Other';
+        materialMap[mat] = (materialMap[mat] || 0) + 1;
+      });
+    }
+  });
+
+  res.json({
+    totalUsers,
+    totalCredits,
+    totalItems,
+    totalRewards,
+    co2Saved,
+    materialBreakdown: materialMap,
+  });
+});
+
 // --- Stats ---
 app.get('/api/stats/global', (_req, res) => {
   const db = readDb();
@@ -1447,9 +1553,14 @@ app.post('/api/contact', contactRateLimit, (req, res) => {
   
   const phase2Routes = [
     '/admin-dashboard', 
-    '/pickup-request-tracking', 
-    '/collector-dashboard', 
-    '/sign-up-login-screen'
+    '/sign-up-login-screen',
+    '/api/auth/session',
+    '/api/auth/providers',
+    '/api/auth/csrf',
+    '/api/auth/callback',
+    '/api/auth/signin',
+    '/api/auth/signout',
+    '/api/auth/error'
   ];
   const phase1Routes = [
     '/dashboard',

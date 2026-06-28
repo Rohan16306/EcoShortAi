@@ -1423,13 +1423,8 @@
                     };
                     let targetUrl = phase2Base + routeMap[viewName];
 
-                    // When redirecting cross-domain (Vercel), pass auth via URL params
-                    // since localStorage is not shared across domains
-                    if (phase2Base && currentUser) {
-                        let phase2Role = 'user';
-                        if (role === 'ROLE_ADMIN') phase2Role = 'admin';
-                        else if (role === 'ROLE_RECEIVER') phase2Role = 'collector';
-
+                    // Pass auth via URL params so Phase 2 NextAuth can pick it up via AuthBridge
+                    if (currentUser && authToken) {
                         const params = new URLSearchParams({
                             pb_token: authToken
                         });

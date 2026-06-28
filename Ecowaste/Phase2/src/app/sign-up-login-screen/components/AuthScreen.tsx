@@ -4,11 +4,11 @@ import React, { useState } from 'react';
 import AuthBrandPanel from './AuthBrandPanel';
 import AuthFormPanel from './AuthFormPanel';
 
-export type AuthRole = 'user' | 'collector' | 'admin';
-export type AuthMode = 'login' | 'signup';
+export type AuthRole = 'admin';
+export type AuthMode = 'login';
 
 export default function AuthScreen() {
-  const [role, setRole] = useState<AuthRole>('user');
+  const [role, setRole] = useState<AuthRole>('admin');
   const [mode, setMode] = useState<AuthMode>('login');
 
   return (

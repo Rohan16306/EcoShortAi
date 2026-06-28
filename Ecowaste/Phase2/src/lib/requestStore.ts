@@ -1,6 +1,7 @@
 'use client';
 
-import { getAuthCookie, setAuthCookie, removeAuthCookie } from '@/lib/authStorage';
+// NextAuth handles auth now. For backward compatibility in this store, we mock getAuthCookie.
+const getAuthCookie = () => null;
 
 
 // Real-time pickup request store using localStorage + BroadcastChannel

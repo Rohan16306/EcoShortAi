@@ -23,8 +23,6 @@ import CollectorList from './components/CollectorList';
 import RequestList from './components/RequestList';
 import SystemLogs from './components/SystemLogs';
 import RewardDashboard from '@/components/rewards/RewardDashboard';
-import { getAuthCookie, setAuthCookie, removeAuthCookie } from '@/lib/authStorage';
-
 
 export type AdminTab = 'overview' | 'users' | 'collectors' | 'requests' | 'logs' | 'rewards';
 
@@ -39,28 +37,30 @@ export default function AdminPortalEntry() {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    // Backend Check (Simulated)
-    const auth = getAuthCookie();
-    if (!auth) {
-      router.push('/sign-up-login-screen');
-      return;
+    // Admin Auth Guard using localStorage (bypassing next-auth)
+    try {
+      const authData = localStorage.getItem('wastepickup_auth');
+      if (!authData) {
+        router.replace('/sign-up-login-screen');
+        return;
+      }
+      const parsed = JSON.parse(authData);
+      if (!parsed.token || !parsed.user) {
+        router.replace('/sign-up-login-screen');
+        return;
+      }
+      setAdminName(parsed.user.name || 'Administrator');
+      setIsLoaded(true);
+    } catch {
+      router.replace('/sign-up-login-screen');
     }
-
-    const user = JSON.parse(auth);
-    if (user.role !== 'admin') {
-      toast.error('Access denied. Administrator privileges required.');
-      router.push('/sign-up-login-screen');
-      return;
-    }
-
-    setAdminName(user.fullName || 'Administrator');
-    setIsLoaded(true);
   }, [router]);
 
   const handleLogout = () => {
-    removeAuthCookie();
+    localStorage.removeItem('wastepickup_auth');
+    localStorage.removeItem('pb_auth');
+    router.replace('/sign-up-login-screen');
     toast.success('Logged out from Admin Portal');
-    router.push('/sign-up-login-screen');
   };
 
   if (!isLoaded) return null;

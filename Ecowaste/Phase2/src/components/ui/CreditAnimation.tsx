@@ -1,13 +1,15 @@
 "use client";
+import { useSession } from 'next-auth/react';
 
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Coins, Star } from 'lucide-react';
 import { subscribeToBroadcast } from '@/lib/requestStore';
-import { getAuthCookie, setAuthCookie, removeAuthCookie } from '@/lib/authStorage';
+
 
 
 export default function CreditAnimation() {
+  const { data: session } = useSession();
   const [show, setShow] = useState(false);
   const [credits, setCredits] = useState(0);
 
@@ -16,14 +18,7 @@ export default function CreditAnimation() {
     const unsubscribe = subscribeToBroadcast((msg) => {
       if (msg.type === 'STATUS_CHANGED' && msg.request.status === 'completed') {
         // Determine credits for current user based on role
-        let role = '';
-        const authRaw = getAuthCookie();
-        if (authRaw) {
-          try {
-            const auth = JSON.parse(authRaw);
-            role = auth.role ?? '';
-          } catch { /* ignore */ }
-        }
+        let role = (session?.user as any)?.role || '';
 
         let awarded = 0;
         if (role === 'collector' || role === 'ROLE_RECEIVER') {

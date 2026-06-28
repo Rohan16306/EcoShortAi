@@ -4,10 +4,11 @@ import React, { useState, useEffect } from 'react';
 import { Gift, Coins, AlertCircle, CheckCircle, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getRewardsCatalog, getUserCredits, claimReward, getUserClaimedRewards, Reward, ClaimedReward } from '@/lib/requestStore';
-import { getAuthCookie, setAuthCookie, removeAuthCookie } from '@/lib/authStorage';
+import { useSession } from 'next-auth/react';
 
 
 export default function RewardDashboard({ roleName }: { roleName: string }) {
+  const { data: session } = useSession();
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [history, setHistory] = useState<ClaimedReward[]>([]);
   const [credits, setCredits] = useState<number>(0);
@@ -24,16 +25,9 @@ export default function RewardDashboard({ roleName }: { roleName: string }) {
 
   const loadData = () => {
     try {
-      const authRaw = getAuthCookie();
-      let userId = 'current';
-      let role = roleName.toLowerCase() === 'collector' ? 'collector' : 'user';
-      if (authRaw) {
-        try {
-          const auth = JSON.parse(authRaw);
-          userId = auth.email || auth.id || 'current';
-          if (auth.role) role = auth.role;
-        } catch { /* ignore */ }
-      }
+      const auth = session?.user as any;
+      const userId = auth?.email || auth?.id || 'current';
+      const role = roleName.toLowerCase() === 'collector' ? 'collector' : 'user';
 
       setRewards(getRewardsCatalog(role));
       setCredits(getUserCredits(userId));
@@ -49,14 +43,8 @@ export default function RewardDashboard({ roleName }: { roleName: string }) {
     try {
       setError(null);
       setSuccessMsg(null);
-      const authRaw = getAuthCookie();
-      let userId = 'current';
-      if (authRaw) {
-        try {
-          const auth = JSON.parse(authRaw);
-          userId = auth.email || auth.id || 'current';
-        } catch { /* ignore */ }
-      }
+      const auth = session?.user as any;
+      const userId = auth?.email || auth?.id || 'current';
 
       const success = claimReward(userId, rewardId);
       if (success) {
