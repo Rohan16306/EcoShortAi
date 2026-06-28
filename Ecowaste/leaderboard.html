@@ -14,6 +14,7 @@
     <meta property="og:description" content="Transform your waste into rewards. Scan, recycle, and earn points toward exclusive eco-friendly products. Join the circular economy today.">
     <meta property="og:image" content="https://placehold.co/1200x630/22c55e/white?text=EcoSort+AI">
     <meta property="og:type" content="website">
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 </head>
 <body class="text-gray-800">
     <nav class="site-nav fixed w-full z-50 glass-panel shadow-sm">
@@ -173,10 +174,11 @@
                 return;
             }
 
-            body.innerHTML = rows.map((row) => {
+            body.innerHTML = rows.map((row, index) => {
                 const rowClass = row.rank === 1 ? 'bg-green-50/60' : '';
+                const delay = index * 50;
                 return `
-                    <tr class="${rowClass}">
+                    <tr class="${rowClass}" data-aos="fade-down" data-aos-delay="${delay}">
                         <td class="px-6 py-4 ${getRankClass(row.rank)}">${row.rank}</td>
                         <td class="px-6 py-4 font-semibold text-gray-900">${escapeHtml(row.name)}</td>
                         <td class="px-6 py-4">${formatNumber(row.scans)}</td>
@@ -256,6 +258,8 @@
             }
         });
     </script>
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script>AOS.init({ duration: 800, once: false, offset: 100 });</script>
 </body>
 
 </html>

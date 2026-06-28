@@ -14,6 +14,7 @@
     <meta property="og:description" content="Transform your waste into rewards. Scan, recycle, and earn points toward exclusive eco-friendly products. Join the circular economy today.">
     <meta property="og:image" content="https://placehold.co/1200x630/22c55e/white?text=EcoSort+AI">
     <meta property="og:type" content="website">
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 </head>
 <body class="text-gray-800">
     <nav class="site-nav fixed w-full z-50 glass-panel shadow-sm">
@@ -53,7 +54,7 @@
 
     <header class="pt-24 pb-8">
         <div class="max-w-7xl mx-auto px-6 text-center">
-            <div class="glass-panel inline-block p-8 rounded-3xl">
+            <div class="glass-panel inline-block p-8 rounded-3xl" data-aos="zoom-in-up"
                 <p class="uppercase tracking-widest text-xs text-green-600 mb-3 font-bold">Gallery</p>
                 <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900">Real-world recycling moments</h1>
                 <p class="mt-4 text-gray-600 max-w-2xl mx-auto">
@@ -159,7 +160,7 @@
     </section>
 
     <section class="max-w-7xl mx-auto px-6 pb-12 mt-8">
-        <div class="glass-panel rounded-3xl p-8">
+        <div class="glass-panel rounded-3xl p-8" data-aos="zoom-in-up"
             <h2 class="text-2xl font-bold text-gray-900 mb-4">Waste Management Information</h2>
             <div class="grid md:grid-cols-3 gap-6 text-sm text-gray-600">
                 <div>
@@ -179,7 +180,7 @@
     </section>
 
     <section class="max-w-7xl mx-auto px-6 py-14">
-        <div class="glass-panel rounded-3xl p-8">
+        <div class="glass-panel rounded-3xl p-8" data-aos="zoom-in-up"
             <div class="grid md:grid-cols-2 gap-10 items-start">
                 <div>
                     <p class="uppercase tracking-widest text-xs text-green-600 mb-3">Contact</p>
@@ -348,6 +349,8 @@
             }
         });
     </script>
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script>AOS.init({ duration: 800, once: false, offset: 100 });</script>
 </body>
 
 </html>

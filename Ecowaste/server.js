@@ -548,6 +548,40 @@ async function authMiddleware(req, res, next) {
   }
 }
 
+async function optionalAuthMiddleware(req, res, next) {
+  const authHeader = req.headers.authorization || '';
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  
+  if (!token || token === 'null' || token === 'undefined') {
+    return next();
+  }
+
+  if (isTokenBlacklisted(token)) {
+    return next();
+  }
+
+  try {
+    const pbBase = process.env.PB_URL || 'http://127.0.0.1:8090';
+    const pbRes = await fetch(`${pbBase}/api/collections/users/auth-refresh`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (pbRes.ok) {
+      const pbData = await pbRes.json();
+      req.userId = pbData.record.id;
+      req.authToken = token;
+      return next();
+    }
+
+    const payload = jwt.verify(token, JWT_SECRET);
+    req.userId = payload.sub;
+    req.authToken = token;
+    next();
+  } catch (err) {
+    next();
+  }
+}
+
 async function extractUserIdFromAuth(req) {
   const authHeader = req.headers.authorization || '';
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
@@ -699,6 +733,58 @@ app.get('/api/health', (_req, res) => {
 });
 
 // --- Scan Verification ---
+app.post('/api/scan/validate-image', optionalAuthMiddleware, async (req, res) => {
+  try {
+    if (!ai) {
+      return res.status(500).json({ error: 'AI is not configured.' });
+    }
+    const { imageBase64, mimeType } = req.body;
+    if (!imageBase64) {
+      return res.status(400).json({ error: 'Missing imageBase64' });
+    }
+    
+    let base64Data = imageBase64;
+    if (base64Data.startsWith('data:')) {
+      base64Data = base64Data.split(',')[1];
+    }
+    const mime = mimeType || 'image/jpeg';
+
+    const systemInstruction = "Analyze this image. Is it a computer-generated image (AI generated), a digital illustration, a screenshot, or a stock photo from the internet? It must be a real, authentic, original photograph taken by a smartphone camera in the real world. You must answer strictly with a JSON object: {\"isAuthentic\": true/false, \"reason\": \"short explanation\"}. If it is a real photograph of an item, isAuthentic should be true.";
+    
+    const contentsArray = [
+      {
+        role: 'user',
+        parts: [
+          { text: "Validate this image authenticity." },
+          { inlineData: { mimeType: mime, data: base64Data } }
+        ]
+      }
+    ];
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      config: {
+        systemInstruction: systemInstruction,
+        responseMimeType: "application/json"
+      },
+      contents: contentsArray
+    });
+
+    const textResponse = response.text || '';
+    let jsonResult;
+    try {
+      jsonResult = JSON.parse(textResponse);
+    } catch(e) {
+      jsonResult = { isAuthentic: true, reason: "Failed to parse AI response" };
+    }
+    return res.status(200).json(jsonResult);
+  } catch (error) {
+    console.error('Image Validation Error:', error);
+    // If the API fails, fail open (allow scan) rather than blocking legitimate users
+    return res.status(200).json({ isAuthentic: true, reason: "Validation bypassed due to server error" });
+  }
+});
+
 app.post('/api/scan/verify/start', async (req, res) => {
   cleanupExpiredVerificationSessions();
 
@@ -958,7 +1044,7 @@ app.delete('/api/sustainai/history', authMiddleware, (req, res) => {
 });
 
 // --- AI Chat ---
-app.post('/api/chat', authMiddleware, chatRateLimit, async (req, res) => {
+app.post('/api/chat', optionalAuthMiddleware, chatRateLimit, async (req, res) => {
   try {
     if (!ai) {
       return res.status(500).json({ error: 'AI is not configured. Missing GEMINI_API_KEY.' });

@@ -14,6 +14,7 @@
     <meta property="og:description" content="Transform your waste into rewards. Scan, recycle, and earn points toward exclusive eco-friendly products. Join the circular economy today.">
     <meta property="og:image" content="https://placehold.co/1200x630/22c55e/white?text=EcoSort+AI">
     <meta property="og:type" content="website">
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 </head>
 <body class="text-gray-800">
     <nav class="site-nav fixed w-full z-50 glass-panel shadow-sm">
@@ -53,7 +54,7 @@
 
     <header class="pt-24 pb-8">
         <div class="max-w-7xl mx-auto px-6 text-center">
-            <div class="glass-panel inline-block p-8 rounded-3xl">
+            <div class="glass-panel inline-block p-8 rounded-3xl" data-aos="zoom-out"
                 <p class="uppercase tracking-widest text-xs text-green-600 mb-3 font-bold">Impact</p>
                 <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900">Measured results, shared openly</h1>
                 <p class="mt-4 text-gray-600 max-w-2xl mx-auto">
@@ -66,22 +67,22 @@
 
     <section class="max-w-7xl mx-auto px-6 pb-12">
         <div class="grid md:grid-cols-4 gap-6">
-            <div class="glass-panel rounded-3xl p-6 shadow-sm">
+            <div class="glass-panel rounded-3xl p-6 shadow-sm" data-aos="zoom-out"
                 <p class="text-xs uppercase font-bold text-green-700">Total Scans</p>
                 <p id="impact-total-items" class="text-3xl font-extrabold text-green-600 mt-2">0</p>
                 <p class="text-sm text-gray-600 mt-2 font-medium">Verified by the EcoSort community</p>
             </div>
-            <div class="glass-panel rounded-3xl p-6 shadow-sm">
+            <div class="glass-panel rounded-3xl p-6 shadow-sm" data-aos="zoom-out"
                 <p class="text-xs uppercase font-bold text-blue-700">Material Diverted</p>
                 <p id="impact-total-users" class="text-3xl font-extrabold text-blue-600 mt-2">0</p>
                 <p class="text-sm text-gray-600 mt-2 font-medium">Active recyclers on the platform</p>
             </div>
-            <div class="glass-panel rounded-3xl p-6 shadow-sm">
+            <div class="glass-panel rounded-3xl p-6 shadow-sm" data-aos="zoom-out"
                 <p class="text-xs uppercase font-bold text-emerald-700">CO2 Avoided</p>
                 <p id="impact-co2-saved" class="text-3xl font-extrabold text-emerald-600 mt-2">0</p>
                 <p class="text-sm text-gray-600 mt-2 font-medium">Estimated kilograms of CO2 saved</p>
             </div>
-            <div class="glass-panel rounded-3xl p-6 shadow-sm">
+            <div class="glass-panel rounded-3xl p-6 shadow-sm" data-aos="zoom-out"
                 <p class="text-xs uppercase font-bold text-yellow-700">Rewards Issued</p>
                 <p id="impact-total-rewards" class="text-3xl font-extrabold text-yellow-600 mt-2">0</p>
                 <p class="text-sm text-gray-600 mt-2 font-medium">Community perks and events</p>
@@ -91,7 +92,7 @@
     </section>
 
     <section class="max-w-7xl mx-auto px-6 py-14">
-        <div class="glass-panel rounded-3xl p-8">
+        <div class="glass-panel rounded-3xl p-8" data-aos="zoom-out"
             <div class="grid md:grid-cols-2 gap-10 items-center">
                 <div>
                     <h2 class="text-2xl font-bold text-gray-900 mb-4">Impact Timeline</h2>
@@ -124,21 +125,21 @@
 
     <section class="max-w-7xl mx-auto px-6 py-14">
         <div class="grid md:grid-cols-3 gap-6">
-            <div class="glass-panel rounded-3xl overflow-hidden shadow-md">
+            <div class="glass-panel rounded-3xl overflow-hidden shadow-md" data-aos="zoom-out"
                 <img src="assets/images/cleanup-forest.jpg" alt="Cleanup day" class="w-full h-40 object-cover">
                 <div class="p-6">
                     <p class="text-lg font-semibold text-gray-900">Community Actions</p>
                     <p class="text-sm text-gray-600 mt-2">Volunteer events feed the platform with verified data and local momentum.</p>
                 </div>
             </div>
-            <div class="glass-panel rounded-3xl overflow-hidden shadow-md">
+            <div class="glass-panel rounded-3xl overflow-hidden shadow-md" data-aos="zoom-out"
                 <img src="assets/images/recycling-bins.jpg" alt="Drop off stations" class="w-full h-40 object-cover">
                 <div class="p-6">
                     <p class="text-lg font-semibold text-gray-900">Smart Drop-offs</p>
                     <p class="text-sm text-gray-600 mt-2">Consistent bin use improves recovery and reduces sorting costs.</p>
                 </div>
             </div>
-            <div class="glass-panel rounded-3xl overflow-hidden shadow-md">
+            <div class="glass-panel rounded-3xl overflow-hidden shadow-md" data-aos="zoom-out"
                 <img src="assets/images/ewaste-boards.jpg" alt="E-waste recovery" class="w-full h-40 object-cover">
                 <div class="p-6">
                     <p class="text-lg font-semibold text-gray-900">E-waste Recovery</p>
@@ -245,6 +246,8 @@
             }
         });
     </script>
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script>AOS.init({ duration: 800, once: false, offset: 100 });</script>
 </body>
 
 </html>

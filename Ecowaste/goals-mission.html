@@ -14,6 +14,7 @@
     <meta property="og:description" content="Transform your waste into rewards. Scan, recycle, and earn points toward exclusive eco-friendly products. Join the circular economy today.">
     <meta property="og:image" content="https://placehold.co/1200x630/22c55e/white?text=EcoSort+AI">
     <meta property="og:type" content="website">
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 </head>
 <body class="text-gray-800">
     <nav class="site-nav fixed w-full z-50 glass-panel shadow-sm">
@@ -70,7 +71,7 @@
 
     <section class="max-w-7xl mx-auto px-6 py-14">
         <div class="grid md:grid-cols-2 gap-10">
-            <div class="glass-panel rounded-3xl p-8 shadow-sm">
+            <div class="glass-panel rounded-3xl p-8 shadow-sm" data-aos="flip-left"
                 <h2 class="text-2xl font-bold text-gray-900 mb-4">Core Goals</h2>
                 <ul class="space-y-4 text-gray-600">
                     <li class="flex gap-3">
@@ -91,7 +92,7 @@
                     </li>
                 </ul>
             </div>
-            <div class="glass-panel rounded-3xl p-8 shadow-sm">
+            <div class="glass-panel rounded-3xl p-8 shadow-sm" data-aos="flip-left"
                 <h2 class="text-2xl font-bold text-gray-900 mb-4">Mission Statement</h2>
                 <p class="text-gray-600 leading-relaxed">
                     Our mission is to make proper recycling effortless and rewarding. We use AI to guide individuals in real time,
@@ -117,15 +118,15 @@
 
     <section class="max-w-7xl mx-auto px-6 pb-14">
         <div class="grid md:grid-cols-3 gap-8">
-            <div class="glass-panel rounded-3xl p-6 shadow-sm">
+            <div class="glass-panel rounded-3xl p-6 shadow-sm" data-aos="flip-left"
                 <h3 class="text-lg font-bold text-gray-900 mb-3">2026 Milestone</h3>
                 <p class="text-gray-600">Reach 1 million verified scans and onboard 50 partner recycling centers.</p>
             </div>
-            <div class="glass-panel rounded-3xl p-6 shadow-sm">
+            <div class="glass-panel rounded-3xl p-6 shadow-sm" data-aos="flip-left"
                 <h3 class="text-lg font-bold text-gray-900 mb-3">Product Goal</h3>
                 <p class="text-gray-600">Deliver 95%+ identification accuracy across top 100 household items.</p>
             </div>
-            <div class="glass-panel rounded-3xl p-6 shadow-sm">
+            <div class="glass-panel rounded-3xl p-6 shadow-sm" data-aos="flip-left"
                 <h3 class="text-lg font-bold text-gray-900 mb-3">Community Goal</h3>
                 <p class="text-gray-600">Launch 100 local challenges and support 25 school recycling programs.</p>
             </div>
@@ -141,19 +142,19 @@
                     showing how individual choices add up to meaningful climate action.
                 </p>
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="glass-panel rounded-2xl p-4 shadow-sm">
+                    <div class="glass-panel rounded-2xl p-4 shadow-sm" data-aos="flip-left"
                         <p class="text-xs uppercase font-bold text-green-700">Diversion Rate</p>
                         <p id="goals-co2" class="text-2xl font-extrabold text-green-600 mt-1">0</p>
                     </div>
-                    <div class="glass-panel rounded-2xl p-4 shadow-sm">
+                    <div class="glass-panel rounded-2xl p-4 shadow-sm" data-aos="flip-left"
                         <p class="text-xs uppercase font-bold text-blue-700">Partner Sites</p>
                         <p id="goals-users" class="text-2xl font-extrabold text-blue-600 mt-1">0</p>
                     </div>
-                    <div class="glass-panel rounded-2xl p-4 shadow-sm">
+                    <div class="glass-panel rounded-2xl p-4 shadow-sm" data-aos="flip-left"
                         <p class="text-xs uppercase font-bold text-emerald-700">Active Users</p>
                         <p id="goals-items" class="text-2xl font-extrabold text-emerald-600 mt-1">0</p>
                     </div>
-                    <div class="glass-panel rounded-2xl p-4 shadow-sm">
+                    <div class="glass-panel rounded-2xl p-4 shadow-sm" data-aos="flip-left"
                         <p class="text-xs uppercase font-bold text-yellow-700">Rewards Redeemed</p>
                         <p id="goals-rewards" class="text-2xl font-extrabold text-yellow-600 mt-1">0</p>
                     </div>
@@ -270,6 +271,8 @@
             }
         });
     </script>
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script>AOS.init({ duration: 800, once: false, offset: 100 });</script>
 </body>
 
 </html>

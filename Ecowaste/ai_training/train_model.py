@@ -1,146 +1,235 @@
-import tensorflow as tf
-from tensorflow.keras.applications import MobileNetV2
-from tensorflow.keras.layers import Dense, GlobalAveragePooling2D, RandomFlip, RandomRotation, RandomZoom, Dropout
-from tensorflow.keras.models import Model
-from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
 import os
 import numpy as np
+import tensorflow as tf
+from tensorflow.keras.applications import MobileNetV2
+from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
+from tensorflow.keras.layers import Dense, GlobalAveragePooling2D, Dropout
+from tensorflow.keras.models import Model
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
+from sklearn.utils.class_weight import compute_class_weight
 
-# Hide Intel iGPU (Adapter 1) to force RTX 4050 (Adapter 0)
+# ==========================================
+# 1. Environment & Setup
+# ==========================================
+print("Setting up GPU and Mixed Precision...")
 gpus = tf.config.list_physical_devices('GPU')
-if len(gpus) > 1:
-    tf.config.set_visible_devices(gpus[0], 'GPU')
+if gpus:
+    try:
+        # Use the primary GPU
+        tf.config.set_visible_devices(gpus[0], 'GPU')
+        tf.config.experimental.set_memory_growth(gpus[0], True)
+        print(f"Using GPU: {gpus[0].name}")
+    except RuntimeError as e:
+        print(e)
+else:
+    print("No GPU found. Training will fall back to CPU.")
 
-# --- RTX 4050 OPTIMIZATION ---
-# Enable Mixed Precision to use Tensor Cores (Trains faster, uses 50% less VRAM)
+# Enable Mixed Precision (mixed_float16) to leverage Tensor Cores
+# This significantly speeds up training and reduces VRAM usage on modern NVIDIA GPUs
 policy = tf.keras.mixed_precision.Policy('mixed_float16')
 tf.keras.mixed_precision.set_global_policy(policy)
 print(f"Compute dtype: {policy.compute_dtype}")
 print(f"Variable dtype: {policy.variable_dtype}")
 
-# 1. Load the Dataset
-# Change this to point to the new massive dataset directory
-dataset_path = './dataset/garbage_classification'
-
-# For a massive dataset on a 6GB VRAM card with mixed precision, a batch size of 128 or 256 is better to fully utilize GPU
+# ==========================================
+# 2. Data Loading & Preprocessing
+# ==========================================
+# Correct path to where the actual image classes reside
+dataset_path = 'd:/Codes/Vs Code/Ecowaste b/archive/Garbage classification/Garbage classification'
 batch_size = 128
 img_size = (224, 224)
 
-print("Loading dataset...")
-# shuffle=False avoids a DirectML bug where duplicate Equal kernels crash on seed comparison
+print(f"\nLoading dataset from: {dataset_path}")
+# Load Training Dataset (80%) - unbatched for mapping
 train_dataset = tf.keras.utils.image_dataset_from_directory(
     dataset_path,
     validation_split=0.2,
     subset="training",
     seed=123,
     image_size=img_size,
-    batch_size=batch_size,
-    shuffle=False
+    batch_size=None,
+    label_mode='int'
 )
-class_names = train_dataset.class_names
-train_dataset = train_dataset.shuffle(buffer_size=1000)
 
+# Load Validation Dataset (20%) - unbatched
 val_dataset = tf.keras.utils.image_dataset_from_directory(
     dataset_path,
     validation_split=0.2,
     subset="validation",
     seed=123,
     image_size=img_size,
-    batch_size=batch_size,
-    shuffle=False
+    batch_size=None,
+    label_mode='int'
 )
 
-print(f"Classes detected ({len(class_names)}): {class_names}")
+class_names = train_dataset.class_names if hasattr(train_dataset, 'class_names') else []
+if not class_names:
+    # When batch_size=None, class_names might not be exposed on the dataset object directly 
+    # depending on TF version. We can get them from the directory.
+    class_names = sorted(os.listdir(dataset_path))
 
-# --- DATA AUGMENTATION ---
-# Prevents overfitting on huge datasets
-# We force this to run entirely on the CPU dataset pipeline to bypass DirectML GPU kernel bugs!
-# We use pure tf.image functions because Keras Random layers create Variables 
-# that trigger a fatal DirectML AssignVariableOp GPU crash.
+num_classes = len(class_names)
+print(f"Found {num_classes} classes: {class_names}")
+
+# ==========================================
+# 3. Class Imbalance Handling
+# ==========================================
+print("\nCalculating class weights to handle dataset imbalance...")
+# We iterate over the dataset folder to count images per class
+labels = []
+for i, class_name in enumerate(class_names):
+    class_dir = os.path.join(dataset_path, class_name)
+    if os.path.isdir(class_dir):
+        num_images = len(os.listdir(class_dir))
+        labels.extend([i] * num_images)
+
+class_weights_array = compute_class_weight('balanced', classes=np.unique(labels), y=labels)
+class_weights_dict = {i: float(weight) for i, weight in enumerate(class_weights_array)}
+print(f"Class Weights: {class_weights_dict}")
+
+# ==========================================
+# 4. Advanced Data Augmentation ("Truth Mode")
+# ==========================================
+# We use pure tf.image functions for mapping to avoid potential Keras layer GPU bugs in the data pipeline.
+# Note: To handle non-rigid objects (e.g., squished plastic bottles), 
+# elastic deformations (via tfa.image.dense_image_warp) could be added here in the future.
+
 def augment_image(image, label):
+    # 1. Geometric: Random horizontal flip
     image = tf.image.random_flip_left_right(image)
+    
+    # 2. Geometric & Scale: Random zoom/crop
+    # We crop the image to a random size (e.g., 200x200) and resize back to 224x224
+    image = tf.image.random_crop(image, size=[200, 200, 3])
+    image = tf.image.resize(image, size=[224, 224])
+    
+    # 3. Appearance: Random brightness and contrast
     image = tf.image.random_brightness(image, max_delta=0.2)
     image = tf.image.random_contrast(image, lower=0.8, upper=1.2)
-    # Add slight random crop and resize to make AI robust to different angles (Truth Mode)
-    image = tf.image.resize(tf.image.random_crop(image, size=[200, 200, 3]), [224, 224])
+    
+    # Ensure values remain valid
+    image = tf.clip_by_value(image, 0.0, 255.0)
+    
     return image, label
 
 AUTOTUNE = tf.data.AUTOTUNE
-train_dataset = train_dataset.unbatch().map(augment_image, num_parallel_calls=AUTOTUNE).batch(batch_size)
 
-# 2. Build the Custom Model (Transfer Learning)
-base_model = MobileNetV2(input_shape=(224, 224, 3), include_top=False, weights='imagenet')
-base_model.trainable = False # Freeze base model initially
+# Apply augmentation only to the training set
+train_dataset = train_dataset.map(augment_image, num_parallel_calls=AUTOTUNE)
 
-# Apply augmentations to inputs
+# Apply MobileNetV2 preprocessing to both train and val sets
+def preprocess(image, label):
+    # MobileNetV2 expects inputs in the range [-1, 1]
+    return preprocess_input(image), label
+
+train_dataset = train_dataset.map(preprocess, num_parallel_calls=AUTOTUNE)
+val_dataset = val_dataset.map(preprocess, num_parallel_calls=AUTOTUNE)
+
+# Optimize pipeline with caching, batching, and prefetching
+train_dataset = train_dataset.cache().shuffle(buffer_size=1000).batch(batch_size).prefetch(buffer_size=AUTOTUNE)
+val_dataset = val_dataset.cache().batch(batch_size).prefetch(buffer_size=AUTOTUNE)
+
+# ==========================================
+# 5. Model Architecture (Transfer Learning)
+# ==========================================
+print("\nBuilding the model architecture...")
+# Base model: MobileNetV2 pre-trained on ImageNet
+base_model = MobileNetV2(
+    weights='imagenet',
+    include_top=False,
+    input_shape=(224, 224, 3)
+)
+
+# Freeze the base model for Phase 1
+base_model.trainable = False
+
+# Create the custom classification head
 inputs = tf.keras.Input(shape=(224, 224, 3))
-# (Augmentation is now safely handled on the CPU before it reaches the GPU model)
-x = tf.keras.applications.mobilenet_v2.preprocess_input(inputs) # MobileNetV2 specific preprocessing
-x = base_model(x, training=False)
+x = base_model(inputs, training=False) # Ensure batchnorm stays in inference mode
 x = GlobalAveragePooling2D()(x)
 x = Dense(256, activation='relu')(x)
-x = Dropout(0.5)(x) # Help prevent overfitting
+x = Dropout(0.5)(x) # Regularization to prevent overfitting
+# CRITICAL: Final layer must be float32 for mixed precision stability
+outputs = Dense(num_classes, activation='softmax', dtype='float32')(x)
 
-# Using float32 for final layer is required when using mixed precision
-predictions = Dense(len(class_names), activation='softmax', dtype='float32')(x)
+model = Model(inputs, outputs)
+model.summary()
 
-model = Model(inputs=inputs, outputs=predictions)
+# ==========================================
+# 6. Callbacks Configuration
+# ==========================================
+checkpoint_cb = ModelCheckpoint(
+    "massive_waste_model_best.keras",
+    save_best_only=True,
+    monitor="val_accuracy",
+    mode="max",
+    verbose=1
+)
 
-# 3. Compile and Train
-# Using Adam optimizer
-model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+early_stopping_cb = EarlyStopping(
+    patience=8,
+    restore_best_weights=True,
+    monitor="val_accuracy",
+    mode="max",
+    verbose=1
+)
 
-# --- CHECKPOINTS & EARLY STOPPING ---
-# Ensure we don't lose days of training if it crashes
-callbacks = [
-    ModelCheckpoint('best_massive_waste_model.keras', save_best_only=True, monitor='val_accuracy'),
-    ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=3, min_lr=1e-6),
-    EarlyStopping(monitor='val_accuracy', patience=5, restore_best_weights=True)
-]
+reduce_lr_cb = ReduceLROnPlateau(
+    monitor="val_loss",
+    factor=0.2,
+    patience=3,
+    min_lr=1e-6,
+    verbose=1
+)
 
-# Calculate Class Weights to handle dataset imbalances (Truth Mode)
-class_weights = {}
-total_samples = 0
-for i, class_name in enumerate(class_names):
-    class_dir = os.path.join(dataset_path, class_name)
-    if os.path.exists(class_dir):
-        num_samples = len(os.listdir(class_dir))
-        class_weights[i] = num_samples
-        total_samples += num_samples
+callbacks = [checkpoint_cb, early_stopping_cb, reduce_lr_cb]
 
-num_classes = len(class_names)
-if total_samples > 0:
-    for i in class_weights.keys():
-        if class_weights[i] > 0:
-            class_weights[i] = (1 / class_weights[i]) * (total_samples / num_classes)
-        else:
-            class_weights[i] = 0.0
-else:
-    class_weights = None
+# ==========================================
+# 7. Training Strategy: Phase 1 (Feature Extraction)
+# ==========================================
+print("\n--- Phase 1: Feature Extraction (Frozen Base) ---")
+model.compile(
+    optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3),
+    loss='sparse_categorical_crossentropy',
+    metrics=['accuracy']
+)
 
-print("Starting Highly Optimized GPU Training for RTX 4050...")
-# Prefetching to keep GPU busy
-AUTOTUNE = tf.data.AUTOTUNE
-train_dataset = train_dataset.prefetch(buffer_size=AUTOTUNE)
-val_dataset = val_dataset.prefetch(buffer_size=AUTOTUNE)
+# Train only the custom top layers
+history_phase1 = model.fit(
+    train_dataset,
+    validation_data=val_dataset,
+    epochs=15,
+    class_weight=class_weights_dict,
+    callbacks=callbacks
+)
 
-# Phase 1: Train Top Layers
-print("Starting Phase 1: Training Top Layers...")
-model.fit(train_dataset, validation_data=val_dataset, epochs=50, callbacks=callbacks, class_weight=class_weights)
-
-# Phase 2: Truth Mode Fine-Tuning
-print("Starting Phase 2: Fine-Tuning base model layers (Truth Mode)...")
-# Unfreeze the top 30 layers of the base model to adapt specific edge-detection to waste
+# ==========================================
+# 8. Training Strategy: Phase 2 (Fine-Tuning)
+# ==========================================
+print("\n--- Phase 2: Fine-Tuning (Unfrozen Base) ---")
+# Unfreeze the top layers of the base model (from layer 100 onwards)
 base_model.trainable = True
-for layer in base_model.layers[:-30]:
+for layer in base_model.layers[:100]:
     layer.trainable = False
 
-# Recompile with a microscopically low learning rate to prevent catastrophic forgetting
-model.compile(optimizer=tf.keras.optimizers.Adam(1e-5), loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+# Recompile with a VERY LOW learning rate to prevent catastrophic forgetting
+model.compile(
+    optimizer=tf.keras.optimizers.Adam(learning_rate=1e-5),
+    loss='sparse_categorical_crossentropy',
+    metrics=['accuracy']
+)
 
-# Train for another 20 epochs with early stopping to cement 'Truth Mode' knowledge
-model.fit(train_dataset, validation_data=val_dataset, epochs=20, callbacks=callbacks, class_weight=class_weights)
+history_phase2 = model.fit(
+    train_dataset,
+    validation_data=val_dataset,
+    epochs=15, 
+    class_weight=class_weights_dict,
+    callbacks=callbacks
+)
 
-# 4. Save the trained Keras model
-model.save('massive_waste_model_final.h5')
-print("Model saved successfully as massive_waste_model_final.h5 and best_massive_waste_model.keras!")
+# ==========================================
+# 9. Save Final Model
+# ==========================================
+print("\nTraining complete. Saving the final model...")
+model.save("massive_waste_model_final.keras")
+print("Model saved as 'massive_waste_model_final.keras' and best weights as 'massive_waste_model_best.keras'.")

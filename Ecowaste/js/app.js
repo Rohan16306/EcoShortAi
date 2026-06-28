@@ -37,6 +37,22 @@
         const PRODUCTION_BACKEND_URL = 'https://ecowaste-node.onrender.com';
         const PRODUCTION_PB_URL = 'https://ecowaste-pocketbase.onrender.com';
 
+        // Phase 2 URL — UPDATE this after deploying Phase2 folder to Vercel
+        // On localhost, Express proxies Phase 2 routes, so we use '' (relative paths).
+        // On Vercel/production, Phase 2 is a separate deployment.
+        const PHASE2_VERCEL_URL = 'https://eco-sort-ai-phase2.vercel.app';
+
+        function isLocalhost() {
+            return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        }
+
+        function getPhase2BaseUrl() {
+            // On localhost, Express server proxies Phase 2 routes directly
+            if (isLocalhost()) return '';
+            // On Vercel/production, redirect to the separate Phase 2 deployment
+            return PHASE2_VERCEL_URL;
+        }
+
         function resolveApiBase() {
             return PRODUCTION_BACKEND_URL + '/api';
         }
@@ -151,7 +167,7 @@
             }
         });
 
-        const CLASS_NAMES = ['glass', 'hard_waste', 'liquid_waste', 'metal', 'non_organic_waste', 'organic_waste', 'plastic'];
+        const CLASS_NAMES = ['cardboard', 'glass', 'metal', 'paper', 'plastic', 'trash'];
 
         function startModelLoad() {
             if (model) return Promise.resolve(model);
@@ -164,7 +180,7 @@
 
             // Load the custom-trained local model instead of the generic internet one
             // We load it from the frontend-next folder where the converted model lives
-            modelLoadPromise = tf.loadLayersModel('/model/model.json')
+            modelLoadPromise = tf.loadGraphModel('/model/model.json')
                 .then((loadedModel) => {
                     // Create a wrapper that mimics the old MobileNet .classify() API
                     // so we don't have to rewrite the rest of the old frontend
@@ -1386,17 +1402,35 @@
                     }));
                 }
 
-                // Redirect to Phase 2 (Next.js app proxied on the same port)
-                if (viewName === 'admin') {
-                    window.location.href = '/admin-dashboard';
-                    return;
-                }
-                if (viewName === 'collector') {
-                    window.location.href = '/collector-dashboard';
-                    return;
-                }
-                if (viewName === 'pickup') {
-                    window.location.href = '/pickup-request-tracking';
+                // Redirect to Phase 2 (Next.js app)
+                // On localhost: Express proxies to port 3005 (relative paths work)
+                // On Vercel: Redirect to separate Phase 2 deployment with auth in URL params
+                if (viewName === 'admin' || viewName === 'collector' || viewName === 'pickup') {
+                    const phase2Base = getPhase2BaseUrl();
+                    const routeMap = {
+                        admin: '/admin-dashboard',
+                        collector: '/collector-dashboard',
+                        pickup: '/pickup-request-tracking'
+                    };
+                    let targetUrl = phase2Base + routeMap[viewName];
+
+                    // When redirecting cross-domain (Vercel), pass auth via URL params
+                    // since localStorage is not shared across domains
+                    if (phase2Base && currentUser) {
+                        let phase2Role = 'user';
+                        if (role === 'ROLE_ADMIN') phase2Role = 'admin';
+                        else if (role === 'ROLE_RECEIVER') phase2Role = 'collector';
+
+                        const params = new URLSearchParams({
+                            auth_id: currentUser.id,
+                            auth_email: currentUser.email,
+                            auth_name: currentUser.name || 'User',
+                            auth_role: phase2Role
+                        });
+                        targetUrl += '?' + params.toString();
+                    }
+
+                    window.location.href = targetUrl;
                     return;
                 }
 
@@ -2014,7 +2048,13 @@
 
             const isDuplicate = duplicate !== null;
             const isLocationDuplicate = locationDuplicate !== null;
-            const finalCredits = isDuplicate ? 0 : credits;
+            let finalCredits = isDuplicate ? 0 : credits;
+
+            // Enforce minimum confidence criteria for credits
+            if (prob < 0.20) {
+                finalCredits = 0;
+                credits = 0;
+            }
 
             return {
                 topPrediction: predictions[0],
@@ -2318,6 +2358,20 @@
                 currentImageHash = await generateImageHash(currentImage);
             }
             
+            try {
+                const valRes = await apiRequest('/scan/validate-image', {
+                    method: 'POST',
+                    body: JSON.stringify({ imageBase64: currentImage, mimeType: 'image/jpeg' })
+                });
+                if (valRes && valRes.isAuthentic === false) {
+                    alert("Scan Blocked: " + (valRes.reason || "This image appears to be computer-generated or from the internet. Please scan a real item."));
+                    document.getElementById('loading-area').classList.add('hidden');
+                    return;
+                }
+            } catch (err) {
+                console.warn("Image authenticity validation failed or was bypassed:", err);
+            }
+            
             let predictions;
             let duplicate;
             let locationDuplicate;
@@ -2430,6 +2484,20 @@
 
             document.getElementById('video-preview-area').classList.add('hidden');
             document.getElementById('loading-area').classList.remove('hidden');
+
+            try {
+                const valRes = await apiRequest('/scan/validate-image', {
+                    method: 'POST',
+                    body: JSON.stringify({ imageBase64: frameDataUrl, mimeType: 'image/jpeg' })
+                });
+                if (valRes && valRes.isAuthentic === false) {
+                    alert("Scan Blocked: " + (valRes.reason || "This image appears to be computer-generated or from the internet. Please scan a real item."));
+                    document.getElementById('loading-area').classList.add('hidden');
+                    return;
+                }
+            } catch (err) {
+                console.warn("Video authenticity validation failed or was bypassed:", err);
+            }
 
             try {
                 // Generate hash
@@ -2806,10 +2874,22 @@
 
             if (aiMessages.length === 0 && !isAiTyping) {
                 container.innerHTML = `
-                    <div class="ai-welcome-card">
+                    <div class="ai-welcome-card shadow-organic" style="border-radius: 24px;">
                         <div class="ai-welcome-icon"><i class="fa-solid fa-leaf"></i></div>
-                        <h3 class="ai-welcome-title">Welcome to SustainAssist Pro</h3>
-                        <p class="ai-welcome-subtitle">I'm your AI guide to recycling, sustainability, and the circular economy. Ask me anything about plastic types, recycling methods, or how to earn credits on EcoSort!</p>
+                        <h3 class="ai-welcome-title">Hello, I'm Sustain AI</h3>
+                        <p class="ai-welcome-subtitle mb-6">Ask me about plastic types, recycling, or upload a photo of a plastic item and I'll help identify it.</p>
+                        
+                        <div class="flex flex-wrap gap-2 justify-center mt-6">
+                            <button onclick="sendSuggestedMessage('How do I identify plastic type #5 (PP)?')" class="inline-flex items-center gap-2 rounded-full border border-green-200 bg-white/70 hover:bg-green-50 transition-colors px-4 py-2 text-sm text-gray-700 shadow-sm">
+                                <i class="fa-solid fa-recycle text-green-600"></i> How do I identify plastic type #5 (PP)?
+                            </button>
+                            <button onclick="sendSuggestedMessage('Tips for reducing single-use plastic at home')" class="inline-flex items-center gap-2 rounded-full border border-green-200 bg-white/70 hover:bg-green-50 transition-colors px-4 py-2 text-sm text-gray-700 shadow-sm">
+                                <i class="fa-solid fa-leaf text-green-600"></i> Tips for reducing single-use plastic at home
+                            </button>
+                            <button onclick="sendSuggestedMessage('How does the credit & reward system work?')" class="inline-flex items-center gap-2 rounded-full border border-green-200 bg-white/70 hover:bg-green-50 transition-colors px-4 py-2 text-sm text-gray-700 shadow-sm">
+                                <i class="fa-solid fa-wand-magic-sparkles text-green-600"></i> How does the credit & reward system work?
+                            </button>
+                        </div>
                     </div>
                 `;
                 renderAiSidebarHistory();
@@ -2914,6 +2994,17 @@
                     });
                 } catch (e) {
                     console.error("Failed to delete item", e);
+                }
+            }
+        }
+
+        function sendSuggestedMessage(text) {
+            const input = document.getElementById('ai-chat-input');
+            if (input) {
+                input.value = text;
+                const form = document.getElementById('ai-chat-form');
+                if (form) {
+                    form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
                 }
             }
         }
