@@ -171,7 +171,7 @@ export default function PickupRequestForm({ onSuccess }: { onSuccess: () => void
       <header className="px-6 pt-10 pb-6">
         <div className="flex items-center gap-3 mb-6">
           <AppLogo size={36} />
-          <h1 className="text-xl font-extrabold text-foreground tracking-tight">WastePickup</h1>
+          <h1 className="text-xl font-extrabold text-foreground tracking-tight">EcoSortAI</h1>
         </div>
         <div className="relative bg-primary/5 rounded-2xl p-5 border border-primary/10 overflow-hidden">
            <div className="absolute top-0 right-0 p-3 opacity-10">

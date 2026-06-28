@@ -19,9 +19,9 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'WastePickup — On-Demand Plastic Waste Collection',
+  title: 'EcoSortAI — On-Demand Plastic Waste Collection',
   description:
-    'WastePickup connects plastic waste generators with verified collectors for fast, trackable, on-demand pickup across your city.',
+    'EcoSortAI connects plastic waste generators with verified collectors for fast, trackable, on-demand pickup across your city.',
   icons: {
     icon: [{ url: '/favicon.ico', type: 'image/x-icon' }],
   },

@@ -65,7 +65,7 @@ export default function PickupTopbar() {
     <header className="h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 bg-card border-b border-border flex-shrink-0 relative z-30">
       <Link href="/pickup-request-tracking" className="flex items-center gap-2.5">
         <AppLogo size={34} />
-        <span className="font-bold text-base text-primary tracking-tight">WastePickup</span>
+        <span className="font-bold text-base text-primary tracking-tight">EcoSortAI</span>
       </Link>
 
       <nav className="hidden md:flex items-center gap-1">

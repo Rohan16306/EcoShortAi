@@ -177,7 +177,7 @@ export default function AuthFormPanel({ role, setRole, mode, setMode }: Props) {
       {/* Mobile logo */}
       <div className="flex items-center gap-2 mb-8 lg:hidden">
         <AppLogo size={36} />
-        <span className="font-bold text-lg text-primary tracking-tight">WastePickup</span>
+        <span className="font-bold text-lg text-primary tracking-tight">EcoSortAI</span>
       </div>
 
       <div className="w-full max-w-md mx-auto">

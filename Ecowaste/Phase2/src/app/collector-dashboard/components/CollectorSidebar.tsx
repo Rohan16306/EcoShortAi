@@ -61,7 +61,7 @@ export default function CollectorSidebar({ open, onToggle, collector }: Props) {
         <div className={`flex items-center gap-3 ${!open ? 'justify-center w-full' : ''}`}>
           <AppLogo size={32} />
           {open && (
-            <span className="font-bold text-lg text-primary tracking-tight">WastePickup</span>
+            <span className="font-bold text-lg text-primary tracking-tight">EcoSortAI</span>
           )}
         </div>
         {open && (

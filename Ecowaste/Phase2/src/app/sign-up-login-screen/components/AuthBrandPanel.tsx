@@ -67,7 +67,7 @@ export default function AuthBrandPanel({ role }: { role: AuthRole }) {
         <div className="flex items-center gap-3 mb-14">
           <AppLogo size={40} />
           <span className="font-bold text-xl text-white tracking-tight">
-            WastePickup
+            EcoSortAI
           </span>
         </div>
 
