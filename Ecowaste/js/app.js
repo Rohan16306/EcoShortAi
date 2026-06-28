@@ -1122,14 +1122,16 @@
 
             // RBAC: Show/hide nav buttons based on role
             const navAdmin = document.getElementById('nav-admin');
+            const mobileNavAdmin = document.getElementById('mobile-nav-admin');
             const navCollector = document.getElementById('nav-collector');
+            const mobileNavCollector = document.getElementById('mobile-nav-collector');
+            
             const role = currentUser.role || 'ROLE_USER';
-            if (navAdmin) {
-                navAdmin.classList.toggle('hidden', role !== 'ROLE_ADMIN');
-            }
-            if (navCollector) {
-                navCollector.classList.toggle('hidden', role !== 'ROLE_RECEIVER');
-            }
+            if (navAdmin) navAdmin.classList.toggle('hidden', role !== 'ROLE_ADMIN');
+            if (mobileNavAdmin) mobileNavAdmin.classList.toggle('hidden', role !== 'ROLE_ADMIN');
+            
+            if (navCollector) navCollector.classList.toggle('hidden', role !== 'ROLE_RECEIVER');
+            if (mobileNavCollector) mobileNavCollector.classList.toggle('hidden', role !== 'ROLE_RECEIVER');
         }
 
         function showLoggedOutState() {
@@ -1431,22 +1433,21 @@
                 // On localhost: Express proxies to port 3005 (relative paths work)
                 // On Vercel: Redirect to separate Phase 2 deployment with auth in URL params
                 if (viewName === 'admin') {
-                    const phase2Base = getPhase2BaseUrl();
-                    const routeMap = {
-                        admin: '/admin-dashboard'
-                    };
-                    let targetUrl = phase2Base + routeMap[viewName];
+                    try {
+                        const phase2Base = getPhase2BaseUrl();
+                        let targetUrl = phase2Base + '/admin-dashboard';
 
-                    // Pass auth via URL params so Phase 2 NextAuth can pick it up via AuthBridge
-                    if (currentUser && authToken) {
-                        const params = new URLSearchParams({
-                            pb_token: authToken
-                        });
-                        targetUrl += '?' + params.toString();
+                        if (currentUser && authToken) {
+                            targetUrl += '?pb_token=' + encodeURIComponent(authToken);
+                        }
+
+                        window.location.assign(targetUrl);
+                        return;
+                    } catch (err) {
+                        console.error('Redirect error:', err);
+                        alert('Could not redirect to Admin Dashboard. Please check console.');
+                        return;
                     }
-
-                    window.location.href = targetUrl;
-                    return;
                 }
 
                 document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
