@@ -53,7 +53,7 @@ export default function AdminPortalEntry() {
 
       if (!token) {
         toast.error('Authentication required. Redirecting...');
-        window.location.href = 'https://eco-sort-ai-ochre.vercel.app';
+        window.location.href = 'https://eco-sort-ai-ochre.vercel.app/?intent=admin';
         return;
       }
 
@@ -76,7 +76,7 @@ export default function AdminPortalEntry() {
         const data = await res.json();
         if (data.record.role !== 'ROLE_ADMIN') {
           toast.error('Access denied. Admin role required.');
-          window.location.href = 'https://eco-sort-ai-ochre.vercel.app';
+          window.location.href = 'https://eco-sort-ai-ochre.vercel.app/?intent=admin';
           return;
         }
 
@@ -87,7 +87,7 @@ export default function AdminPortalEntry() {
       } catch (err) {
         toast.error('Session expired. Please log in again.');
         localStorage.removeItem('pb_auth');
-        window.location.href = 'https://eco-sort-ai-ochre.vercel.app';
+        window.location.href = 'https://eco-sort-ai-ochre.vercel.app/?intent=admin';
       }
     };
 

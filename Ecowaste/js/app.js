@@ -114,6 +114,22 @@
 
             // Prevent Tailwind FOUC by removing preloader
             document.body.classList.add('loaded');
+            
+            // Check for intent param
+            const urlParams = new URLSearchParams(window.location.search);
+            const intent = urlParams.get('intent');
+            if (intent === 'admin') {
+                window.history.replaceState({}, '', window.location.pathname); // remove intent from URL
+                sessionStorage.setItem('redirectAfterLogin', 'admin');
+                setTimeout(() => {
+                    if (!currentUser) {
+                        openAuthModal('login');
+                    } else {
+                        router('admin');
+                    }
+                }, 500);
+            }
+
             const preloader = document.getElementById('css-preloader');
             if (preloader) preloader.remove();
 
@@ -1414,12 +1430,10 @@
                 // Redirect to Phase 2 (Next.js app)
                 // On localhost: Express proxies to port 3005 (relative paths work)
                 // On Vercel: Redirect to separate Phase 2 deployment with auth in URL params
-                if (viewName === 'admin' || viewName === 'collector' || viewName === 'pickup') {
+                if (viewName === 'admin') {
                     const phase2Base = getPhase2BaseUrl();
                     const routeMap = {
-                        admin: '/admin-dashboard',
-                        collector: '/collector-dashboard',
-                        pickup: '/pickup-request-tracking'
+                        admin: '/admin-dashboard'
                     };
                     let targetUrl = phase2Base + routeMap[viewName];
 
