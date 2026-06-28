@@ -4,9 +4,10 @@ import "./globals.css";
 import Navigation from "@/components/layout/Navigation";
 import BottomNav from "@/components/layout/BottomNav";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { LiveTicker } from "@/components/features/LiveTicker";
+import dynamic from "next/dynamic";
 import { ServiceWorkerCleanup } from "@/components/ServiceWorkerCleanup";
-import CreditAnimation from "@/components/ui/CreditAnimation";
+const LiveTicker = dynamic(() => import("@/components/features/LiveTicker").then(mod => mod.LiveTicker));
+const CreditAnimation = dynamic(() => import("@/components/ui/CreditAnimation"));
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {

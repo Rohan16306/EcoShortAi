@@ -5,6 +5,7 @@ import { useState, useRef, useEffect } from "react";
 import { useChat } from "@ai-sdk/react";
 import { MessageSquare, X, Recycle, Leaf, SparklesIcon, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 import {
   Conversation,
   ConversationContent,
@@ -136,11 +137,13 @@ export function ChatWidget() {
                             }
                             if (part.type === "file" && part.mediaType?.startsWith("image/")) {
                               return (
-                                <img
+                                <Image
                                   key={i}
                                   src={part.url}
                                   alt="Uploaded plastic item"
-                                  className="mt-2 rounded-xl max-h-48 border border-border/60"
+                                  width={400}
+                                  height={300}
+                                  className="mt-2 rounded-xl max-h-48 border border-border/60 object-contain"
                                 />
                               );
                             }

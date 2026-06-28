@@ -34,7 +34,7 @@
     <!-- TensorFlow.js -->
     <script async src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
     <!-- Canonical URL -->
-    <link rel="canonical" href="https://ecosort.ai/" />
+    <link rel="canonical" href="https://ecosort.ai/">
     <!-- Canvas Confetti -->
     <script async src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <!-- Chart.js for Dashboard -->
@@ -50,7 +50,7 @@
     <meta property="og:description" content="Transform your waste into rewards. Scan, recycle, and earn points toward exclusive eco-friendly products. Join the circular economy today.">
     <meta property="og:image" content="https://placehold.co/1200x630/22c55e/white?text=EcoSort+AI">
     <meta property="og:type" content="website">
-    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css">
 </head>
 <body class="text-gray-800" style="opacity: 0; transition: opacity 0.5s ease-in-out;">
     <!-- Preloader to prevent FOUC -->
@@ -97,9 +97,9 @@
                     <!-- User Menu -->
                     <div id="user-menu" class="hidden relative">
                         <button aria-label="User menu" aria-expanded="false" aria-controls="user-dropdown" onclick="toggleUserMenu()" class="flex items-center space-x-2 focus:outline-none">
-                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600">
+                            <span class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600">
                                 <i class="fa-solid fa-user"></i>
-                            </div>
+                            </span>
                             <span id="user-name" class="hidden md:block font-medium text-gray-700">User</span>
                             <i class="fa-solid fa-chevron-down text-xs text-gray-500"></i>
                         </button>
@@ -147,9 +147,9 @@
             <span class="text-[10px] font-medium">Home</span>
         </a>
         <button onclick="router('detect')" class="flex flex-col items-center justify-center w-full h-full text-gray-500 hover:text-green-600 transition">
-            <div class="bg-green-600 text-white rounded-full w-12 h-12 flex items-center justify-center -mt-6 shadow-lg border-4 border-white">
+            <span class="bg-green-600 text-white rounded-full w-12 h-12 flex items-center justify-center -mt-6 shadow-lg border-4 border-white">
                 <i class="fa-solid fa-camera text-xl"></i>
-            </div>
+            </span>
             <span class="text-[10px] font-medium mt-1">Scan</span>
         </button>
         <button onclick="router('rewards')" class="flex flex-col items-center justify-center w-full h-full text-gray-500 hover:text-green-600 transition">
@@ -331,6 +331,7 @@
 
                 <div id="featured-media-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <article class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+                        <h3 class="sr-only">Featured Article</h3>
                         <div class="h-56 bg-gray-200/50 animate-pulse flex items-center justify-center">
                             <i class="fa-solid fa-image text-gray-300 text-4xl"></i>
                         </div>
@@ -341,6 +342,7 @@
                         </div>
                     </article>
                     <article class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+                        <h3 class="sr-only">Featured Article</h3>
                         <div class="h-56 bg-gray-200/50 animate-pulse flex items-center justify-center">
                             <i class="fa-solid fa-image text-gray-300 text-4xl"></i>
                         </div>
@@ -351,6 +353,7 @@
                         </div>
                     </article>
                     <article class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hidden lg:block">
+                        <h3 class="sr-only">Featured Article</h3>
                         <div class="h-56 bg-gray-200/50 animate-pulse flex items-center justify-center">
                             <i class="fa-solid fa-image text-gray-300 text-4xl"></i>
                         </div>
@@ -706,7 +709,7 @@
                             <div class="flex items-center mb-4">
                                 <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-xl mr-4">SJ</div>
                                 <div>
-                                    <h4 class="font-bold text-gray-900">Sarah Johnson</h4>
+                                    <h3 class="font-bold text-gray-900">Sarah Johnson</h3>
                                     <p class="text-sm text-gray-500">Eco Warrior â€¢ 1,240 credits</p>
                                 </div>
                             </div>
@@ -993,7 +996,7 @@
                     <!-- Step 2 Smart Bin Preview Area -->
                     <div id="video-preview-area" class="hidden text-center">
                         <div class="relative inline-block w-full max-w-3xl">
-                            <img id="preview-video" class="w-full max-h-96 rounded-lg shadow-md border border-gray-200 object-contain bg-gray-100" alt="Step 2 smart bin preview">
+                            <img id="preview-video" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" class="w-full max-h-96 rounded-lg shadow-md border border-gray-200 object-contain bg-gray-100" alt="Step 2 smart bin preview">
                             <!-- NEW: Location display over captured image -->
                             <div id="video-preview-location-overlay" class="absolute bottom-2 left-2 bg-black/60 text-green-400 px-2 py-1 rounded font-mono text-[10px] sm:text-xs backdrop-blur hidden">
                                 <i class="fa-solid fa-location-dot mr-1"></i> <span id="video-preview-coords"></span>
@@ -1121,7 +1124,7 @@
                             <i class="fa-solid fa-times"></i>
                         </button>
                         <button aria-label="Capture photo" onclick="capturePhoto()" class="w-16 h-16 rounded-full border-4 border-white bg-white bg-opacity-20 flex items-center justify-center hover:bg-opacity-40 transition">
-                            <div class="w-12 h-12 bg-white rounded-full"></div>
+                            <span class="w-12 h-12 bg-white rounded-full"></span>
                         </button>
                     </div>
                 </div>
@@ -1151,9 +1154,9 @@
             <!-- Badges Section -->
             <div class="mb-16 fade-in" style="animation-delay: 0.1s;">
                 <h3 class="text-2xl font-extrabold text-gray-900 mb-6 flex items-center">
-                    <div class="w-10 h-10 bg-yellow-100 rounded-xl flex items-center justify-center mr-3 shadow-inner">
+                    <span class="w-10 h-10 bg-yellow-100 rounded-xl flex items-center justify-center mr-3 shadow-inner">
                         <i class="fa-solid fa-medal text-yellow-500 text-lg"></i>
-                    </div> 
+                    </span> 
                     Achievement Badges
                 </h3>
                 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6" id="badges-container">
@@ -1165,9 +1168,9 @@
             <div class="mb-16 fade-in" style="animation-delay: 0.2s;">
                 <div class="flex items-center justify-between mb-6">
                     <h3 class="text-2xl font-extrabold text-gray-900 flex items-center">
-                        <div class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center mr-3 shadow-inner">
+                        <span class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center mr-3 shadow-inner">
                             <i class="fa-solid fa-gift text-emerald-500 text-lg"></i>
-                        </div>
+                        </span>
                         Marketplace
                     </h3>
                     <span class="text-sm font-medium text-emerald-600 bg-emerald-50 px-3 py-1 rounded-lg">Updated Daily</span>
@@ -1180,9 +1183,9 @@
             <!-- Claimed Rewards History -->
             <div class="fade-in" style="animation-delay: 0.3s;">
                 <h3 class="text-2xl font-extrabold text-gray-900 mb-6 flex items-center">
-                    <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center mr-3 shadow-inner">
+                    <span class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center mr-3 shadow-inner">
                         <i class="fa-solid fa-clock-rotate-left text-blue-500 text-lg"></i>
-                    </div>
+                    </span>
                     Reward History
                 </h3>
                 <div class="glass-panel rounded-3xl overflow-hidden shadow-sm">
@@ -1228,7 +1231,7 @@
                 
                 <div class="p-8 text-center">
                     <div id="reward-icon" class="text-6xl mb-4"></div>
-                    <h3 id="reward-name" class="text-xl font-bold text-gray-900 mb-2"></h3>
+                    <h3 id="reward-name" class="text-xl font-bold text-gray-900 mb-2">&nbsp;</h3>
                     <p id="reward-description" class="text-gray-600 mb-6"></p>
                     
                     <div id="redeem-code-section" class="hidden mb-6">
@@ -1425,7 +1428,7 @@ window.addEventListener('unhandledrejection', function(e) {
                 <!-- Input Area -->
                 <div class="ai-input-bar">
                     <div id="ai-image-preview-container" class="hidden">
-                        <img id="ai-image-preview" src="" alt="Attached preview">
+                        <img id="ai-image-preview" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="Attached preview">
                         <button type="button" id="ai-remove-image-btn" onclick="removeAiImage()" title="Remove image">
                             <i class="fa-solid fa-times"></i>
                         </button>

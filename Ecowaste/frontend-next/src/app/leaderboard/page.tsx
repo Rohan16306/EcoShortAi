@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowRight, Trophy, Medal, Award } from 'lucide-react';
 import { LeaderboardService, LeaderboardEntry } from '@/services/leaderboardService';
 
@@ -93,7 +94,7 @@ export default function LeaderboardPage() {
                       </td>
                       <td className="px-6 py-4 font-semibold text-gray-900 dark:text-white flex items-center gap-3">
                         {row.avatar ? (
-                          <img src={row.avatar} alt={row.name} className="w-8 h-8 rounded-full object-cover" />
+                          <Image src={row.avatar} alt={row.name} width={32} height={32} className="w-8 h-8 rounded-full object-cover" />
                         ) : (
                           <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center text-green-700 dark:text-green-300 font-bold text-xs">
                             {row.name.charAt(0).toUpperCase()}

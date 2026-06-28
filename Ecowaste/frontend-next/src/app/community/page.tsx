@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 import { MessageSquare, Image as ImageIcon, Send, User, Trash2 } from 'lucide-react';
 import { CommunityService, CommunityPost } from '@/services/communityService';
 import { useUserStore } from '@/store/useUserStore';
@@ -186,8 +187,8 @@ export default function CommunityPage() {
                       <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">{post.text}</p>
                       
                       {post.imageUrl && (
-                        <div className="mt-4 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800">
-                          <img src={post.imageUrl} alt="Community Post" className="w-full object-cover max-h-96" />
+                        <div className="mt-4 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800 relative w-full h-96">
+                          <Image src={post.imageUrl} alt="Community Post" fill className="object-cover" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />
                         </div>
                       )}
                     </div>

@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useChat } from "@ai-sdk/react";
 import { Leaf, Plus, MessageSquare, Trash2, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 import { useChatHistory } from "@/hooks/useChatHistory";
 import {
   Conversation,
@@ -223,10 +224,12 @@ export default function SustainAIPage() {
                         }
                         if (part.type === "file" && part.mediaType?.startsWith("image/")) {
                           return (
-                            <img
+                            <Image
                               key={i}
                               src={part.url}
                               alt="Uploaded content"
+                              width={400}
+                              height={300}
                               className="mt-2 rounded-xl max-h-[300px] object-contain border border-border/60"
                             />
                           );
