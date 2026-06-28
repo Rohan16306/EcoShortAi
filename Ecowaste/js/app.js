@@ -54,10 +54,12 @@
         }
 
         function resolveApiBase() {
+            if (isLocalhost()) return 'http://localhost:3001/api';
             return PRODUCTION_BACKEND_URL + '/api';
         }
 
         function resolvePbUrl() {
+            if (isLocalhost()) return 'http://localhost:8090';
             return PRODUCTION_PB_URL;
         }
 
