@@ -3,42 +3,63 @@
 import { useEffect } from 'react';
 import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 
-/**
- * AuthBridge — Reads auth data from URL query params and saves to localStorage.
- * 
- * When the main EcoSort site redirects to Phase 2 on a different domain (Vercel),
- * localStorage is not shared. So the main site encodes the auth data as URL params:
- *   ?auth_id=xxx&auth_email=xxx&auth_name=xxx&auth_role=xxx
- * 
- * This component reads those params, saves them to localStorage as `wastepickup_auth`,
- * then cleans the URL by removing the query params.
- */
 export default function AuthBridge() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
 
   useEffect(() => {
-    const authId = searchParams.get('auth_id');
-    const authEmail = searchParams.get('auth_email');
-    const authName = searchParams.get('auth_name');
-    const authRole = searchParams.get('auth_role');
+    const pbToken = searchParams.get('pb_token');
 
-    if (authId && authEmail && authRole) {
-      // Save auth to localStorage (same format Phase 2 expects)
-      const authData = {
-        id: authId,
-        email: authEmail,
-        fullName: authName || 'User',
-        role: authRole, // 'admin', 'collector', or 'user'
+    if (pbToken) {
+      // Verify token with PocketBase
+      const verifyToken = async () => {
+        try {
+          const PRODUCTION_PB_URL = 'https://ecowaste-pocketbase.onrender.com';
+          const pbUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+            ? 'http://localhost:8090' 
+            : PRODUCTION_PB_URL;
+
+          const res = await fetch(`${pbUrl}/api/collections/users/auth-refresh`, {
+            method: 'POST',
+            headers: {
+              'Authorization': pbToken,
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            const user = data.record;
+            
+            // Map PocketBase roles to Phase 2 roles
+            let phase2Role = 'user';
+            if (user.role === 'ROLE_ADMIN') phase2Role = 'admin';
+            else if (user.role === 'ROLE_RECEIVER') phase2Role = 'collector';
+
+            const authData = {
+              id: user.id,
+              email: user.email,
+              fullName: user.name || 'User',
+              role: phase2Role,
+            };
+            
+            localStorage.setItem('wastepickup_auth', JSON.stringify(authData));
+          } else {
+            console.error('AuthBridge: Token verification failed.');
+          }
+        } catch (error) {
+          console.error('AuthBridge: Error verifying token.', error);
+        } finally {
+          // Clean up URL
+          router.replace(pathname);
+        }
       };
-      localStorage.setItem('wastepickup_auth', JSON.stringify(authData));
 
-      // Clean up URL — remove auth params but keep the path
-      const cleanUrl = pathname;
-      router.replace(cleanUrl);
+      verifyToken();
     }
   }, [searchParams, pathname, router]);
 
-  return null; // This component renders nothing
+  return null;
 }
+

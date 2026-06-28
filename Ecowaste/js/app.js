@@ -1424,10 +1424,7 @@
                         else if (role === 'ROLE_RECEIVER') phase2Role = 'collector';
 
                         const params = new URLSearchParams({
-                            auth_id: currentUser.id,
-                            auth_email: currentUser.email,
-                            auth_name: currentUser.name || 'User',
-                            auth_role: phase2Role
+                            pb_token: authToken
                         });
                         targetUrl += '?' + params.toString();
                     }
