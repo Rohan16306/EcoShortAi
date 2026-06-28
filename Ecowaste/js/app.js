@@ -1257,10 +1257,17 @@
 
                 if (!createRes.ok) {
                     const err = await createRes.json().catch(() => ({}));
-                    // PocketBase returns validation errors in data
-                    if (err.data?.email?.code === 'validation_not_unique') {
-                        throw new Error('This email is already registered. Please log in instead.');
+                    
+                    // PocketBase returns validation errors inside 'data'
+                    if (err.data) {
+                        const firstErrorKey = Object.keys(err.data)[0];
+                        if (firstErrorKey && err.data[firstErrorKey]?.message) {
+                            // Example: "The email is invalid or already in use."
+                            throw new Error(err.data[firstErrorKey].message);
+                        }
                     }
+                    
+                    // Fallback to generic message
                     throw new Error(err.message || 'Signup failed. Please try again.');
                 }
 
