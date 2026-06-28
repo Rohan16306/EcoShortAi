@@ -467,7 +467,19 @@
       "claimedRewards": [],
       "badges": [],
       "imageHashes": [],
-      "lastUpdated": "2026-06-25T17:58:21.011Z"
+      "lastUpdated": "2026-06-25T17:58:21.011Z",
+      "aiHistory": [
+        {
+          "id": "1782620468669",
+          "role": "user",
+          "content": "hi"
+        },
+        {
+          "id": "1782620471187",
+          "role": "assistant",
+          "content": "Hello there! I'm Ecosort AI, your dedicated assistant from the Plastic Preservation, Recycling, Environmental Sustainability, and Circular Economy Platform.\n\nI'm here to help you understand plastics, master recycling, navigate our platform, and champion a more sustainable future.\n\nHow can I assist you today on your journey towards a greener planet? Feel free to ask me anything about plastics, recycling, sustainability, or how to make the most of our platform!"
+        }
+      ]
     },
     "73rrjvg4esflmm9": {
       "credits": 40,

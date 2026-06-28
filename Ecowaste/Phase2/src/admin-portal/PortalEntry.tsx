@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { 
   Users, 
   Truck, 
@@ -26,44 +26,87 @@ import RewardDashboard from '@/components/rewards/RewardDashboard';
 
 export type AdminTab = 'overview' | 'users' | 'collectors' | 'requests' | 'logs' | 'rewards';
 
-/**
- * THE COMPLETE ADMIN PORTAL
- * This component encapsulates the entire admin experience.
- */
 export default function AdminPortalEntry() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
   const [adminName, setAdminName] = useState('Administrator');
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    // Admin Auth Guard using localStorage (bypassing next-auth)
-    try {
-      const authData = localStorage.getItem('wastepickup_auth');
-      if (!authData) {
-        router.replace('/sign-up-login-screen');
+    const authenticate = async () => {
+      let token = searchParams.get('pb_token');
+      
+      // If found in URL, save it and clean URL
+      if (token) {
+        localStorage.setItem('pb_auth', JSON.stringify({ token }));
+        window.history.replaceState({}, '', '/admin-dashboard');
+      } else {
+        // Fallback to local storage
+        const stored = localStorage.getItem('pb_auth');
+        if (stored) {
+          try {
+            token = JSON.parse(stored).token;
+          } catch (e) {}
+        }
+      }
+
+      if (!token) {
+        toast.error('Authentication required. Redirecting...');
+        window.location.href = 'https://eco-sort-ai-ochre.vercel.app';
         return;
       }
-      const parsed = JSON.parse(authData);
-      if (!parsed.token || !parsed.user) {
-        router.replace('/sign-up-login-screen');
-        return;
+
+      try {
+        const pbUrl = process.env.NODE_ENV === 'development' 
+            ? 'https://ecowaste-pocketbase.onrender.com' 
+            : 'https://ecowaste-pocketbase.onrender.com';
+            
+        const res = await fetch(`${pbUrl}/api/collections/users/auth-refresh`, {
+          method: 'POST',
+          headers: {
+            'Authorization': token
+          }
+        });
+
+        if (!res.ok) {
+          throw new Error('Invalid token');
+        }
+
+        const data = await res.json();
+        if (data.record.role !== 'ROLE_ADMIN') {
+          toast.error('Access denied. Admin role required.');
+          window.location.href = 'https://eco-sort-ai-ochre.vercel.app';
+          return;
+        }
+
+        setAdminName(data.record.name || 'Administrator');
+        setIsLoaded(true);
+        // Refresh token in storage
+        localStorage.setItem('pb_auth', JSON.stringify({ token: data.token }));
+      } catch (err) {
+        toast.error('Session expired. Please log in again.');
+        localStorage.removeItem('pb_auth');
+        window.location.href = 'https://eco-sort-ai-ochre.vercel.app';
       }
-      setAdminName(parsed.user.name || 'Administrator');
-      setIsLoaded(true);
-    } catch {
-      router.replace('/sign-up-login-screen');
-    }
-  }, [router]);
+    };
+
+    authenticate();
+  }, [searchParams]);
 
   const handleLogout = () => {
-    localStorage.removeItem('wastepickup_auth');
     localStorage.removeItem('pb_auth');
-    router.replace('/sign-up-login-screen');
     toast.success('Logged out from Admin Portal');
+    window.location.href = 'https://eco-sort-ai-ochre.vercel.app';
   };
 
-  if (!isLoaded) return null;
+  if (!isLoaded) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-slate-50">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-[#F8FAFC]">

@@ -4,8 +4,6 @@ import { Plus_Jakarta_Sans } from 'next/font/google';
 import { Toaster } from 'sonner';
 import '../styles/tailwind.css';
 import CreditAnimation from '@/components/ui/CreditAnimation';
-import AuthBridge from '@/components/AuthBridge';
-import Providers from '@/components/Providers';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -34,14 +32,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={plusJakartaSans.variable}>
       <body className={plusJakartaSans.className}>
-        <Providers>
-          <Suspense fallback={null}>
-            <AuthBridge />
-          </Suspense>
-          {children}
-          <Toaster position="bottom-right" richColors closeButton />
-          <CreditAnimation />
-        </Providers>
+        {children}
+        <Toaster position="bottom-right" richColors closeButton />
+        <CreditAnimation />
       </body>
     </html>
   );
