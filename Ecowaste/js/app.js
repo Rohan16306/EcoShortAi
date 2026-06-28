@@ -2851,7 +2851,7 @@
         async function loadAiHistory() {
             if (!authToken) return;
             try {
-                const res = await fetch('/api/sustainai/history', {
+                const res = await fetch(API_BASE + '/sustainai/history', {
                     headers: { 'Authorization': `Bearer ${authToken}` }
                 });
                 if (res.ok) {
@@ -3055,7 +3055,7 @@
                     renderAiChat();
 
                     try {
-                        const res = await fetch('/api/chat', {
+                        const res = await fetch(API_BASE + '/chat', {
                             method: 'POST',
                             headers: { 
                                 'Content-Type': 'application/json',
@@ -3069,7 +3069,7 @@
                             aiMessages.push({ id: Date.now().toString(), role: 'assistant', content: data.reply });
                             
                             // Save history silently
-                            fetch('/api/sustainai/history', {
+                            fetch(API_BASE + '/sustainai/history', {
                                 method: 'POST',
                                 headers: { 
                                     'Content-Type': 'application/json',
@@ -3127,7 +3127,7 @@
             aiMessages = [];
             renderAiChat();
             if (authToken) {
-                await fetch('/api/sustainai/history', {
+                await fetch(API_BASE + '/sustainai/history', {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${authToken}` }
                 });
