@@ -1,7 +1,7 @@
 onAfterBootstrap((e) => {
     try {
-        if (!$app.dao().hasTable("_collections")) {
-            console.log("Skipping API rules update (tables not created yet)");
+        if (!$app.dao().hasTable("users")) {
+            console.log("Skipping API rules update (users table not created yet)");
             return;
         }
         // Update scans collection
