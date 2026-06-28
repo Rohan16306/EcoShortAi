@@ -8,6 +8,8 @@ import PickupRequestForm from './PickupRequestForm';
 import NotificationFeed from './NotificationFeed';
 import RewardDashboard from '@/components/rewards/RewardDashboard';
 import {
+import { getAuthCookie, setAuthCookie, removeAuthCookie } from '@/lib/authStorage';
+
     getAllRequests,
     subscribeToBroadcast,
     type PickupRequest,
@@ -27,7 +29,7 @@ export default function PickupRequestTrackingScreen() {
     useEffect(() => {
         setMounted(true);
         // Authentication check
-        const authRaw = typeof window !== 'undefined' ? localStorage.getItem('wastepickup_auth') : null;
+        const authRaw = typeof window !== 'undefined' ? getAuthCookie() : null;
         if (!authRaw) {
             router.replace('/sign-up-login-screen');
             return;
@@ -71,7 +73,7 @@ export default function PickupRequestTrackingScreen() {
                 )}
                 {activeTab === 'rewards' && (
                     <div className="p-6">
-                        <RewardDashboard roleName={(typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('wastepickup_auth') || '{}').role === 'collector' ? 'Collector' : 'User' : 'User')} />
+                        <RewardDashboard roleName={(typeof window !== 'undefined' ? JSON.parse(getAuthCookie() || '{}').role === 'collector' ? 'Collector' : 'User' : 'User')} />
                     </div>
                 )}
             </main>

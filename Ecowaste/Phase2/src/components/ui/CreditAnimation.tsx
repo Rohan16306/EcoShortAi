@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Coins, Star } from 'lucide-react';
 import { subscribeToBroadcast } from '@/lib/requestStore';
+import { getAuthCookie, setAuthCookie, removeAuthCookie } from '@/lib/authStorage';
+
 
 export default function CreditAnimation() {
   const [show, setShow] = useState(false);
@@ -15,7 +17,7 @@ export default function CreditAnimation() {
       if (msg.type === 'STATUS_CHANGED' && msg.request.status === 'completed') {
         // Determine credits for current user based on role
         let role = '';
-        const authRaw = localStorage.getItem('wastepickup_auth');
+        const authRaw = getAuthCookie();
         if (authRaw) {
           try {
             const auth = JSON.parse(authRaw);

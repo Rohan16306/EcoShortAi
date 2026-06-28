@@ -19,6 +19,8 @@ import {
   type CollectorSession,
 } from '@/lib/requestStore';
 import { useRouter } from 'next/navigation';
+import { getAuthCookie, setAuthCookie, removeAuthCookie } from '@/lib/authStorage';
+
 
 export type { RequestStatus, PickupRequest, CollectorSession };
 
@@ -50,7 +52,7 @@ export default function CollectorDashboardScreen() {
     setMounted(true);
 
     // ── Role guard: only collectors can access this page ──────────────────────
-    const authRaw = typeof window !== 'undefined' ? localStorage.getItem('wastepickup_auth') : null;
+    const authRaw = typeof window !== 'undefined' ? getAuthCookie() : null;
     if (!authRaw) {
       router.replace('/sign-up-login-screen');
       return;

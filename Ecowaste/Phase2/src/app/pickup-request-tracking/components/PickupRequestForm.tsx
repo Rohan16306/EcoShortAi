@@ -6,6 +6,8 @@ import { toast } from 'sonner';
 import { MapPin, Calendar, Scale, ChevronRight, Loader2, Map as MapIcon, Send, Sparkles } from 'lucide-react';
 import AppLogo from '@/components/ui/AppLogo';
 import { addRequest } from '@/lib/requestStore';
+import { getAuthCookie, setAuthCookie, removeAuthCookie } from '@/lib/authStorage';
+
 
 interface FormInputs {
   address: string;
@@ -138,7 +140,7 @@ export default function PickupRequestForm({ onSuccess }: { onSuccess: () => void
   const onSubmit = async (data: FormInputs) => {
     setLoading(true);
 
-    const authRaw = localStorage.getItem('wastepickup_auth');
+    const authRaw = getAuthCookie();
     const auth = authRaw ? JSON.parse(authRaw) : null;
 
     // Use real detected coordinates if available, otherwise attempt to get them

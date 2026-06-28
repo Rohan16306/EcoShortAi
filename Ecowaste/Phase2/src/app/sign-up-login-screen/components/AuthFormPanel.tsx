@@ -9,6 +9,8 @@ import AppLogo from '@/components/ui/AppLogo';
 import { setCollectorSession, registerAccount, findAccount, accountExists, initializeAdminAccount } from '@/lib/requestStore';
 import type { AuthRole, AuthMode } from './AuthScreen';
 import { useEffect } from 'react';
+import { getAuthCookie, setAuthCookie, removeAuthCookie } from '@/lib/authStorage';
+
 
 interface LoginFormData {
   email: string;
@@ -81,7 +83,7 @@ export default function AuthFormPanel({ role, setRole, mode, setMode }: Props) {
       };
       setCollectorSession(session);
       if (typeof window !== 'undefined') {
-        localStorage.setItem('wastepickup_auth', JSON.stringify({ ...session, email: data.email, role: 'collector' }));
+        setAuthCookie(JSON.stringify({ ...session, email: data.email, role: 'collector' }));
       }
       toast.success(`Welcome back, ${account.fullName}! Redirecting to your dashboard.`);
       router.push('/collector-dashboard');
@@ -163,7 +165,7 @@ export default function AuthFormPanel({ role, setRole, mode, setMode }: Props) {
       };
       setCollectorSession(session);
       if (typeof window !== 'undefined') {
-        localStorage.setItem('wastepickup_auth', JSON.stringify({ ...session, email: data.email, role: 'collector' }));
+        setAuthCookie(JSON.stringify({ ...session, email: data.email, role: 'collector' }));
       }
     }
 

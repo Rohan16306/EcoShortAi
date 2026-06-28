@@ -6,6 +6,8 @@ import Link from 'next/link';
 import AppLogo from '@/components/ui/AppLogo';
 import { Bell, User, LogOut, Phone } from 'lucide-react';
 import { getNotifications, markNotificationsRead, subscribeToBroadcast, type AppNotification } from '@/lib/requestStore';
+import { getAuthCookie, setAuthCookie, removeAuthCookie } from '@/lib/authStorage';
+
 
 interface UserAuth {
   fullName?: string;
@@ -24,7 +26,7 @@ export default function PickupTopbar() {
   useEffect(() => {
     setMounted(true);
     // Load user auth
-    const raw = localStorage.getItem('wastepickup_auth');
+    const raw = getAuthCookie();
     if (raw) {
       try { setUser(JSON.parse(raw)); } catch { /* ignore */ }
     }
@@ -43,7 +45,7 @@ export default function PickupTopbar() {
 
   const handleLogout = () => {
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('wastepickup_auth');
+      removeAuthCookie();
     }
     router.push('/sign-up-login-screen');
   };

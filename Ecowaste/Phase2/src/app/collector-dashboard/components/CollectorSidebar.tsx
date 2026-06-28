@@ -19,6 +19,8 @@ import AppLogo from '@/components/ui/AppLogo';
 import { clearCollectorSession } from '@/lib/requestStore';
 import { useRouter } from 'next/navigation';
 import type { CollectorSession } from './CollectorDashboardScreen';
+import { getAuthCookie, setAuthCookie, removeAuthCookie } from '@/lib/authStorage';
+
 
 interface Props {
   open: boolean;
@@ -45,7 +47,7 @@ export default function CollectorSidebar({ open, onToggle, collector }: Props) {
   const handleLogout = () => {
     clearCollectorSession();
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('wastepickup_auth');
+      removeAuthCookie();
     }
     router.replace('/sign-up-login-screen');
   };

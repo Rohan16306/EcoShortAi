@@ -2,6 +2,8 @@
 
 import { useEffect } from 'react';
 import { useSearchParams, usePathname, useRouter } from 'next/navigation';
+import { getAuthCookie, setAuthCookie, removeAuthCookie } from '@/lib/authStorage';
+
 
 export default function AuthBridge() {
   const searchParams = useSearchParams();
@@ -44,7 +46,7 @@ export default function AuthBridge() {
               role: phase2Role,
             };
             
-            localStorage.setItem('wastepickup_auth', JSON.stringify(authData));
+            setAuthCookie(authData);
           } else {
             console.error('AuthBridge: Token verification failed.');
           }

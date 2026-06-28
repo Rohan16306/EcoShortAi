@@ -1,5 +1,8 @@
 'use client';
 
+import { getAuthCookie, setAuthCookie, removeAuthCookie } from '@/lib/authStorage';
+
+
 // Real-time pickup request store using localStorage + BroadcastChannel
 // This acts as the shared state layer between user and collector interfaces
 
@@ -436,7 +439,7 @@ export function getCollectorStats(collectorId: string) {
 
 export function getUserCredits(userId?: string): number {
   const all = getAllRequests();
-  const authRaw = typeof window !== 'undefined' ? localStorage.getItem('wastepickup_auth') : null;
+  const authRaw = typeof window !== 'undefined' ? getAuthCookie() : null;
   let userPhone = '';
   let userName = '';
   let userRole = '';
@@ -479,7 +482,7 @@ export function getUserCreditHistory(userId?: string): Array<{
   date: string;
 }> {
   const all = getAllRequests();
-  const authRaw = typeof window !== 'undefined' ? localStorage.getItem('wastepickup_auth') : null;
+  const authRaw = typeof window !== 'undefined' ? getAuthCookie() : null;
   let userPhone = '';
   let userName = '';
   let userRole = '';
@@ -565,7 +568,7 @@ export interface ClaimedReward {
 const CLAIMED_REWARDS_KEY = 'wastepickup_claimed_rewards';
 
 export function getRewardsCatalog(role?: string): Reward[] {
-  const authRaw = typeof window !== 'undefined' ? localStorage.getItem('wastepickup_auth') : null;
+  const authRaw = typeof window !== 'undefined' ? getAuthCookie() : null;
   let userRole = role;
   if (!userRole && authRaw) {
     try {

@@ -23,6 +23,8 @@ import CollectorList from './components/CollectorList';
 import RequestList from './components/RequestList';
 import SystemLogs from './components/SystemLogs';
 import RewardDashboard from '@/components/rewards/RewardDashboard';
+import { getAuthCookie, setAuthCookie, removeAuthCookie } from '@/lib/authStorage';
+
 
 export type AdminTab = 'overview' | 'users' | 'collectors' | 'requests' | 'logs' | 'rewards';
 
@@ -38,7 +40,7 @@ export default function AdminPortalEntry() {
 
   useEffect(() => {
     // Backend Check (Simulated)
-    const auth = localStorage.getItem('wastepickup_auth');
+    const auth = getAuthCookie();
     if (!auth) {
       router.push('/sign-up-login-screen');
       return;
@@ -56,7 +58,7 @@ export default function AdminPortalEntry() {
   }, [router]);
 
   const handleLogout = () => {
-    localStorage.removeItem('wastepickup_auth');
+    removeAuthCookie();
     toast.success('Logged out from Admin Portal');
     router.push('/sign-up-login-screen');
   };

@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { Gift, Coins, AlertCircle, CheckCircle, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getRewardsCatalog, getUserCredits, claimReward, getUserClaimedRewards, Reward, ClaimedReward } from '@/lib/requestStore';
+import { getAuthCookie, setAuthCookie, removeAuthCookie } from '@/lib/authStorage';
+
 
 export default function RewardDashboard({ roleName }: { roleName: string }) {
   const [rewards, setRewards] = useState<Reward[]>([]);
@@ -22,7 +24,7 @@ export default function RewardDashboard({ roleName }: { roleName: string }) {
 
   const loadData = () => {
     try {
-      const authRaw = localStorage.getItem('wastepickup_auth');
+      const authRaw = getAuthCookie();
       let userId = 'current';
       let role = roleName.toLowerCase() === 'collector' ? 'collector' : 'user';
       if (authRaw) {
@@ -47,7 +49,7 @@ export default function RewardDashboard({ roleName }: { roleName: string }) {
     try {
       setError(null);
       setSuccessMsg(null);
-      const authRaw = localStorage.getItem('wastepickup_auth');
+      const authRaw = getAuthCookie();
       let userId = 'current';
       if (authRaw) {
         try {
