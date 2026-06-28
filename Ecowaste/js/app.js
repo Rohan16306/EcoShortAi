@@ -40,7 +40,7 @@
         // Phase 2 URL — UPDATE this after deploying Phase2 folder to Vercel
         // On localhost, Express proxies Phase 2 routes, so we use '' (relative paths).
         // On Vercel/production, Phase 2 is a separate deployment.
-        const PHASE2_VERCEL_URL = 'https://eco-sort-ai-phase2.vercel.app';
+        const PHASE2_VERCEL_URL = 'https://eco-short-ai-livid.vercel.app';
 
         function isLocalhost() {
             return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
