@@ -1,5 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import * as tf from '@tensorflow/tfjs';
+// TensorFlow.js is NOT imported here statically — it is lazy-loaded inside
+// loadModel() so it only downloads (~8MB) when the scan page is first opened.
+// This keeps the homepage and all other pages loading instantly.
+import type * as TFType from '@tensorflow/tfjs';
 
 /**
  * useWasteModel — Custom-trained waste classification model (Truth Mode)
@@ -41,16 +44,22 @@ export interface WastePrediction {
 }
 
 export const useWasteModel = () => {
-  const [model, setModel] = useState<tf.LayersModel | null>(null);
+  const [model, setModel] = useState<TFType.LayersModel | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const modelRef = useRef<tf.LayersModel | null>(null);
+  const modelRef = useRef<TFType.LayersModel | null>(null);
+  // Keep a reference to the tf module so predict() can use it after lazy load
+  const tfRef = useRef<typeof TFType | null>(null);
 
   useEffect(() => {
     let isMounted = true;
 
     const loadModel = async () => {
       try {
+        // Lazy-load TF.js — only downloaded when the scan page is first opened
+        // This saves ~8MB from the initial page bundle
+        const tf = await import('@tensorflow/tfjs');
+        tfRef.current = tf;
         await tf.ready();
 
         // Load the custom-trained model from local files (no CDN, no network)
@@ -80,10 +89,12 @@ export const useWasteModel = () => {
     };
   }, []);
 
+
   const predict = useCallback(
     async (videoElement: HTMLVideoElement): Promise<WastePrediction | null> => {
       const currentModel = modelRef.current;
-      if (!currentModel) return null;
+      const tf = tfRef.current;
+      if (!currentModel || !tf) return null;
 
       // Use tf.tidy for automatic tensor cleanup — zero memory leaks
       return tf.tidy(() => {
@@ -102,7 +113,7 @@ export const useWasteModel = () => {
         const batched = preprocessed.expandDims(0);
 
         // 5. Run inference
-        const predictions = currentModel.predict(batched) as tf.Tensor;
+        const predictions = currentModel.predict(batched) as TFType.Tensor;
         const probabilities = predictions.dataSync() as Float32Array;
 
         // 6. Build sorted results

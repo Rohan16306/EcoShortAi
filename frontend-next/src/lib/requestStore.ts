@@ -49,7 +49,7 @@ export interface CollectorSession {
 export interface RegisteredAccount {
   id: string;
   email: string;
-  password: string; // stored as plain text (client-only demo — no real backend)
+  passwordHash: string; // SHA-256 hash — never store plain-text passwords
   role: 'user' | 'collector';
   fullName: string;
   phone: string;
@@ -59,6 +59,15 @@ export interface RegisteredAccount {
 }
 
 const ACCOUNTS_KEY = 'wastepickup_accounts';
+
+/** Hash a password using SHA-256 via the Web Crypto API (built into all modern browsers) */
+export async function hashPassword(password: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+}
 
 export function getAllAccounts(): RegisteredAccount[] {
   if (typeof window === 'undefined') return [];
@@ -70,16 +79,25 @@ export function getAllAccounts(): RegisteredAccount[] {
   }
 }
 
-export function registerAccount(account: RegisteredAccount): void {
+export async function registerAccount(account: Omit<RegisteredAccount, 'passwordHash'> & { password: string }): Promise<void> {
   if (typeof window === 'undefined') return;
   const all = getAllAccounts();
-  all.push(account);
+  const { password, ...rest } = account;
+  const passwordHash = await hashPassword(password);
+  all.push({ ...rest, passwordHash });
   localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(all));
 }
 
 export function findAccount(email: string, role: 'user' | 'collector'): RegisteredAccount | null {
   const all = getAllAccounts();
   return all.find((a) => a.email.toLowerCase() === email.toLowerCase() && a.role === role) ?? null;
+}
+
+export async function verifyAccountPassword(email: string, role: 'user' | 'collector', password: string): Promise<RegisteredAccount | null> {
+  const account = findAccount(email, role);
+  if (!account) return null;
+  const hash = await hashPassword(password);
+  return hash === account.passwordHash ? account : null;
 }
 
 export function accountExists(email: string, role: 'user' | 'collector'): boolean {
