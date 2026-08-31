@@ -1,7 +1,0 @@
-{
-  "version": 2,
-  "framework": "nextjs",
-  "env": {
-    "NEXTAUTH_URL": "https://eco-short-ai-livid.vercel.app"
-  }
-}
