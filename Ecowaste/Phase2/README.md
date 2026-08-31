@@ -73,6 +73,17 @@ Build the application for production:
   npm run build
   ```
 
+### Vercel Auth Environment
+
+Set these environment variables in the Vercel project before deploying:
+
+```bash
+NEXTAUTH_SECRET=<generate with: openssl rand -base64 32>
+NEXTAUTH_URL=https://eco-short-ai-livid.vercel.app
+```
+
+`NEXTAUTH_SECRET` is required by NextAuth in production. If it is missing, `/api/auth/error` shows a server configuration error.
+
 ## 📚 Learn More
 
 To learn more about Next.js, take a look at the following resources:

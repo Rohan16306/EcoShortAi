@@ -22,16 +22,11 @@ export default function RewardDashboard({ roleName }: { roleName: string }) {
 
   const loadData = () => {
     try {
-      const authRaw = localStorage.getItem('wastepickup_auth');
-      let userId = 'current';
-      let role = roleName.toLowerCase() === 'collector' ? 'collector' : 'user';
-      if (authRaw) {
-        try {
-          const auth = JSON.parse(authRaw);
-          userId = auth.email || auth.id || 'current';
-          if (auth.role) role = auth.role;
-        } catch { /* ignore */ }
-      }
+      // In Admin Dashboard, we are an admin. 
+      // The reward dashboard is mostly for viewing what rewards exist, 
+      // but if the admin redeems, it's just recorded against 'admin' ID.
+      const userId = 'admin_user';
+      const role = roleName.toLowerCase() === 'collector' ? 'collector' : 'user';
 
       setRewards(getRewardsCatalog(role));
       setCredits(getUserCredits(userId));
@@ -47,14 +42,7 @@ export default function RewardDashboard({ roleName }: { roleName: string }) {
     try {
       setError(null);
       setSuccessMsg(null);
-      const authRaw = localStorage.getItem('wastepickup_auth');
-      let userId = 'current';
-      if (authRaw) {
-        try {
-          const auth = JSON.parse(authRaw);
-          userId = auth.email || auth.id || 'current';
-        } catch { /* ignore */ }
-      }
+      const userId = 'admin_user';
 
       const success = claimReward(userId, rewardId);
       if (success) {

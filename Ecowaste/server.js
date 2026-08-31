@@ -1,4 +1,4 @@
-require('dotenv').config();
+try { require('dotenv').config(); } catch (e) {}
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
@@ -548,6 +548,40 @@ async function authMiddleware(req, res, next) {
   }
 }
 
+async function optionalAuthMiddleware(req, res, next) {
+  const authHeader = req.headers.authorization || '';
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  
+  if (!token || token === 'null' || token === 'undefined') {
+    return next();
+  }
+
+  if (isTokenBlacklisted(token)) {
+    return next();
+  }
+
+  try {
+    const pbBase = process.env.PB_URL || 'http://127.0.0.1:8090';
+    const pbRes = await fetch(`${pbBase}/api/collections/users/auth-refresh`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (pbRes.ok) {
+      const pbData = await pbRes.json();
+      req.userId = pbData.record.id;
+      req.authToken = token;
+      return next();
+    }
+
+    const payload = jwt.verify(token, JWT_SECRET);
+    req.userId = payload.sub;
+    req.authToken = token;
+    next();
+  } catch (err) {
+    next();
+  }
+}
+
 async function extractUserIdFromAuth(req) {
   const authHeader = req.headers.authorization || '';
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
@@ -699,6 +733,58 @@ app.get('/api/health', (_req, res) => {
 });
 
 // --- Scan Verification ---
+app.post('/api/scan/validate-image', optionalAuthMiddleware, async (req, res) => {
+  try {
+    if (!ai) {
+      return res.status(500).json({ error: 'AI is not configured.' });
+    }
+    const { imageBase64, mimeType } = req.body;
+    if (!imageBase64) {
+      return res.status(400).json({ error: 'Missing imageBase64' });
+    }
+    
+    let base64Data = imageBase64;
+    if (base64Data.startsWith('data:')) {
+      base64Data = base64Data.split(',')[1];
+    }
+    const mime = mimeType || 'image/jpeg';
+
+    const systemInstruction = "Analyze this image. Is it a computer-generated image (AI generated), a digital illustration, a screenshot, or a stock photo from the internet? It must be a real, authentic, original photograph taken by a smartphone camera in the real world. You must answer strictly with a JSON object: {\"isAuthentic\": true/false, \"reason\": \"short explanation\"}. If it is a real photograph of an item, isAuthentic should be true.";
+    
+    const contentsArray = [
+      {
+        role: 'user',
+        parts: [
+          { text: "Validate this image authenticity." },
+          { inlineData: { mimeType: mime, data: base64Data } }
+        ]
+      }
+    ];
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      config: {
+        systemInstruction: systemInstruction,
+        responseMimeType: "application/json"
+      },
+      contents: contentsArray
+    });
+
+    const textResponse = response.text || '';
+    let jsonResult;
+    try {
+      jsonResult = JSON.parse(textResponse);
+    } catch(e) {
+      jsonResult = { isAuthentic: true, reason: "Failed to parse AI response" };
+    }
+    return res.status(200).json(jsonResult);
+  } catch (error) {
+    console.error('Image Validation Error:', error);
+    // If the API fails, fail open (allow scan) rather than blocking legitimate users
+    return res.status(200).json({ isAuthentic: true, reason: "Validation bypassed due to server error" });
+  }
+});
+
 app.post('/api/scan/verify/start', async (req, res) => {
   cleanupExpiredVerificationSessions();
 
@@ -958,7 +1044,7 @@ app.delete('/api/sustainai/history', authMiddleware, (req, res) => {
 });
 
 // --- AI Chat ---
-app.post('/api/chat', authMiddleware, chatRateLimit, async (req, res) => {
+app.post('/api/chat', optionalAuthMiddleware, chatRateLimit, async (req, res) => {
   try {
     if (!ai) {
       return res.status(500).json({ error: 'AI is not configured. Missing GEMINI_API_KEY.' });
@@ -1003,6 +1089,112 @@ app.post('/api/chat', authMiddleware, chatRateLimit, async (req, res) => {
       error: err.message || 'Sorry, I encountered an internal error while processing your request.'
     });
   }
+});
+
+// ============================================================
+// Admin Portal API Endpoints
+// ============================================================
+
+// Admin role check middleware — verifies the authenticated user has ROLE_ADMIN in PocketBase
+async function adminGuard(req, res, next) {
+  try {
+    const authHeader = req.headers.authorization || '';
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+    if (!token) return res.status(403).json({ error: 'Admin access required' });
+
+    const pbBase = process.env.PB_URL || 'http://127.0.0.1:8090';
+    const pbRes = await fetch(`${pbBase}/api/collections/users/auth-refresh`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    if (pbRes.ok) {
+      const pbData = await pbRes.json();
+      const role = pbData.record?.role;
+      if (role !== 'ROLE_ADMIN') {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+      req.adminPbRecord = pbData.record;
+      return next();
+    }
+
+    // Fallback: check JWT for admin email
+    const payload = jwt.verify(token, JWT_SECRET);
+    const db = readDb();
+    const user = db.users.find(u => u.id === payload.sub);
+    if (!user || user.email !== 'rohanipawar16@gmail.com') {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+    return next();
+  } catch (err) {
+    return res.status(403).json({ error: 'Admin access required' });
+  }
+}
+
+// GET /api/admin/users — Returns all users combined with their userData (credits, history)
+app.get('/api/admin/users', authMiddleware, adminGuard, (req, res) => {
+  const db = readDb();
+  const users = (db.users || []).map(user => {
+    const data = db.userData[user.id] || defaultUserData();
+    const history = Array.isArray(data.history) ? data.history : [];
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      createdAt: user.createdAt,
+      credits: Number(data.credits) || 0,
+      totalScans: history.length,
+      badges: Array.isArray(data.badges) ? data.badges : [],
+      history: history.slice(0, 50), // Limit history items sent to client
+    };
+  });
+  res.json({ users, total: users.length });
+});
+
+// DELETE /api/admin/users/:id — Removes a user and their data from db.json
+app.delete('/api/admin/users/:id', authMiddleware, adminGuard, (req, res) => {
+  const db = readDb();
+  const userId = req.params.id;
+  const userIndex = db.users.findIndex(u => u.id === userId);
+  if (userIndex < 0) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+  const deletedUser = db.users.splice(userIndex, 1)[0];
+  delete db.userData[userId];
+  writeDb(db);
+  res.json({ ok: true, message: `User ${deletedUser.name} (${deletedUser.email}) deleted.` });
+});
+
+// GET /api/admin/stats — Returns aggregated platform stats for the admin dashboard
+app.get('/api/admin/stats', authMiddleware, adminGuard, (req, res) => {
+  const db = readDb();
+  const allUserData = Object.values(db.userData || {});
+
+  const totalUsers = (db.users || []).length;
+  const totalCredits = allUserData.reduce((sum, d) => sum + (Number(d.credits) || 0), 0);
+  const totalItems = allUserData.reduce((sum, d) => sum + (Array.isArray(d.history) ? d.history.length : 0), 0);
+  const totalRewards = allUserData.reduce((sum, d) => sum + (Array.isArray(d.claimedRewards) ? d.claimedRewards.length : 0), 0);
+  const co2Saved = Math.round(totalItems * 0.5);
+
+  // Material breakdown
+  const materialMap = {};
+  allUserData.forEach(d => {
+    if (Array.isArray(d.history)) {
+      d.history.forEach(item => {
+        const mat = item.material || 'Other';
+        materialMap[mat] = (materialMap[mat] || 0) + 1;
+      });
+    }
+  });
+
+  res.json({
+    totalUsers,
+    totalCredits,
+    totalItems,
+    totalRewards,
+    co2Saved,
+    materialBreakdown: materialMap,
+  });
 });
 
 // --- Stats ---
@@ -1361,9 +1553,14 @@ app.post('/api/contact', contactRateLimit, (req, res) => {
   
   const phase2Routes = [
     '/admin-dashboard', 
-    '/pickup-request-tracking', 
-    '/collector-dashboard', 
-    '/sign-up-login-screen'
+    '/sign-up-login-screen',
+    '/api/auth/session',
+    '/api/auth/providers',
+    '/api/auth/csrf',
+    '/api/auth/callback',
+    '/api/auth/signin',
+    '/api/auth/signout',
+    '/api/auth/error'
   ];
   const phase1Routes = [
     '/dashboard',

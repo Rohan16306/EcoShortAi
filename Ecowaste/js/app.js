@@ -37,11 +37,29 @@
         const PRODUCTION_BACKEND_URL = 'https://ecowaste-node.onrender.com';
         const PRODUCTION_PB_URL = 'https://ecowaste-pocketbase.onrender.com';
 
+        // Phase 2 URL — UPDATE this after deploying Phase2 folder to Vercel
+        // On localhost, Express proxies Phase 2 routes, so we use '' (relative paths).
+        // On Vercel/production, Phase 2 is a separate deployment.
+        const PHASE2_VERCEL_URL = 'https://eco-short-ai-livid.vercel.app';
+
+        function isLocalhost() {
+            return window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        }
+
+        function getPhase2BaseUrl() {
+            // On localhost, Express server proxies Phase 2 routes directly
+            if (isLocalhost()) return '';
+            // On Vercel/production, redirect to the separate Phase 2 deployment
+            return PHASE2_VERCEL_URL;
+        }
+
         function resolveApiBase() {
+            if (isLocalhost()) return 'http://localhost:3001/api';
             return PRODUCTION_BACKEND_URL + '/api';
         }
 
         function resolvePbUrl() {
+            if (isLocalhost()) return 'http://localhost:8090';
             return PRODUCTION_PB_URL;
         }
 
@@ -96,6 +114,22 @@
 
             // Prevent Tailwind FOUC by removing preloader
             document.body.classList.add('loaded');
+            
+            // Check for intent param
+            const urlParams = new URLSearchParams(window.location.search);
+            const intent = urlParams.get('intent');
+            if (intent === 'admin') {
+                window.history.replaceState({}, '', window.location.pathname); // remove intent from URL
+                sessionStorage.setItem('redirectAfterLogin', 'admin');
+                setTimeout(() => {
+                    if (!currentUser) {
+                        openAuthModal('login');
+                    } else {
+                        router('admin');
+                    }
+                }, 500);
+            }
+
             const preloader = document.getElementById('css-preloader');
             if (preloader) preloader.remove();
 
@@ -151,7 +185,7 @@
             }
         });
 
-        const CLASS_NAMES = ['glass', 'hard_waste', 'liquid_waste', 'metal', 'non_organic_waste', 'organic_waste', 'plastic'];
+        const CLASS_NAMES = ['cardboard', 'glass', 'metal', 'paper', 'plastic', 'trash'];
 
         function startModelLoad() {
             if (model) return Promise.resolve(model);
@@ -164,7 +198,7 @@
 
             // Load the custom-trained local model instead of the generic internet one
             // We load it from the frontend-next folder where the converted model lives
-            modelLoadPromise = tf.loadLayersModel('/model/model.json')
+            modelLoadPromise = tf.loadGraphModel('/model/model.json')
                 .then((loadedModel) => {
                     // Create a wrapper that mimics the old MobileNet .classify() API
                     // so we don't have to rewrite the rest of the old frontend
@@ -1088,14 +1122,16 @@
 
             // RBAC: Show/hide nav buttons based on role
             const navAdmin = document.getElementById('nav-admin');
+            const mobileNavAdmin = document.getElementById('mobile-nav-admin');
             const navCollector = document.getElementById('nav-collector');
+            const mobileNavCollector = document.getElementById('mobile-nav-collector');
+            
             const role = currentUser.role || 'ROLE_USER';
-            if (navAdmin) {
-                navAdmin.classList.toggle('hidden', role !== 'ROLE_ADMIN');
-            }
-            if (navCollector) {
-                navCollector.classList.toggle('hidden', role !== 'ROLE_RECEIVER');
-            }
+            if (navAdmin) navAdmin.classList.toggle('hidden', role !== 'ROLE_ADMIN');
+            if (mobileNavAdmin) mobileNavAdmin.classList.toggle('hidden', role !== 'ROLE_ADMIN');
+            
+            if (navCollector) navCollector.classList.toggle('hidden', role !== 'ROLE_RECEIVER');
+            if (mobileNavCollector) mobileNavCollector.classList.toggle('hidden', role !== 'ROLE_RECEIVER');
         }
 
         function showLoggedOutState() {
@@ -1239,10 +1275,17 @@
 
                 if (!createRes.ok) {
                     const err = await createRes.json().catch(() => ({}));
-                    // PocketBase returns validation errors in data
-                    if (err.data?.email?.code === 'validation_not_unique') {
-                        throw new Error('This email is already registered. Please log in instead.');
+                    
+                    // PocketBase returns validation errors inside 'data'
+                    if (err.data) {
+                        const firstErrorKey = Object.keys(err.data)[0];
+                        if (firstErrorKey && err.data[firstErrorKey]?.message) {
+                            // Example: "The email is invalid or already in use."
+                            throw new Error(err.data[firstErrorKey].message);
+                        }
                     }
+                    
+                    // Fallback to generic message
                     throw new Error(err.message || 'Signup failed. Please try again.');
                 }
 
@@ -1386,18 +1429,25 @@
                     }));
                 }
 
-                // Redirect to Phase 2 (Next.js app proxied on the same port)
+                // Redirect to Phase 2 (Next.js app)
+                // On localhost: Express proxies to port 3005 (relative paths work)
+                // On Vercel: Redirect to separate Phase 2 deployment with auth in URL params
                 if (viewName === 'admin') {
-                    window.location.href = '/admin-dashboard';
-                    return;
-                }
-                if (viewName === 'collector') {
-                    window.location.href = '/collector-dashboard';
-                    return;
-                }
-                if (viewName === 'pickup') {
-                    window.location.href = '/pickup-request-tracking';
-                    return;
+                    try {
+                        const phase2Base = getPhase2BaseUrl();
+                        let targetUrl = phase2Base + '/admin-dashboard';
+
+                        if (currentUser && authToken) {
+                            targetUrl += '?pb_token=' + encodeURIComponent(authToken);
+                        }
+
+                        window.location.assign(targetUrl);
+                        return;
+                    } catch (err) {
+                        console.error('Redirect error:', err);
+                        alert('Could not redirect to Admin Dashboard. Please check console.');
+                        return;
+                    }
                 }
 
                 document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
@@ -2014,7 +2064,13 @@
 
             const isDuplicate = duplicate !== null;
             const isLocationDuplicate = locationDuplicate !== null;
-            const finalCredits = isDuplicate ? 0 : credits;
+            let finalCredits = isDuplicate ? 0 : credits;
+
+            // Enforce minimum confidence criteria for credits
+            if (prob < 0.20) {
+                finalCredits = 0;
+                credits = 0;
+            }
 
             return {
                 topPrediction: predictions[0],
@@ -2318,6 +2374,20 @@
                 currentImageHash = await generateImageHash(currentImage);
             }
             
+            try {
+                const valRes = await apiRequest('/scan/validate-image', {
+                    method: 'POST',
+                    body: JSON.stringify({ imageBase64: currentImage, mimeType: 'image/jpeg' })
+                });
+                if (valRes && valRes.isAuthentic === false) {
+                    alert("Scan Blocked: " + (valRes.reason || "This image appears to be computer-generated or from the internet. Please scan a real item."));
+                    document.getElementById('loading-area').classList.add('hidden');
+                    return;
+                }
+            } catch (err) {
+                console.warn("Image authenticity validation failed or was bypassed:", err);
+            }
+            
             let predictions;
             let duplicate;
             let locationDuplicate;
@@ -2430,6 +2500,20 @@
 
             document.getElementById('video-preview-area').classList.add('hidden');
             document.getElementById('loading-area').classList.remove('hidden');
+
+            try {
+                const valRes = await apiRequest('/scan/validate-image', {
+                    method: 'POST',
+                    body: JSON.stringify({ imageBase64: frameDataUrl, mimeType: 'image/jpeg' })
+                });
+                if (valRes && valRes.isAuthentic === false) {
+                    alert("Scan Blocked: " + (valRes.reason || "This image appears to be computer-generated or from the internet. Please scan a real item."));
+                    document.getElementById('loading-area').classList.add('hidden');
+                    return;
+                }
+            } catch (err) {
+                console.warn("Video authenticity validation failed or was bypassed:", err);
+            }
 
             try {
                 // Generate hash
@@ -2782,7 +2866,7 @@
         async function loadAiHistory() {
             if (!authToken) return;
             try {
-                const res = await fetch('/api/sustainai/history', {
+                const res = await fetch(API_BASE + '/sustainai/history', {
                     headers: { 'Authorization': `Bearer ${authToken}` }
                 });
                 if (res.ok) {
@@ -2806,10 +2890,22 @@
 
             if (aiMessages.length === 0 && !isAiTyping) {
                 container.innerHTML = `
-                    <div class="ai-welcome-card">
+                    <div class="ai-welcome-card shadow-organic" style="border-radius: 24px;">
                         <div class="ai-welcome-icon"><i class="fa-solid fa-leaf"></i></div>
-                        <h3 class="ai-welcome-title">Welcome to SustainAssist Pro</h3>
-                        <p class="ai-welcome-subtitle">I'm your AI guide to recycling, sustainability, and the circular economy. Ask me anything about plastic types, recycling methods, or how to earn credits on EcoSort!</p>
+                        <h3 class="ai-welcome-title">Hello, I'm Sustain AI</h3>
+                        <p class="ai-welcome-subtitle mb-6">Ask me about plastic types, recycling, or upload a photo of a plastic item and I'll help identify it.</p>
+                        
+                        <div class="flex flex-wrap gap-2 justify-center mt-6">
+                            <button onclick="sendSuggestedMessage('How do I identify plastic type #5 (PP)?')" class="inline-flex items-center gap-2 rounded-full border border-green-200 bg-white/70 hover:bg-green-50 transition-colors px-4 py-2 text-sm text-gray-700 shadow-sm">
+                                <i class="fa-solid fa-recycle text-green-600"></i> How do I identify plastic type #5 (PP)?
+                            </button>
+                            <button onclick="sendSuggestedMessage('Tips for reducing single-use plastic at home')" class="inline-flex items-center gap-2 rounded-full border border-green-200 bg-white/70 hover:bg-green-50 transition-colors px-4 py-2 text-sm text-gray-700 shadow-sm">
+                                <i class="fa-solid fa-leaf text-green-600"></i> Tips for reducing single-use plastic at home
+                            </button>
+                            <button onclick="sendSuggestedMessage('How does the credit & reward system work?')" class="inline-flex items-center gap-2 rounded-full border border-green-200 bg-white/70 hover:bg-green-50 transition-colors px-4 py-2 text-sm text-gray-700 shadow-sm">
+                                <i class="fa-solid fa-wand-magic-sparkles text-green-600"></i> How does the credit & reward system work?
+                            </button>
+                        </div>
                     </div>
                 `;
                 renderAiSidebarHistory();
@@ -2918,6 +3014,17 @@
             }
         }
 
+        function sendSuggestedMessage(text) {
+            const input = document.getElementById('ai-chat-input');
+            if (input) {
+                input.value = text;
+                const form = document.getElementById('ai-chat-form');
+                if (form) {
+                    form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                }
+            }
+        }
+
         function fillAiPrompt(text) {
             const input = document.getElementById('ai-chat-input');
             if (input) {
@@ -2963,7 +3070,7 @@
                     renderAiChat();
 
                     try {
-                        const res = await fetch('/api/chat', {
+                        const res = await fetch(API_BASE + '/chat', {
                             method: 'POST',
                             headers: { 
                                 'Content-Type': 'application/json',
@@ -2977,7 +3084,7 @@
                             aiMessages.push({ id: Date.now().toString(), role: 'assistant', content: data.reply });
                             
                             // Save history silently
-                            fetch('/api/sustainai/history', {
+                            fetch(API_BASE + '/sustainai/history', {
                                 method: 'POST',
                                 headers: { 
                                     'Content-Type': 'application/json',
@@ -3035,7 +3142,7 @@
             aiMessages = [];
             renderAiChat();
             if (authToken) {
-                await fetch('/api/sustainai/history', {
+                await fetch(API_BASE + '/sustainai/history', {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${authToken}` }
                 });

@@ -286,6 +286,7 @@
     <meta property="og:description" content="Transform your waste into rewards. Scan, recycle, and earn points toward exclusive eco-friendly products. Join the circular economy today.">
     <meta property="og:image" content="https://placehold.co/1200x630/22c55e/white?text=EcoSort+AI">
     <meta property="og:type" content="website">
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 </head>
 <body class="community-page">
     <!-- Animated background injected by js/ui-animations.js -->
@@ -295,8 +296,8 @@
             <div class="flex flex-wrap items-center justify-between gap-4 relative z-10">
                 <div>
                     <a class="inline-flex items-center mb-4 transition hover:scale-105" href="javascript:void(0)" onclick="if(window.parent && window.parent.router) { window.parent.router('home'); } else { window.location.href='index.html'; }">
-                        <div class="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center mr-3 shadow-lg shadow-emerald-500/30">
-                            <i class="fa-solid fa-leaf text-white text-xl"></i>
+                        <div class="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center mr-3 shadow-lg shadow-emerald-500/30 overflow-hidden p-1">
+                            <img src="assets/images/app_logo.png" alt="Logo" class="w-full h-full object-contain">
                         </div>
                         <span class="font-extrabold text-2xl tracking-tight text-color-main">EcoSort<span class="text-emerald-500">AI</span></span>
                     </a>
@@ -317,7 +318,7 @@
 
         <section class="community-grid">
             <aside>
-                <div class="glass-panel p-6">
+                <div class="glass-panel p-6" data-aos="fade-left"
                     <h2 class="font-extrabold text-color-main text-xl mb-4 flex items-center">
                         <i class="fa-solid fa-hashtag text-emerald-500 mr-2"></i> Channels
                     </h2>
@@ -336,7 +337,7 @@
                 </div>
 
                 <!-- Top Contributors -->
-                <div class="glass-panel p-6 mt-6">
+                <div class="glass-panel p-6 mt-6" data-aos="fade-left"
                     <h2 class="font-extrabold text-color-main text-xl mb-4 flex items-center">
                         <i class="fa-solid fa-trophy text-yellow-500 mr-2"></i> Top Eco-Warriors
                     </h2>
@@ -420,7 +421,7 @@
             </main>
 
             <aside>
-                <div class="glass-panel p-6 sticky top-6">
+                <div class="glass-panel p-6 sticky top-6" data-aos="fade-left"
                     <h2 class="font-extrabold text-color-main text-xl mb-4 flex items-center">
                         <i class="fa-solid fa-pen-nib text-emerald-500 mr-2"></i> Share a Post
                     </h2>
@@ -964,5 +965,7 @@
         </div>
     </div>
     <script src="js/ui-animations.js"></script>
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script>AOS.init({ duration: 800, once: false, offset: 100 });</script>
 </body>
 </html>

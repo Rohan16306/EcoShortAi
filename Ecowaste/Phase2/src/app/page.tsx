@@ -1,6 +1,5 @@
-// Entry point → Sign Up / Login Screen
-import AuthScreen from './sign-up-login-screen/components/AuthScreen';
+import { redirect } from 'next/navigation';
 
 export default function RootPage() {
-  return <AuthScreen />;
+  redirect('/admin-dashboard');
 }

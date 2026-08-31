@@ -34,7 +34,7 @@
     <!-- TensorFlow.js -->
     <script async src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
     <!-- Canonical URL -->
-    <link rel="canonical" href="https://ecosort.ai/" />
+    <link rel="canonical" href="https://ecosort.ai/">
     <!-- Canvas Confetti -->
     <script async src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <!-- Chart.js for Dashboard -->
@@ -50,6 +50,10 @@
     <meta property="og:description" content="Transform your waste into rewards. Scan, recycle, and earn points toward exclusive eco-friendly products. Join the circular economy today.">
     <meta property="og:image" content="https://placehold.co/1200x630/22c55e/white?text=EcoSort+AI">
     <meta property="og:type" content="website">
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css">
+    
+    <!-- Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' cdn.tailwindcss.com cdn.jsdelivr.net unpkg.com; style-src 'self' 'unsafe-inline' fonts.googleapis.com cdnjs.cloudflare.com unpkg.com; img-src 'self' data: blob: https://images.unsplash.com https://placehold.co; connect-src 'self' http://localhost:* ws://localhost:* http://127.0.0.1:* ws://127.0.0.1:* https://cdn.jsdelivr.net https://pocketbase-production-e630.up.railway.app https://ecowaste-pocketbase.onrender.com https://ecowaste-node.onrender.com; font-src 'self' cdnjs.cloudflare.com;">
 </head>
 <body class="text-gray-800" style="opacity: 0; transition: opacity 0.5s ease-in-out;">
     <!-- Preloader to prevent FOUC -->
@@ -61,11 +65,12 @@
     <div id="vanta-bg" class="fixed inset-0 w-full h-full pointer-events-none bg-gradient-to-br from-green-50 to-teal-100" style="z-index: -10;"></div>
     
     <!-- Navigation -->
+    <header>
     <nav class="fixed w-full z-50 glass-panel shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
                 <div class="flex items-center cursor-pointer" onclick="router('home')">
-                    <i class="fa-solid fa-leaf text-green-600 text-2xl mr-2"></i>
+                    <img src="assets/images/app_logo.png" alt="Logo" class="h-8 w-8 mr-2">
                     <span class="font-bold text-xl tracking-tight text-gray-900">EcoSort<span class="text-green-600">AI</span></span>
                 </div>
                 <div class="hidden md:flex space-x-6 items-center">
@@ -73,6 +78,7 @@
                     <button onclick="router('detect')" class="nav-btn text-gray-700 hover:text-green-600 font-semibold transition">Scan & Earn</button>
                     <button onclick="router('rewards')" class="nav-btn text-gray-700 hover:text-green-600 font-semibold transition">Marketplace</button>
                     <a href="eco-community.html" class="nav-btn text-gray-700 hover:text-green-600 font-semibold transition">Community</a>
+                    <button onclick="router('security')" class="nav-btn text-gray-700 hover:text-green-600 font-semibold transition">Security</button>
                     <button type="button" onclick="router('pickup')" class="nav-btn text-blue-600 font-bold hover:text-blue-800 transition px-4 py-2 bg-blue-50 rounded-full border border-blue-200 shadow-sm flex items-center ml-2">
                         <i class="fa-solid fa-truck-fast mr-2"></i>On-Demand Pickup
                     </button>
@@ -96,9 +102,9 @@
                     <!-- User Menu -->
                     <div id="user-menu" class="hidden relative">
                         <button aria-label="User menu" aria-expanded="false" aria-controls="user-dropdown" onclick="toggleUserMenu()" class="flex items-center space-x-2 focus:outline-none">
-                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600">
+                            <span class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600">
                                 <i class="fa-solid fa-user"></i>
-                            </div>
+                            </span>
                             <span id="user-name" class="hidden md:block font-medium text-gray-700">User</span>
                             <i class="fa-solid fa-chevron-down text-xs text-gray-500"></i>
                         </button>
@@ -136,8 +142,10 @@
             <a href="gallery-contact.html" class="block w-full text-left py-2 text-gray-600">Gallery</a>
             <a href="leaderboard.html" class="block w-full text-left py-2 text-gray-600">Leaderboard</a>
             <a href="eco-community.html" class="block w-full text-left py-2 text-gray-600">Community</a>
+            <button onclick="router('security'); document.getElementById('mobile-menu').classList.add('hidden')" class="block w-full text-left py-2 text-gray-600">Security</button>
         </div>
     </nav>
+    </header>
 
     <!-- Mobile Bottom Navigation -->
     <div class="md:hidden fixed bottom-0 w-full bg-white border-t border-gray-200 z-50 flex justify-around items-center h-16 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
@@ -146,9 +154,9 @@
             <span class="text-[10px] font-medium">Home</span>
         </a>
         <button onclick="router('detect')" class="flex flex-col items-center justify-center w-full h-full text-gray-500 hover:text-green-600 transition">
-            <div class="bg-green-600 text-white rounded-full w-12 h-12 flex items-center justify-center -mt-6 shadow-lg border-4 border-white">
+            <span class="bg-green-600 text-white rounded-full w-12 h-12 flex items-center justify-center -mt-6 shadow-lg border-4 border-white">
                 <i class="fa-solid fa-camera text-xl"></i>
-            </div>
+            </span>
             <span class="text-[10px] font-medium mt-1">Scan</span>
         </button>
         <button onclick="router('rewards')" class="flex flex-col items-center justify-center w-full h-full text-gray-500 hover:text-green-600 transition">
@@ -161,6 +169,7 @@
         </button>
     </div>
 
+    <main>
     <!-- VIEW: HOME PAGE -->
     <section id="view-home" class="view-section active pt-16 bg-transparent">
         <!-- Hero Section -->
@@ -173,7 +182,7 @@
                 </div>
                 
                 <h1 class="hero-title text-5xl md:text-7xl font-extrabold tracking-tight mb-6">
-                    <span id="typing-text"></span><span class="animate-pulse border-r-4 border-green-600 ml-1">&nbsp;</span>
+                    <span id="typing-text" aria-live="polite"></span><span class="animate-pulse border-r-4 border-green-600 ml-1">&nbsp;</span>
                 </h1>
                 
                 <p class="hero-subtitle mt-4 max-w-3xl mx-auto text-xl leading-relaxed">
@@ -214,22 +223,22 @@
                     <p class="text-green-100 max-w-2xl mx-auto">Every scan you make contributes to a cleaner planet. Here's what our community has achieved together:</p>
                 </div>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-                    <div class="impact-stat scroll-reveal hover-3d p-4 rounded-xl hover:bg-white/5 transition-colors">
+                    <div class="impact-stat  hover-3d p-4 rounded-xl hover:bg-white/5 transition-colors" data-aos="fade-up">
                         <div class="text-5xl font-bold text-yellow-400 mb-2" id="home-total-credits">0</div>
                         <div class="text-sm opacity-80">Eco-Credits Earned</div>
                         <div class="text-xs text-green-300 mt-1">Rewarding sustainable choices</div>
                     </div>
-                    <div class="impact-stat scroll-reveal hover-3d p-4 rounded-xl hover:bg-white/5 transition-colors">
+                    <div class="impact-stat  hover-3d p-4 rounded-xl hover:bg-white/5 transition-colors" data-aos="fade-up">
                         <div class="text-5xl font-bold text-blue-400 mb-2" id="home-total-items">0</div>
                         <div class="text-sm opacity-80">Items Properly Sorted</div>
                         <div class="text-xs text-green-300 mt-1">Diverting from landfills</div>
                     </div>
-                    <div class="impact-stat scroll-reveal hover-3d p-4 rounded-xl hover:bg-white/5 transition-colors">
+                    <div class="impact-stat  hover-3d p-4 rounded-xl hover:bg-white/5 transition-colors" data-aos="fade-up">
                         <div class="text-5xl font-bold text-green-400 mb-2" id="home-co2-saved">0</div>
                         <div class="text-sm opacity-80">kg COâ‚‚ Saved</div>
                         <div class="text-xs text-green-300 mt-1">Equivalent to planting trees</div>
                     </div>
-                    <div class="impact-stat scroll-reveal hover-3d p-4 rounded-xl hover:bg-white/5 transition-colors">
+                    <div class="impact-stat  hover-3d p-4 rounded-xl hover:bg-white/5 transition-colors" data-aos="fade-up">
                         <div class="text-5xl font-bold text-purple-400 mb-2" id="home-rewards">0</div>
                         <div class="text-sm opacity-80">Rewards Claimed</div>
                         <div class="text-xs text-green-300 mt-1">Real-world incentives</div>
@@ -252,7 +261,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-center justify-center text-center relative z-10">
                     
                     <!-- Step 1 -->
-                    <div class="glass-panel premium-glow p-8 rounded-3xl flex flex-col items-center hover-3d scroll-reveal">
+                    <div class="glass-panel premium-glow p-8 rounded-3xl flex flex-col items-center hover-3d " data-aos="fade-up">
                         <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-4 shadow-inner">
                             <i class="fa-solid fa-recycle text-emerald-600 text-2xl"></i>
                         </div>
@@ -266,7 +275,7 @@
                     </div>
 
                     <!-- Step 2 -->
-                    <div class="glass-panel premium-glow p-8 rounded-3xl flex flex-col items-center hover-3d scroll-reveal" style="transition-delay: 0.1s">
+                    <div class="glass-panel premium-glow p-8 rounded-3xl flex flex-col items-center hover-3d " data-aos="fade-up" style="transition-delay: 0.1s">
                         <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-4 shadow-inner">
                             <i class="fa-solid fa-coins text-yellow-600 text-2xl"></i>
                         </div>
@@ -280,7 +289,7 @@
                     </div>
 
                     <!-- Step 3 -->
-                    <div class="glass-panel premium-glow p-8 rounded-3xl flex flex-col items-center hover-3d scroll-reveal" style="transition-delay: 0.2s">
+                    <div class="glass-panel premium-glow p-8 rounded-3xl flex flex-col items-center hover-3d " data-aos="fade-up" style="transition-delay: 0.2s">
                         <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4 shadow-inner">
                             <i class="fa-solid fa-store text-blue-600 text-2xl"></i>
                         </div>
@@ -290,7 +299,7 @@
 
                 </div>
 
-                <div class="mt-12 glass-panel p-6 rounded-2xl max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between scroll-reveal relative z-10 bg-white/80">
+                <div class="mt-12 glass-panel p-6 rounded-2xl max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between  relative z-10 bg-white/80" data-aos="fade-up">
                     <div class="flex items-center mb-4 md:mb-0">
                         <div class="bg-emerald-100 p-3 rounded-xl mr-4 shadow-inner"><i class="fa-solid fa-chart-line text-emerald-600 text-2xl"></i></div>
                         <div>
@@ -323,13 +332,14 @@
                         </p>
                         <p id="featured-media-status" class="text-sm text-emerald-700 mt-4 font-medium">Loading media stories...</p>
                     </div>
-                    <div class="scroll-reveal bg-white rounded-2xl border border-emerald-100 shadow-sm overflow-hidden">
+                    <div class=" bg-white rounded-2xl border border-emerald-100 shadow-sm overflow-hidden" data-aos="fade-up">
                         <img src="https://images.unsplash.com/photo-1528323273322-d81458248d40?auto=format&fit=crop&w=1200&q=80" alt="Recycling line showcase" class="w-full h-[300px] object-cover" loading="lazy">
                     </div>
                 </div>
 
                 <div id="featured-media-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <article class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+                        <h3 class="sr-only">Featured Article</h3>
                         <div class="h-56 bg-gray-200/50 animate-pulse flex items-center justify-center">
                             <i class="fa-solid fa-image text-gray-300 text-4xl"></i>
                         </div>
@@ -340,6 +350,7 @@
                         </div>
                     </article>
                     <article class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+                        <h3 class="sr-only">Featured Article</h3>
                         <div class="h-56 bg-gray-200/50 animate-pulse flex items-center justify-center">
                             <i class="fa-solid fa-image text-gray-300 text-4xl"></i>
                         </div>
@@ -350,6 +361,7 @@
                         </div>
                     </article>
                     <article class="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hidden lg:block">
+                        <h3 class="sr-only">Featured Article</h3>
                         <div class="h-56 bg-gray-200/50 animate-pulse flex items-center justify-center">
                             <i class="fa-solid fa-image text-gray-300 text-4xl"></i>
                         </div>
@@ -375,28 +387,28 @@
                     </p>
                 </div>
                 <div class="grid md:grid-cols-2 xl:grid-cols-4 gap-6">
-                    <article class="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm scroll-reveal hover-3d">
+                    <article class="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm  hover-3d" data-aos="fade-up">
                         <img src="assets/images/blue_bin.png" alt="Blue EcoSort recycling bin for paper and cardboard" class="w-full h-48 object-cover" loading="lazy" width="400" height="192">
                         <div class="p-5">
                             <h3 class="text-lg font-bold text-blue-700 mb-2">Blue Bin</h3>
                             <p class="text-sm text-gray-600">Paper, cardboard, magazines, and clean cartons.</p>
                         </div>
                     </article>
-                    <article class="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm scroll-reveal hover-3d">
+                    <article class="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm  hover-3d" data-aos="fade-up">
                         <img src="assets/images/green_bin.png" alt="Green EcoSort organic waste bin for food scraps" class="w-full h-48 object-cover" loading="lazy" width="400" height="192">
                         <div class="p-5">
                             <h3 class="text-lg font-bold text-green-700 mb-2">Green Bin</h3>
                             <p class="text-sm text-gray-600">Food scraps, fruit peels, leaves, and garden waste.</p>
                         </div>
                     </article>
-                    <article class="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm scroll-reveal hover-3d">
+                    <article class="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm  hover-3d" data-aos="fade-up">
                         <img src="assets/images/yellow_bin.png" alt="Yellow EcoSort dry waste bin for plastics and cans" class="w-full h-48 object-cover" loading="lazy" width="400" height="192">
                         <div class="p-5">
                             <h3 class="text-lg font-bold text-yellow-700 mb-2">Yellow Bin</h3>
                             <p class="text-sm text-gray-600">Plastic bottles, cans, wrappers, and dry mixed recyclables.</p>
                         </div>
                     </article>
-                    <article class="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm scroll-reveal hover-3d">
+                    <article class="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm  hover-3d" data-aos="fade-up">
                         <img src="assets/images/red_bin.png" alt="Red EcoSort hazardous waste bin for medical and batteries" class="w-full h-48 object-cover" loading="lazy" width="400" height="192">
                         <div class="p-5">
                             <h3 class="text-lg font-bold text-red-700 mb-2">Red Bin</h3>
@@ -405,7 +417,7 @@
                     </article>
                 </div>
                 <div class="grid md:grid-cols-2 gap-6 mt-10">
-                    <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm scroll-reveal">
+                    <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm " data-aos="fade-up">
                         <h4 class="text-xl font-bold text-gray-900 mb-3">Waste Management Tips</h4>
                         <ul class="space-y-2 text-gray-600 text-sm">
                             <li><i class="fa-solid fa-check text-emerald-600 mr-2"></i>Rinse food containers before recycling.</li>
@@ -414,7 +426,7 @@
                             <li><i class="fa-solid fa-check text-emerald-600 mr-2"></i>Store e-waste separately for pickup.</li>
                         </ul>
                     </div>
-                    <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm scroll-reveal">
+                    <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm " data-aos="fade-up">
                         <h4 class="text-xl font-bold text-gray-900 mb-3">Smart Bin Step 2 Flow</h4>
                         <ul class="space-y-2 text-gray-600 text-sm">
                             <li><i class="fa-solid fa-check text-blue-600 mr-2"></i>Step 1 scans the waste item and predicts material.</li>
@@ -443,7 +455,7 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-                    <div class="bg-red-50 p-8 rounded-2xl border border-red-100 hover:shadow-xl transition duration-300 scroll-reveal">
+                    <div class="bg-red-50 p-8 rounded-2xl border border-red-100 hover:shadow-xl transition duration-300 " data-aos="fade-up">
                         <div class="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mb-6 text-red-600 text-2xl">
                             <i class="fa-solid fa-water"></i>
                         </div>
@@ -456,7 +468,7 @@
                         </div>
                     </div>
                     
-                    <div class="bg-orange-50 p-8 rounded-2xl border border-orange-100 hover:shadow-xl transition duration-300 scroll-reveal">
+                    <div class="bg-orange-50 p-8 rounded-2xl border border-orange-100 hover:shadow-xl transition duration-300 " data-aos="fade-up">
                         <div class="w-14 h-14 bg-orange-100 rounded-full flex items-center justify-center mb-6 text-orange-600 text-2xl">
                             <i class="fa-solid fa-smog"></i>
                         </div>
@@ -469,7 +481,7 @@
                         </div>
                     </div>
                     
-                    <div class="bg-green-50 p-8 rounded-2xl border border-green-100 hover:shadow-xl transition duration-300 scroll-reveal">
+                    <div class="bg-green-50 p-8 rounded-2xl border border-green-100 hover:shadow-xl transition duration-300 " data-aos="fade-up">
                         <div class="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mb-6 text-green-600 text-2xl">
                             <i class="fa-solid fa-oil-well"></i>
                         </div>
@@ -553,21 +565,21 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-                        <div class="scroll-reveal hover-3d bg-green-50 p-8 rounded-2xl border border-green-100 shadow-sm text-center">
+                        <div class=" hover-3d bg-green-50 p-8 rounded-2xl border border-green-100 shadow-sm text-center" data-aos="fade-up">
                             <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6 text-green-600 text-3xl mx-auto">
                                 <i class="fa-solid fa-camera"></i>
                             </div>
                             <h3 class="text-xl font-bold mb-3">1. Scan</h3>
                             <p class="text-gray-600">Use your camera to snap a photo of your waste item. Our AI identifies it instantly with machine learning precision.</p>
                         </div>
-                        <div class="scroll-reveal hover-3d bg-yellow-50 p-8 rounded-2xl border border-yellow-100 shadow-sm text-center" style="transition-delay: 0.1s">
+                        <div class=" hover-3d bg-yellow-50 p-8 rounded-2xl border border-yellow-100 shadow-sm text-center" data-aos="fade-up" style="transition-delay: 0.1s">
                             <div class="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mb-6 text-yellow-600 text-3xl mx-auto">
                                 <i class="fa-solid fa-brain"></i>
                             </div>
                             <h3 class="text-xl font-bold mb-3">2. Identify</h3>
                             <p class="text-gray-600">The AI classifies the material (Plastic, Metal, Glass, Paper) and calculates recyclability using our proprietary algorithm.</p>
                         </div>
-                        <div class="scroll-reveal hover-3d bg-blue-50 p-8 rounded-2xl border border-blue-100 shadow-sm text-center" style="transition-delay: 0.2s">
+                        <div class=" hover-3d bg-blue-50 p-8 rounded-2xl border border-blue-100 shadow-sm text-center" data-aos="fade-up" style="transition-delay: 0.2s">
                             <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mb-6 text-blue-600 text-3xl mx-auto">
                                 <i class="fa-solid fa-coins"></i>
                             </div>
@@ -701,11 +713,11 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <div class="scroll-reveal hover-3d testimonial-card glass-panel p-8 rounded-2xl shadow-lg border border-gray-100">
+                        <div class=" hover-3d testimonial-card glass-panel p-8 rounded-2xl shadow-lg border border-gray-100" data-aos="fade-up">
                             <div class="flex items-center mb-4">
                                 <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-xl mr-4">SJ</div>
                                 <div>
-                                    <h4 class="font-bold text-gray-900">Sarah Johnson</h4>
+                                    <h3 class="font-bold text-gray-900">Sarah Johnson</h3>
                                     <p class="text-sm text-gray-500">Eco Warrior â€¢ 1,240 credits</p>
                                 </div>
                             </div>
@@ -725,7 +737,7 @@
                             </div>
                         </div>
 
-                        <div class="scroll-reveal hover-3d testimonial-card glass-panel p-8 rounded-2xl shadow-lg border border-gray-100" style="transition-delay: 0.1s">
+                        <div class=" hover-3d testimonial-card glass-panel p-8 rounded-2xl shadow-lg border border-gray-100" data-aos="fade-up" style="transition-delay: 0.1s">
                             <div class="flex items-center mb-4">
                                 <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold text-xl mr-4">MC</div>
                                 <div>
@@ -749,7 +761,7 @@
                             </div>
                         </div>
 
-                        <div class="scroll-reveal hover-3d testimonial-card glass-panel p-8 rounded-2xl shadow-lg border border-gray-100" style="transition-delay: 0.2s">
+                        <div class=" hover-3d testimonial-card glass-panel p-8 rounded-2xl shadow-lg border border-gray-100" data-aos="fade-up" style="transition-delay: 0.2s">
                             <div class="flex items-center mb-4">
                                 <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 font-bold text-xl mr-4">EP</div>
                                 <div>
@@ -812,19 +824,19 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <div class="scroll-reveal hover-3d glass-panel p-6 rounded-xl shadow-sm border-l-4 border-yellow-500">
+                <div class=" hover-3d glass-panel p-6 rounded-xl shadow-sm border-l-4 border-yellow-500" data-aos="fade-up">
                     <div class="text-gray-500 text-sm font-medium uppercase">Total Credits</div>
                     <div class="text-3xl font-bold text-gray-800 mt-1" id="dash-credits">0</div>
                 </div>
-                <div class="scroll-reveal hover-3d glass-panel p-6 rounded-xl shadow-sm border-l-4 border-blue-500" style="transition-delay: 0.1s">
+                <div class=" hover-3d glass-panel p-6 rounded-xl shadow-sm border-l-4 border-blue-500" data-aos="fade-up" style="transition-delay: 0.1s">
                     <div class="text-gray-500 text-sm font-medium uppercase">Items Scanned</div>
                     <div class="text-3xl font-bold text-gray-800 mt-1" id="dash-items">0</div>
                 </div>
-                <div class="scroll-reveal hover-3d glass-panel p-6 rounded-xl shadow-sm border-l-4 border-green-500" style="transition-delay: 0.2s">
+                <div class=" hover-3d glass-panel p-6 rounded-xl shadow-sm border-l-4 border-green-500" data-aos="fade-up" style="transition-delay: 0.2s">
                     <div class="text-gray-500 text-sm font-medium uppercase">Recyclable Rate</div>
                     <div class="text-3xl font-bold text-gray-800 mt-1" id="dash-rate">0%</div>
                 </div>
-                <div class="scroll-reveal hover-3d glass-panel p-6 rounded-xl shadow-sm border-l-4 border-purple-500" style="transition-delay: 0.3s">
+                <div class=" hover-3d glass-panel p-6 rounded-xl shadow-sm border-l-4 border-purple-500" data-aos="fade-up" style="transition-delay: 0.3s">
                     <div class="text-gray-500 text-sm font-medium uppercase">Rewards Claimed</div>
                     <div class="text-3xl font-bold text-gray-800 mt-1" id="dash-rewards">0</div>
                 </div>
@@ -992,7 +1004,7 @@
                     <!-- Step 2 Smart Bin Preview Area -->
                     <div id="video-preview-area" class="hidden text-center">
                         <div class="relative inline-block w-full max-w-3xl">
-                            <img id="preview-video" class="w-full max-h-96 rounded-lg shadow-md border border-gray-200 object-contain bg-gray-100" alt="Step 2 smart bin preview">
+                            <img id="preview-video" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" class="w-full max-h-96 rounded-lg shadow-md border border-gray-200 object-contain bg-gray-100" alt="Step 2 smart bin preview">
                             <!-- NEW: Location display over captured image -->
                             <div id="video-preview-location-overlay" class="absolute bottom-2 left-2 bg-black/60 text-green-400 px-2 py-1 rounded font-mono text-[10px] sm:text-xs backdrop-blur hidden">
                                 <i class="fa-solid fa-location-dot mr-1"></i> <span id="video-preview-coords"></span>
@@ -1120,7 +1132,7 @@
                             <i class="fa-solid fa-times"></i>
                         </button>
                         <button aria-label="Capture photo" onclick="capturePhoto()" class="w-16 h-16 rounded-full border-4 border-white bg-white bg-opacity-20 flex items-center justify-center hover:bg-opacity-40 transition">
-                            <div class="w-12 h-12 bg-white rounded-full"></div>
+                            <span class="w-12 h-12 bg-white rounded-full"></span>
                         </button>
                     </div>
                 </div>
@@ -1150,9 +1162,9 @@
             <!-- Badges Section -->
             <div class="mb-16 fade-in" style="animation-delay: 0.1s;">
                 <h3 class="text-2xl font-extrabold text-gray-900 mb-6 flex items-center">
-                    <div class="w-10 h-10 bg-yellow-100 rounded-xl flex items-center justify-center mr-3 shadow-inner">
+                    <span class="w-10 h-10 bg-yellow-100 rounded-xl flex items-center justify-center mr-3 shadow-inner">
                         <i class="fa-solid fa-medal text-yellow-500 text-lg"></i>
-                    </div> 
+                    </span> 
                     Achievement Badges
                 </h3>
                 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6" id="badges-container">
@@ -1164,9 +1176,9 @@
             <div class="mb-16 fade-in" style="animation-delay: 0.2s;">
                 <div class="flex items-center justify-between mb-6">
                     <h3 class="text-2xl font-extrabold text-gray-900 flex items-center">
-                        <div class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center mr-3 shadow-inner">
+                        <span class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center mr-3 shadow-inner">
                             <i class="fa-solid fa-gift text-emerald-500 text-lg"></i>
-                        </div>
+                        </span>
                         Marketplace
                     </h3>
                     <span class="text-sm font-medium text-emerald-600 bg-emerald-50 px-3 py-1 rounded-lg">Updated Daily</span>
@@ -1179,9 +1191,9 @@
             <!-- Claimed Rewards History -->
             <div class="fade-in" style="animation-delay: 0.3s;">
                 <h3 class="text-2xl font-extrabold text-gray-900 mb-6 flex items-center">
-                    <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center mr-3 shadow-inner">
+                    <span class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center mr-3 shadow-inner">
                         <i class="fa-solid fa-clock-rotate-left text-blue-500 text-lg"></i>
-                    </div>
+                    </span>
                     Reward History
                 </h3>
                 <div class="glass-panel rounded-3xl overflow-hidden shadow-sm">
@@ -1227,7 +1239,7 @@
                 
                 <div class="p-8 text-center">
                     <div id="reward-icon" class="text-6xl mb-4"></div>
-                    <h3 id="reward-name" class="text-xl font-bold text-gray-900 mb-2"></h3>
+                    <h3 id="reward-name" class="text-xl font-bold text-gray-900 mb-2">&nbsp;</h3>
                     <p id="reward-description" class="text-gray-600 mb-6"></p>
                     
                     <div id="redeem-code-section" class="hidden mb-6">
@@ -1253,6 +1265,8 @@
         </div>
     </div>
 
+    </main>
+
     <!-- AUTH MODAL -->
     <div id="auth-modal" class="fixed inset-0 z-50 hidden">
         <div class="modal-overlay absolute inset-0" onclick="closeAuthModal()"></div>
@@ -1272,20 +1286,20 @@
                         <button onclick="switchAuthTab('signup')" id="tab-signup" class="flex-1 py-2 rounded-md text-sm font-medium transition text-gray-500 hover:text-gray-700">Sign Up</button>
                     </div>
                     
-                    <form id="login-form" onsubmit="handleLogin(event)">
+                    <form id="login-form" method="POST" onsubmit="handleLogin(event)">
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
                                 <div class="relative">
                                     <i class="fa-solid fa-envelope absolute left-3 top-3 text-gray-400"></i>
-                                    <input type="email" id="login-email" required class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition" placeholder="you@example.com">
+                                    <input type="email" id="login-email" autocomplete="username" required class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition" placeholder="you@example.com">
                                 </div>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
                                 <div class="relative">
                                     <i class="fa-solid fa-lock absolute left-3 top-3 text-gray-400"></i>
-                                    <input type="password" id="login-password" required class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢">
+                                    <input type="password" id="login-password" autocomplete="current-password" required class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢">
                                 </div>
                             </div>
                             <button type="submit" class="w-full bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700 transition shadow-lg flex items-center justify-center">
@@ -1294,7 +1308,7 @@
                         </div>
                     </form>
                     
-                    <form id="signup-form" onsubmit="handleSignup(event)" class="hidden">
+                    <form id="signup-form" method="POST" onsubmit="handleSignup(event)" class="hidden">
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
@@ -1307,14 +1321,14 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
                                 <div class="relative">
                                     <i class="fa-solid fa-envelope absolute left-3 top-3 text-gray-400"></i>
-                                    <input type="email" id="signup-email" required class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition" placeholder="you@example.com">
+                                    <input type="email" id="signup-email" autocomplete="username" required class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition" placeholder="you@example.com">
                                 </div>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
                                 <div class="relative">
                                     <i class="fa-solid fa-lock absolute left-3 top-3 text-gray-400"></i>
-                                    <input type="password" id="signup-password" required minlength="6" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢">
+                                    <input type="password" id="signup-password" autocomplete="new-password" required minlength="6" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢">
                                 </div>
                             </div>
                             <div>
@@ -1350,7 +1364,7 @@ window.addEventListener('unhandledrejection', function(e) {
     if(!window.errShown){ alert('Unhandled Promise Rejection: ' + (e.reason && e.reason.message ? e.reason.message : String(e.reason))); window.errShown=true; }
 });
 </script>
-<script src="js/app.js?v=4"></script>
+<script src="js/app.js?v=5"></script>
 <script src="js/ui-animations.js"></script>
 <script>
         // Typing Effect for Hero Title
@@ -1400,6 +1414,8 @@ window.addEventListener('unhandledrejection', function(e) {
 
             <!-- Chat Panel -->
             <div class="ai-chat-panel flex-1 flex flex-col min-w-0 relative">
+                <div class="absolute inset-0 bg-gradient-leaf opacity-40 pointer-events-none" aria-hidden="true"></div>
+                
                 <!-- Top Nav / Back Button -->
                 <div class="ai-chat-header w-full flex items-center justify-between sticky top-0 z-20">
                     <h2 class="ai-chat-title text-xl flex items-center">
@@ -1422,7 +1438,7 @@ window.addEventListener('unhandledrejection', function(e) {
                 <!-- Input Area -->
                 <div class="ai-input-bar">
                     <div id="ai-image-preview-container" class="hidden">
-                        <img id="ai-image-preview" src="" alt="Attached preview">
+                        <img id="ai-image-preview" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="Attached preview">
                         <button type="button" id="ai-remove-image-btn" onclick="removeAiImage()" title="Remove image">
                             <i class="fa-solid fa-times"></i>
                         </button>
@@ -1447,10 +1463,409 @@ window.addEventListener('unhandledrejection', function(e) {
     </section>
 
     <!-- VIEW: PICKUP (PHASE 2) -->
+        <!-- Security & Architecture View -->
+    <section id="view-security" class="view-section min-h-screen bg-gray-50 pt-24 pb-12 overflow-x-hidden selection:bg-green-500/30">
+        
+        <!-- Hero Section -->
+        <div class="px-4 text-center max-w-4xl mx-auto mb-16">
+            <div class="inline-flex items-center space-x-2 bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm font-semibold mb-6 shadow-sm border border-green-200">
+                <span class="relative flex h-3 w-3">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                </span>
+                <span>System Status: Fully Operational & Secure</span>
+            </div>
+            <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight mb-6 text-gray-900" data-aos="fade-up">
+                Enterprise-Grade Security <br class="hidden md:block" />
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-green-700">
+                    & Intelligent Architecture
+                </span>
+            </h1>
+            <p class="text-lg md:text-xl text-gray-600 leading-relaxed max-w-3xl mx-auto" data-aos="fade-up" data-aos-delay="100">
+                EcoSort protects your sensitive user data while delivering lightning-fast, highly secure AI-powered waste classification at a global scale.
+            </p>
+        </div>
+
+        <!-- Performance Stats -->
+        <div class="py-12 w-full max-w-6xl mx-auto px-4" data-aos="zoom-in">
+            <div class="bg-gradient-to-r from-green-600 to-emerald-700 rounded-3xl p-8 md:p-12 shadow-xl shadow-green-500/20 text-white overflow-hidden relative border border-green-500/30">
+                <div class="absolute -top-24 -right-24 w-64 h-64 bg-green-500 rounded-full blur-3xl opacity-50"></div>
+                <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-emerald-800 rounded-full blur-3xl opacity-50"></div>
+                
+                <div class="relative z-10 grid grid-cols-2 md:grid-cols-5 gap-8 text-center">
+                    <div class="flex flex-col items-center justify-center">
+                        <div class="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">99.9%</div>
+                        <div class="text-green-100 font-medium text-sm md:text-base uppercase tracking-wider">Availability</div>
+                    </div>
+                    <div class="flex flex-col items-center justify-center">
+                        <div class="text-3xl md:text-4xl font-extrabold tracking-tight mb-2"><150ms</div>
+                        <div class="text-green-100 font-medium text-sm md:text-base uppercase tracking-wider">Cached Response</div>
+                    </div>
+                    <div class="flex flex-col items-center justify-center">
+                        <div class="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">100%</div>
+                        <div class="text-green-100 font-medium text-sm md:text-base uppercase tracking-wider">Enterprise Security</div>
+                    </div>
+                    <div class="flex flex-col items-center justify-center">
+                        <div class="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">Redis</div>
+                        <div class="text-green-100 font-medium text-sm md:text-base uppercase tracking-wider">Accelerated</div>
+                    </div>
+                    <div class="flex flex-col items-center justify-center">
+                        <div class="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">Infinite</div>
+                        <div class="text-green-100 font-medium text-sm md:text-base uppercase tracking-wider">Scalable Architecture</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Architecture -->
+        <div class="bg-white py-16 mt-8">
+            <div class="w-full max-w-5xl mx-auto px-4">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-4" data-aos="fade-up">Interactive Security Architecture</h2>
+                    <p class="text-gray-600" data-aos="fade-up" data-aos-delay="100">Trace the secure lifecycle of every request made on the EcoSort platform.</p>
+                </div>
+                
+                <div class="relative flex flex-col items-center">
+                    <!-- Vertical Line Connecting Cards -->
+                    <div class="absolute top-0 bottom-0 w-1 bg-gradient-to-b from-green-400 to-green-600 rounded"></div>
+                    
+                    <!-- Steps -->
+                    <div class="relative z-10 flex items-center mb-10 w-full max-w-lg group" data-aos="fade-up">
+                        <div class="flex-1 text-right pr-6 md:pr-12">
+                            <h3 class="text-lg font-bold text-gray-900 group-hover:text-green-600 transition-colors">User</h3>
+                            <p class="text-sm text-gray-500">Secure Client Connection</p>
+                        </div>
+                        <div class="w-14 h-14 bg-white rounded-full border-4 border-green-500 flex items-center justify-center shadow-lg group-hover:shadow-green-500/50 transition-shadow">
+                            <i class="fa-solid fa-user text-green-600 text-xl"></i>
+                        </div>
+                        <div class="flex-1 pl-6 md:pl-12"></div>
+                    </div>
+
+                    <div class="relative z-10 flex items-center mb-10 w-full max-w-lg group" data-aos="fade-up">
+                        <div class="flex-1 text-right pr-6 md:pr-12"></div>
+                        <div class="w-14 h-14 bg-white rounded-full border-4 border-green-500 flex items-center justify-center shadow-lg group-hover:shadow-green-500/50 transition-shadow">
+                            <i class="fa-solid fa-shield-halved text-green-600 text-xl"></i>
+                        </div>
+                        <div class="flex-1 pl-6 md:pl-12">
+                            <h3 class="text-lg font-bold text-gray-900 group-hover:text-green-600 transition-colors">HTTPS Encryption</h3>
+                            <p class="text-sm text-gray-500">TLS 1.3 End-to-End Encryption</p>
+                        </div>
+                    </div>
+
+                    <div class="relative z-10 flex items-center mb-10 w-full max-w-lg group" data-aos="fade-up">
+                        <div class="flex-1 text-right pr-6 md:pr-12">
+                            <h3 class="text-lg font-bold text-gray-900 group-hover:text-green-600 transition-colors">Web Application Firewall</h3>
+                            <p class="text-sm text-gray-500">Cloudflare Edge Protection</p>
+                        </div>
+                        <div class="w-14 h-14 bg-white rounded-full border-4 border-green-500 flex items-center justify-center shadow-lg group-hover:shadow-green-500/50 transition-shadow">
+                            <i class="fa-solid fa-cloud-bolt text-green-600 text-xl"></i>
+                        </div>
+                        <div class="flex-1 pl-6 md:pl-12"></div>
+                    </div>
+
+                    <div class="relative z-10 flex items-center mb-10 w-full max-w-lg group" data-aos="fade-up">
+                        <div class="flex-1 text-right pr-6 md:pr-12"></div>
+                        <div class="w-14 h-14 bg-white rounded-full border-4 border-green-500 flex items-center justify-center shadow-lg group-hover:shadow-green-500/50 transition-shadow">
+                            <i class="fa-solid fa-bolt text-green-600 text-xl"></i>
+                        </div>
+                        <div class="flex-1 pl-6 md:pl-12">
+                            <h3 class="text-lg font-bold text-gray-900 group-hover:text-green-600 transition-colors">API Rate Limiter</h3>
+                            <p class="text-sm text-gray-500">DDoS & Brute Force Prevention</p>
+                        </div>
+                    </div>
+
+                    <div class="relative z-10 flex items-center mb-10 w-full max-w-lg group" data-aos="fade-up">
+                        <div class="flex-1 text-right pr-6 md:pr-12">
+                            <h3 class="text-lg font-bold text-gray-900 group-hover:text-green-600 transition-colors">JWT Authentication</h3>
+                            <p class="text-sm text-gray-500">Cryptographically Verified Sessions</p>
+                        </div>
+                        <div class="w-14 h-14 bg-white rounded-full border-4 border-green-500 flex items-center justify-center shadow-lg group-hover:shadow-green-500/50 transition-shadow">
+                            <i class="fa-solid fa-key text-green-600 text-xl"></i>
+                        </div>
+                        <div class="flex-1 pl-6 md:pl-12"></div>
+                    </div>
+
+                    <div class="relative z-10 flex items-center mb-10 w-full max-w-lg group" data-aos="fade-up">
+                        <div class="flex-1 text-right pr-6 md:pr-12"></div>
+                        <div class="w-14 h-14 bg-white rounded-full border-4 border-green-500 flex items-center justify-center shadow-lg group-hover:shadow-green-500/50 transition-shadow">
+                            <i class="fa-solid fa-lock text-green-600 text-xl"></i>
+                        </div>
+                        <div class="flex-1 pl-6 md:pl-12">
+                            <h3 class="text-lg font-bold text-gray-900 group-hover:text-green-600 transition-colors">Role-Based Access</h3>
+                            <p class="text-sm text-gray-500">Strict Privilege Isolation</p>
+                        </div>
+                    </div>
+
+                    <div class="relative z-10 flex items-center mb-10 w-full max-w-lg group" data-aos="fade-up">
+                        <div class="flex-1 text-right pr-6 md:pr-12">
+                            <h3 class="text-lg font-bold text-gray-900 group-hover:text-green-600 transition-colors">Server-side Business Logic</h3>
+                            <p class="text-sm text-gray-500">Protected Un-cloneable Core</p>
+                        </div>
+                        <div class="w-14 h-14 bg-white rounded-full border-4 border-green-500 flex items-center justify-center shadow-lg group-hover:shadow-green-500/50 transition-shadow">
+                            <i class="fa-solid fa-server text-green-600 text-xl"></i>
+                        </div>
+                        <div class="flex-1 pl-6 md:pl-12"></div>
+                    </div>
+
+                    <div class="relative z-10 flex items-center mb-10 w-full max-w-lg group" data-aos="fade-up">
+                        <div class="flex-1 text-right pr-6 md:pr-12"></div>
+                        <div class="w-14 h-14 bg-white rounded-full border-4 border-green-500 flex items-center justify-center shadow-lg group-hover:shadow-green-500/50 transition-shadow">
+                            <i class="fa-solid fa-memory text-green-600 text-xl"></i>
+                        </div>
+                        <div class="flex-1 pl-6 md:pl-12">
+                            <h3 class="text-lg font-bold text-gray-900 group-hover:text-green-600 transition-colors">Redis Cache</h3>
+                            <p class="text-sm text-gray-500">Sub-millisecond Data Retrieval</p>
+                        </div>
+                    </div>
+
+                    <div class="relative z-10 flex items-center w-full max-w-lg group" data-aos="fade-up">
+                        <div class="flex-1 text-right pr-6 md:pr-12">
+                            <h3 class="text-lg font-bold text-gray-900 group-hover:text-green-600 transition-colors">PostgreSQL Database</h3>
+                            <p class="text-sm text-gray-500">Encrypted at Rest</p>
+                        </div>
+                        <div class="w-14 h-14 bg-white rounded-full border-4 border-green-500 flex items-center justify-center shadow-lg group-hover:shadow-green-500/50 transition-shadow">
+                            <i class="fa-solid fa-database text-green-600 text-xl"></i>
+                        </div>
+                        <div class="flex-1 pl-6 md:pl-12"></div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Multi-Tier Caching -->
+        <div class="py-16 w-full max-w-6xl mx-auto px-4">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div data-aos="fade-right">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-6">Multi-Tier Data Caching</h2>
+                    <p class="text-gray-600 mb-8 text-lg">
+                        EcoSort employs a robust caching architecture to guarantee lightning-fast response times and minimal database overhead. By resolving queries at the edge or in-memory, we achieve enterprise-grade scalability.
+                    </p>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="flex items-center space-x-3 p-3 bg-white rounded-xl shadow-sm border border-gray-100 transition hover:shadow-md">
+                            <span class="text-2xl">⚡</span>
+                            <span class="font-medium text-gray-800">Faster Response</span>
+                        </div>
+                        <div class="flex items-center space-x-3 p-3 bg-white rounded-xl shadow-sm border border-gray-100 transition hover:shadow-md">
+                            <span class="text-2xl">🚀</span>
+                            <span class="font-medium text-gray-800">Reduced DB Load</span>
+                        </div>
+                        <div class="flex items-center space-x-3 p-3 bg-white rounded-xl shadow-sm border border-gray-100 transition hover:shadow-md">
+                            <span class="text-2xl">📈</span>
+                            <span class="font-medium text-gray-800">Better Scalability</span>
+                        </div>
+                        <div class="flex items-center space-x-3 p-3 bg-white rounded-xl shadow-sm border border-gray-100 transition hover:shadow-md">
+                            <span class="text-2xl">💾</span>
+                            <span class="font-medium text-gray-800">Intelligent Caching</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-lg" data-aos="fade-left">
+                    <div class="flex flex-col items-center">
+                        <div class="w-full bg-gray-50 p-4 rounded-xl shadow-sm border border-gray-100 flex items-center space-x-4">
+                            <div class="p-3 rounded-lg text-white bg-blue-500"><i class="fa-solid fa-globe text-xl"></i></div>
+                            <div>
+                                <h4 class="font-bold text-gray-900">Browser</h4>
+                                <p class="text-sm text-gray-500">Client-side interface requesting data.</p>
+                            </div>
+                        </div>
+                        <div class="my-3 text-gray-400 animate-bounce"><i class="fa-solid fa-arrow-down text-xl"></i></div>
+                        
+                        <div class="w-full bg-gray-50 p-4 rounded-xl shadow-sm border border-gray-100 flex items-center space-x-4">
+                            <div class="p-3 rounded-lg text-white bg-green-500"><i class="fa-solid fa-mobile-screen text-xl"></i></div>
+                            <div>
+                                <h4 class="font-bold text-gray-900">Local Cache</h4>
+                                <p class="text-sm text-gray-500">Stores frequently accessed UI data (Session State).</p>
+                            </div>
+                        </div>
+                        <div class="my-3 text-gray-400 animate-bounce"><i class="fa-solid fa-arrow-down text-xl"></i></div>
+
+                        <div class="w-full bg-gray-50 p-4 rounded-xl shadow-sm border border-gray-100 flex items-center space-x-4">
+                            <div class="p-3 rounded-lg text-white bg-red-500"><i class="fa-solid fa-memory text-xl"></i></div>
+                            <div>
+                                <h4 class="font-bold text-gray-900">Redis Cache</h4>
+                                <p class="text-sm text-gray-500">Caches AI results, leaderboards, and user points.</p>
+                            </div>
+                        </div>
+                        <div class="my-3 text-gray-400 animate-bounce"><i class="fa-solid fa-arrow-down text-xl"></i></div>
+
+                        <div class="w-full bg-gray-50 p-4 rounded-xl shadow-sm border border-gray-100 flex items-center space-x-4">
+                            <div class="p-3 rounded-lg text-white bg-gray-700"><i class="fa-solid fa-database text-xl"></i></div>
+                            <div>
+                                <h4 class="font-bold text-gray-900">Database (PocketBase)</h4>
+                                <p class="text-sm text-gray-500">Only queried when data is not in cache.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Competitive Advantage -->
+        <div class="bg-white py-16 mt-8 border-y border-gray-200">
+            <div class="w-full max-w-5xl mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-4" data-aos="fade-up">Why EcoSort Cannot Be Easily Cloned</h2>
+                    <p class="text-gray-600 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="100">
+                        EcoSort performs all critical processing securely on the server, making simple API wrapper cloning completely ineffective.
+                    </p>
+                </div>
+                
+                <div class="overflow-x-auto shadow-sm rounded-xl border border-gray-200" data-aos="fade-up">
+                    <table class="w-full text-left border-collapse bg-white">
+                        <thead>
+                            <tr>
+                                <th class="p-4 border-b-2 border-gray-200 text-lg font-semibold text-gray-900">Feature</th>
+                                <th class="p-4 border-b-2 border-gray-200 text-lg font-semibold text-gray-500 text-center bg-gray-50">Simple API Wrapper App</th>
+                                <th class="p-4 border-b-2 border-green-500 text-lg font-bold text-green-700 text-center bg-green-50">EcoSort Platform</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Item 1 -->
+                            <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                <td class="p-4 text-gray-800 font-medium">AI Waste Classification</td>
+                                <td class="p-4 text-center bg-gray-50/50"><i class="fa-solid fa-circle-check text-gray-400 text-xl"></i></td>
+                                <td class="p-4 text-center bg-green-50/50"><i class="fa-solid fa-circle-check text-green-500 text-xl"></i></td>
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                <td class="p-4 text-gray-800 font-medium">Server-side Business Logic</td>
+                                <td class="p-4 text-center bg-gray-50/50"><i class="fa-solid fa-circle-xmark text-red-300 text-xl"></i></td>
+                                <td class="p-4 text-center bg-green-50/50"><i class="fa-solid fa-circle-check text-green-500 text-xl"></i></td>
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                <td class="p-4 text-gray-800 font-medium">Reward Calculation Engine</td>
+                                <td class="p-4 text-center bg-gray-50/50"><i class="fa-solid fa-circle-xmark text-red-300 text-xl"></i></td>
+                                <td class="p-4 text-center bg-green-50/50"><i class="fa-solid fa-circle-check text-green-500 text-xl"></i></td>
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                <td class="p-4 text-gray-800 font-medium">Recycling Verification</td>
+                                <td class="p-4 text-center bg-gray-50/50"><i class="fa-solid fa-circle-xmark text-red-300 text-xl"></i></td>
+                                <td class="p-4 text-center bg-green-50/50"><i class="fa-solid fa-circle-check text-green-500 text-xl"></i></td>
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                <td class="p-4 text-gray-800 font-medium">Environmental Impact Calculator</td>
+                                <td class="p-4 text-center bg-gray-50/50"><i class="fa-solid fa-circle-xmark text-red-300 text-xl"></i></td>
+                                <td class="p-4 text-center bg-green-50/50"><i class="fa-solid fa-circle-check text-green-500 text-xl"></i></td>
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                <td class="p-4 text-gray-800 font-medium">Fraud Detection</td>
+                                <td class="p-4 text-center bg-gray-50/50"><i class="fa-solid fa-circle-xmark text-red-300 text-xl"></i></td>
+                                <td class="p-4 text-center bg-green-50/50"><i class="fa-solid fa-circle-check text-green-500 text-xl"></i></td>
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                <td class="p-4 text-gray-800 font-medium">Secure Authentication</td>
+                                <td class="p-4 text-center bg-gray-50/50"><i class="fa-solid fa-circle-xmark text-red-300 text-xl"></i></td>
+                                <td class="p-4 text-center bg-green-50/50"><i class="fa-solid fa-circle-check text-green-500 text-xl"></i></td>
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                <td class="p-4 text-gray-800 font-medium">Redis Caching</td>
+                                <td class="p-4 text-center bg-gray-50/50"><i class="fa-solid fa-circle-xmark text-red-300 text-xl"></i></td>
+                                <td class="p-4 text-center bg-green-50/50"><i class="fa-solid fa-circle-check text-green-500 text-xl"></i></td>
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                <td class="p-4 text-gray-800 font-medium">Protected APIs</td>
+                                <td class="p-4 text-center bg-gray-50/50"><i class="fa-solid fa-circle-xmark text-red-300 text-xl"></i></td>
+                                <td class="p-4 text-center bg-green-50/50"><i class="fa-solid fa-circle-check text-green-500 text-xl"></i></td>
+                            </tr>
+                            <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                                <td class="p-4 text-gray-800 font-medium">Analytics Engine</td>
+                                <td class="p-4 text-center bg-gray-50/50"><i class="fa-solid fa-circle-xmark text-red-300 text-xl"></i></td>
+                                <td class="p-4 text-center bg-green-50/50"><i class="fa-solid fa-circle-check text-green-500 text-xl"></i></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Grid -->
+        <div class="py-16 w-full max-w-6xl mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4" data-aos="fade-up">Comprehensive Security Measures</h2>
+                <p class="text-gray-600" data-aos="fade-up" data-aos-delay="100">EcoSort is fortified with multiple layers of enterprise-grade security.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- Cards -->
+                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm hover:shadow-lg transition-all hover:-translate-y-1" data-aos="fade-up" data-aos-delay="0">
+                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4 text-green-600">
+                        <i class="fa-solid fa-key text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">JWT Authentication</h3>
+                    <p class="text-sm text-gray-600 leading-relaxed">Stateless, cryptographically signed tokens ensure session integrity.</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm hover:shadow-lg transition-all hover:-translate-y-1" data-aos="fade-up" data-aos-delay="50">
+                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4 text-green-600">
+                        <i class="fa-solid fa-lock text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Role-Based Access</h3>
+                    <p class="text-sm text-gray-600 leading-relaxed">Strict privilege separation between users, collectors, and admins.</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm hover:shadow-lg transition-all hover:-translate-y-1" data-aos="fade-up" data-aos-delay="100">
+                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4 text-green-600">
+                        <i class="fa-solid fa-shield-halved text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">HTTPS Encryption</h3>
+                    <p class="text-sm text-gray-600 leading-relaxed">All data in transit is protected by industry-standard TLS 1.3.</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm hover:shadow-lg transition-all hover:-translate-y-1" data-aos="fade-up" data-aos-delay="150">
+                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4 text-green-600">
+                        <i class="fa-solid fa-bolt text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Rate Limiting</h3>
+                    <p class="text-sm text-gray-600 leading-relaxed">Prevents automated abuse and protects backend resources.</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm hover:shadow-lg transition-all hover:-translate-y-1" data-aos="fade-up" data-aos-delay="200">
+                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4 text-green-600">
+                        <i class="fa-solid fa-cloud-bolt text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Cloudflare Protection</h3>
+                    <p class="text-sm text-gray-600 leading-relaxed">Global edge network filtering malicious traffic before it hits our servers.</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm hover:shadow-lg transition-all hover:-translate-y-1" data-aos="fade-up" data-aos-delay="250">
+                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4 text-green-600">
+                        <i class="fa-solid fa-memory text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Redis Cache</h3>
+                    <p class="text-sm text-gray-600 leading-relaxed">In-memory data structure store for lightning-fast state retrieval.</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm hover:shadow-lg transition-all hover:-translate-y-1" data-aos="fade-up" data-aos-delay="300">
+                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4 text-green-600">
+                        <i class="fa-solid fa-code text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Input Validation</h3>
+                    <p class="text-sm text-gray-600 leading-relaxed">Rigorous sanitization of all user inputs to prevent injection attacks.</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm hover:shadow-lg transition-all hover:-translate-y-1" data-aos="fade-up" data-aos-delay="350">
+                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4 text-green-600">
+                        <i class="fa-solid fa-server text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Server-side Verify</h3>
+                    <p class="text-sm text-gray-600 leading-relaxed">Zero-trust architecture where all critical logic executes securely.</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm hover:shadow-lg transition-all hover:-translate-y-1" data-aos="fade-up" data-aos-delay="400">
+                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4 text-green-600">
+                        <i class="fa-solid fa-database text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Secure Database</h3>
+                    <p class="text-sm text-gray-600 leading-relaxed">Encrypted storage of sensitive user and environmental data.</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm hover:shadow-lg transition-all hover:-translate-y-1" data-aos="fade-up" data-aos-delay="450">
+                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4 text-green-600">
+                        <i class="fa-solid fa-scroll text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Activity Logging</h3>
+                    <p class="text-sm text-gray-600 leading-relaxed">Comprehensive audit trails for system transparency.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section id="view-pickup" class="view-section pt-24 bg-gray-50 min-h-screen">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
             <div class="text-center mb-10">
-                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">On-Demand Pickup</h1>
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">On-Demand Pickup</h2>
                 <p class="text-lg text-gray-600 max-w-2xl mx-auto">Request a reliable e-waste pickup from your location, or manage collections if you're a registered collector.</p>
             </div>
             
@@ -1542,6 +1957,8 @@ window.addEventListener('unhandledrejection', function(e) {
             </div>
         </div>
     </div>
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script>AOS.init({ duration: 800, once: false, offset: 100 });</script>
 </body>
 </html>
 

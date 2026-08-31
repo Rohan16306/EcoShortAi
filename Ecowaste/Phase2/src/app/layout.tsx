@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import type { Metadata, Viewport } from 'next';
 import { Plus_Jakarta_Sans } from 'next/font/google';
 import { Toaster } from 'sonner';
@@ -18,9 +18,9 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'WastePickup — On-Demand Plastic Waste Collection',
+  title: 'EcoSortAI — On-Demand Plastic Waste Collection',
   description:
-    'WastePickup connects plastic waste generators with verified collectors for fast, trackable, on-demand pickup across your city.',
+    'EcoSortAI connects plastic waste generators with verified collectors for fast, trackable, on-demand pickup across your city.',
   icons: {
     icon: [{ url: '/favicon.ico', type: 'image/x-icon' }],
   },
@@ -35,9 +35,7 @@ export default function RootLayout({
         {children}
         <Toaster position="bottom-right" richColors closeButton />
         <CreditAnimation />
-
-        <script type="module" async src="https://static.rocket.new/rocket-web.js?_cfg=https%3A%2F%2Fwastepicku5572back.builtwithrocket.new&_be=https%3A%2F%2Fappanalytics.rocket.new&_v=0.1.19" />
-        <script type="module" defer src="https://static.rocket.new/rocket-shot.js?v=0.0.2" /></body>
+      </body>
     </html>
   );
 }

@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Coins, Star } from 'lucide-react';
@@ -13,22 +12,9 @@ export default function CreditAnimation() {
     // Listen for broadcast events from requestStore
     const unsubscribe = subscribeToBroadcast((msg) => {
       if (msg.type === 'STATUS_CHANGED' && msg.request.status === 'completed') {
-        // Determine credits for current user based on role
-        let role = '';
-        const authRaw = localStorage.getItem('wastepickup_auth');
-        if (authRaw) {
-          try {
-            const auth = JSON.parse(authRaw);
-            role = auth.role ?? '';
-          } catch { /* ignore */ }
-        }
-
+        // Since Phase 2 is an admin portal, no credits are awarded to the admin
+        // but we'll leave this structure in case we ever want to broadcast fake events for testing
         let awarded = 0;
-        if (role === 'collector' || role === 'ROLE_RECEIVER') {
-          awarded = msg.request.collectorCreditsAwarded ?? 0;
-        } else {
-          awarded = msg.request.creditsAwarded ?? 0;
-        }
 
         if (awarded > 0) {
           setCredits(awarded);

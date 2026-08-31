@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import AdminPortalEntry from '@/admin-portal/PortalEntry';
 
 /**
@@ -7,5 +8,9 @@ import AdminPortalEntry from '@/admin-portal/PortalEntry';
  * This route just exposes the main Admin Portal folder.
  */
 export default function AdminDashboardPage() {
-  return <AdminPortalEntry />;
+  return (
+    <Suspense fallback={<div className="flex h-screen items-center justify-center">Loading Admin Portal...</div>}>
+      <AdminPortalEntry />
+    </Suspense>
+  );
 }
