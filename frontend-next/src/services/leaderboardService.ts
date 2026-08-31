@@ -26,13 +26,25 @@ export interface LeaderboardEntry {
   badges: string[];
 }
 
+// ── 5-minute TTL cache — leaderboard doesn't change every second ──────────────
+let leaderboardCache: { data: LeaderboardEntry[]; fetchedAt: number } | null = null;
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
 export const LeaderboardService = {
 
   /**
    * Get the top users by points.
    * Replaces: GET /api/leaderboard (server.js:524-567)
+   * Cached for 5 minutes to avoid hammering the DB on every page load.
    */
   getLeaderboard: async (limit = 10): Promise<LeaderboardEntry[]> => {
+    const now = Date.now();
+
+    // Return cached data if still fresh
+    if (leaderboardCache && now - leaderboardCache.fetchedAt < CACHE_TTL_MS) {
+      return leaderboardCache.data;
+    }
+
     try {
       const safeLimit = Math.min(Math.max(1, limit), 100);
 
@@ -41,7 +53,7 @@ export const LeaderboardService = {
         fields: 'id,name,total_points,current_streak,avatar,badges',
       });
 
-      return records.items.map((record, index) => ({
+      const data: LeaderboardEntry[] = records.items.map((record, index) => ({
         rank: index + 1,
         id: record.id,
         name: record['name'] || 'Anonymous',
@@ -50,11 +62,21 @@ export const LeaderboardService = {
         avatar: record['avatar'] ? pb.files.getURL(record, record['avatar']) : '',
         badges: Array.isArray(record['badges']) ? record['badges'] : [],
       }));
+
+      leaderboardCache = { data, fetchedAt: now };
+      return data;
     } catch (err) {
       console.error('Leaderboard fetch failed:', err);
-      return [];
+      // Return stale cache if available rather than empty array
+      return leaderboardCache?.data ?? [];
     }
   },
+
+  /** Force a cache refresh (call after a user submits a scan) */
+  invalidateCache: () => {
+    leaderboardCache = null;
+  },
+
 
   /**
    * Get the current user's rank.
