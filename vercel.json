@@ -1,12 +1,15 @@
 {
-  "rewrites": [
+  "version": 2,
+  "builds": [
     {
-      "source": "/",
-      "destination": "/Ecowaste/index.html"
-    },
+      "src": "public/**/*",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
     {
-      "source": "/(.*)",
-      "destination": "/Ecowaste/$1"
+      "src": "/(.*)",
+      "dest": "/public/$1"
     }
   ]
 }
