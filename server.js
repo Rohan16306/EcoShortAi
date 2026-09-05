@@ -11,6 +11,7 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 const { GoogleGenAI } = require('@google/genai');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const { z } = require('zod');
 
 let ai;
 if (process.env.GEMINI_API_KEY) {
@@ -736,30 +737,51 @@ function normalizeContentsForGemini(messages) {
 // 0. Response compression (gzip/deflate) — must be first to compress all responses
 app.use(compression());
 
-// 1. Secure HTTP Headers
-app.use(helmet({ contentSecurityPolicy: false })); // Disabled CSP temporarily to not break existing frontend inline scripts
-
-// 2. Restrict CORS
-// Read allowed origins from environment variable (comma-separated) for Railway/Vercel setup
-// e.g. ALLOWED_ORIGINS=https://ecosort.vercel.app,https://ecosortai-production.up.railway.app
-const allowedOrigins = [
-    'http://localhost:3001',
-    'http://localhost:3002',
-    'http://127.0.0.1:3001',
-    'http://127.0.0.1:3002',
-    ...(process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim()) : [])
-];
-app.use(cors({
-    origin: function(origin, callback) {
-        // Allow requests with no origin (mobile apps, curl, Postman)
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            console.warn(`[CORS] Blocked origin: ${origin}`);
-            callback(new Error('Not allowed by CORS'));
-        }
+// 1. Secure HTTP Headers with proper CSP
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", 'https://cdn.jsdelivr.net', 'https://unpkg.com'],
+      scriptSrcAttr: ["'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://cdnjs.cloudflare.com'],
+      fontSrc: ["'self'", 'https://fonts.gstatic.com', 'https://cdnjs.cloudflare.com'],
+      imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
+      connectSrc: ["'self'", 'http://127.0.0.1:8090', 'https://generativelanguage.googleapis.com', 'wss:', 'ws:'],
+      mediaSrc: ["'self'", 'blob:', 'https:'],
+      workerSrc: ["'self'", 'blob:'],
+      frameSrc: ["'none'"],
     },
-    credentials: true // Required for HttpOnly cookies
+  },
+  crossOriginEmbedderPolicy: false,
+}));
+
+// 2. CORS — whitelist all known frontend origins
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'http://localhost:3002',
+  'http://localhost:3005',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:3002',
+  'http://127.0.0.1:3005',
+  process.env.FRONTEND_URL,
+].filter(Boolean);
+
+app.use(cors({
+  origin: function(origin, callback) {
+    // Allow non-browser requests (curl, Postman, server-to-server) and whitelisted origins
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.warn('[CORS] Blocked request from:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID'],
+  exposedHeaders: ['X-Request-ID', 'Retry-After'],
 }));
 
 // 3. Prevent DoS via Payload Limits
@@ -790,8 +812,49 @@ app.use((req, res, next) => {
 // Routes
 // ============================================================
 
-app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, timestamp: new Date().toISOString() });
+// ── Enhanced Health Check ────────────────────────────────────────
+app.get('/api/health', async (_req, res) => {
+  const startMs = Date.now();
+  const dbSizeBytes = (() => {
+    try { return require('fs').statSync(DB_PATH).size; } catch { return -1; }
+  })();
+
+  // Ping PocketBase
+  let pbStatus = 'unknown';
+  let pbLatencyMs = null;
+  try {
+    const pbStart = Date.now();
+    const pbRes = await fetch(`${process.env.PB_URL || 'http://127.0.0.1:8090'}/api/health`, {
+      signal: AbortSignal.timeout(2000),
+    });
+    pbLatencyMs = Date.now() - pbStart;
+    pbStatus = pbRes.ok ? 'connected' : 'error';
+  } catch {
+    pbStatus = 'disconnected';
+  }
+
+  const mem = process.memoryUsage();
+  res.json({
+    ok: true,
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptimeSeconds: Math.round(process.uptime()),
+    database: {
+      json: { sizeBytes: dbSizeBytes, sizeMb: +(dbSizeBytes / 1024 / 1024).toFixed(2) },
+      pocketbase: { status: pbStatus, latencyMs: pbLatencyMs },
+    },
+    memory: {
+      heapUsedMb: +(mem.heapUsed / 1024 / 1024).toFixed(1),
+      heapTotalMb: +(mem.heapTotal / 1024 / 1024).toFixed(1),
+      rssMb: +(mem.rss / 1024 / 1024).toFixed(1),
+    },
+    caches: {
+      tokenCacheSize: tokenCache.size,
+      blacklistSize: tokenBlacklist.size,
+      leaderboardCached: leaderboardCache.data !== null,
+    },
+    latencyMs: Date.now() - startMs,
+  });
 });
 
 // --- Scan Verification ---
@@ -954,20 +1017,28 @@ app.post('/api/scan/verify/complete', (req, res) => {
   });
 });
 
+// --- Zod Schemas ---
+const signupSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters").max(50),
+  email: z.string().email("Invalid email address").toLowerCase().trim(),
+  password: z.string().min(6, "Password must be at least 6 characters").max(100),
+  role: z.enum(['ROLE_USER', 'ROLE_COLLECTOR']).optional().default('ROLE_USER')
+});
+
+const loginSchema = z.object({
+  email: z.string().email("Invalid email address").toLowerCase().trim(),
+  password: z.string().min(1, "Password is required")
+});
+
 // --- Auth ---
 app.post('/api/auth/signup', authRateLimit, async (req, res) => {
   try {
-    const name = (req.body?.name || '').trim();
-    const email = (req.body?.email || '').trim().toLowerCase();
-    const password = req.body?.password || '';
-
-    if (!name || !email || !password) {
-      return res.status(400).json({ error: 'Name, email and password are required' });
+    const parseResult = signupSchema.safeParse(req.body);
+    if (!parseResult.success) {
+      return res.status(400).json({ error: parseResult.error.errors[0].message });
     }
-
-    if (password.length < 6) {
-      return res.status(400).json({ error: 'Password must be at least 6 characters' });
-    }
+    
+    const { name, email, password, role } = parseResult.data;
 
     const db = readDb();
     if (db.users.some((u) => u.email === email)) {
@@ -975,7 +1046,6 @@ app.post('/api/auth/signup', authRateLimit, async (req, res) => {
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
-    const role = (req.body?.role || 'ROLE_USER').trim().toUpperCase();
     const user = {
       id: crypto.randomUUID(),
       name,
@@ -1001,12 +1071,12 @@ app.post('/api/auth/signup', authRateLimit, async (req, res) => {
 
 app.post('/api/auth/login', authRateLimit, async (req, res) => {
   try {
-    const email = (req.body?.email || '').trim().toLowerCase();
-    const password = req.body?.password || '';
-
-    if (!email || !password) {
+    const parseResult = loginSchema.safeParse(req.body);
+    if (!parseResult.success) {
       return res.status(400).json({ error: 'Email and password are required' });
     }
+
+    const { email, password } = parseResult.data;
 
     const db = readDb();
     const user = db.users.find((u) => u.email === email);
@@ -1058,6 +1128,8 @@ app.put('/api/data/me', authMiddleware, (req, res) => {
   const db = readDb();
   db.userData[req.userId] = cleanData;
   writeDb(db);
+  
+  if (typeof invalidateLeaderboardCache === 'function') invalidateLeaderboardCache();
 
   return res.json({ data: cleanData });
 });
@@ -1259,49 +1331,64 @@ app.get('/api/admin/stats', authMiddleware, adminGuard, (req, res) => {
   });
 });
 
-// --- Stats ---
-app.get('/api/stats/global', (_req, res) => {
+// --- Stats (30s TTL cache) ---
+let statsCache = { data: null, expiresAt: 0 };
+
+app.get('/api/stats/global', async (_req, res) => {
+  const now = Date.now();
+
+  // Serve from cache if fresh
+  if (statsCache.data && now < statsCache.expiresAt) {
+    return res.set('X-Cache', 'HIT').json(statsCache.data);
+  }
+
   const db = readDb();
   const all = Object.values(db.userData || {});
 
+  const totalScans = all.reduce((sum, d) => sum + (Array.isArray(d.history) ? d.history.length : 0), 0);
   const totalCredits = all.reduce((sum, d) => sum + (Number(d.credits) || 0), 0);
-  const totalItems = all.reduce((sum, d) => sum + (Array.isArray(d.history) ? d.history.length : 0), 0);
   const totalRewards = all.reduce((sum, d) => sum + (Array.isArray(d.claimedRewards) ? d.claimedRewards.length : 0), 0);
-  const co2Saved = Math.round(totalItems * 0.5);
+  const co2Saved = Math.round(totalScans * 0.2); // kg per scan
 
-  res.json({
-    totalUsers: db.users.length,
+  // Try to get PocketBase user count too (non-blocking)
+  let pbUserCount = 0;
+  try {
+    const pbRes = await fetch(
+      `${process.env.PB_URL || 'http://127.0.0.1:8090'}/api/collections/users/records?perPage=1`,
+      { signal: AbortSignal.timeout(1000) }
+    );
+    if (pbRes.ok) {
+      const pbData = await pbRes.json();
+      pbUserCount = pbData.totalItems || 0;
+    }
+  } catch { /* PocketBase offline — use db.json count */ }
+
+  const result = {
+    totalUsers: Math.max(db.users.length, pbUserCount),
+    totalScans,
     totalCredits,
-    totalItems,
     totalRewards,
-    co2Saved
-  });
+    co2Saved,
+    updatedAt: new Date().toISOString(),
+  };
+
+  statsCache = { data: result, expiresAt: now + 30_000 };
+  res.set('X-Cache', 'MISS').json(result);
 });
 
-// --- Leaderboard ---
-app.get('/api/leaderboard', (req, res) => {
-  const db = readDb();
-  const requestedLimit = Number.parseInt(req.query.limit, 10);
-  const limit = Number.isFinite(requestedLimit) && requestedLimit > 0
-    ? Math.min(requestedLimit, 100)
-    : 10;
+// --- Leaderboard (30s TTL in-memory cache) ---
+let leaderboardCache = { data: null, expiresAt: 0 };
 
-  const rows = db.users
+function computeLeaderboard() {
+  const db = readDb();
+  return db.users
     .map((user) => {
       const data = db.userData[user.id] || defaultUserData();
       const scans = Array.isArray(data.history) ? data.history.length : 0;
       const credits = Number(data.credits) || 0;
       const badges = Array.isArray(data.badges) ? data.badges : [];
       const topBadge = badges.length ? String(badges[badges.length - 1]) : 'Eco Starter';
-
-      return {
-        id: user.id,
-        name: user.name || 'Anonymous',
-        scans,
-        credits,
-        badge: topBadge,
-        createdAt: user.createdAt || null
-      };
+      return { id: user.id, name: user.name || 'Anonymous', scans, credits, badge: topBadge, createdAt: user.createdAt || null };
     })
     .sort((a, b) => {
       if (b.credits !== a.credits) return b.credits - a.credits;
@@ -1309,20 +1396,33 @@ app.get('/api/leaderboard', (req, res) => {
       return (a.createdAt || '').localeCompare(b.createdAt || '');
     })
     .map((entry, idx) => ({
-      rank: idx + 1,
-      id: entry.id,
-      name: entry.name,
-      scans: entry.scans,
-      credits: entry.credits,
-      badge: entry.badge
+      rank: idx + 1, id: entry.id, name: entry.name,
+      scans: entry.scans, credits: entry.credits, badge: entry.badge,
     }));
+}
 
-  res.json({
-    totalUsers: rows.length,
+app.get('/api/leaderboard', (req, res) => {
+  const requestedLimit = Number.parseInt(req.query.limit, 10);
+  const limit = Number.isFinite(requestedLimit) && requestedLimit > 0 ? Math.min(requestedLimit, 100) : 10;
+  const now = Date.now();
+
+  // Serve from cache if fresh
+  if (!leaderboardCache.data || now >= leaderboardCache.expiresAt) {
+    const rows = computeLeaderboard();
+    leaderboardCache = { data: rows, expiresAt: now + 30_000 };
+  }
+
+  res.set('X-Cache', leaderboardCache.data ? 'HIT' : 'MISS').json({
+    totalUsers: leaderboardCache.data.length,
     updatedAt: new Date().toISOString(),
-    leaderboard: rows.slice(0, limit)
+    leaderboard: leaderboardCache.data.slice(0, limit),
   });
 });
+
+// Invalidate leaderboard cache whenever credits change (called after scan complete or reward redeem)
+function invalidateLeaderboardCache() {
+  leaderboardCache = { data: null, expiresAt: 0 };
+}
 
 // --- Content ---
 app.get('/api/content/featured', (_req, res) => {
@@ -1494,6 +1594,7 @@ app.put('/api/pickups/:id/status', authMiddleware, (req, res) => {
   }
   
   writeDb(db);
+  if (typeof invalidateLeaderboardCache === 'function') invalidateLeaderboardCache();
   res.json({ pickup });
 });
 
@@ -1551,6 +1652,7 @@ app.post('/api/rewards/redeem', authMiddleware, (req, res) => {
   userData.claimedRewards.push(claimedItem);
 
   writeDb(db);
+  if (typeof invalidateLeaderboardCache === 'function') invalidateLeaderboardCache();
   res.json({ success: true, couponCode, newBalance: userData.credits, claimedItem });
 });
 
@@ -1601,73 +1703,13 @@ app.post('/api/contact', contactRateLimit, (req, res) => {
   return res.status(201).json({ ok: true, message: 'Message received' });
 });
 
-// --- Phase 1 & 2 Proxy ---
-  const phase2Proxy = createProxyMiddleware({ 
-    target: 'http://localhost:3005', 
-    changeOrigin: true,
-    ws: true 
-  });
-  const phase1Proxy = createProxyMiddleware({ 
-    target: 'http://localhost:3001', 
-    changeOrigin: true,
-    ws: true 
-  });
-  
-  const phase2Routes = [
-    '/admin-dashboard', 
-    '/collector-dashboard',
-    '/pickup-request-tracking',
-    '/sign-up-login-screen',
-    '/api/auth/session',
-    '/api/auth/providers',
-    '/api/auth/csrf',
-    '/api/auth/callback',
-    '/api/auth/signin',
-    '/api/auth/signout',
-    '/api/auth/error'
-  ];
-  const phase1Routes = [
-    '/dashboard',
-    '/scan',
-    '/marketplace',
-    '/gallery',
-    '/community',
-    '/leaderboard',
-    '/sustain-ai',
-    '/chat-widget'
-  ];
+// --- Next.js proxy removed ---
 
-  app.use((req, res, next) => {
-    // Route Next.js internal requests based on Referer
-    if (req.path.startsWith('/_next') || req.path.startsWith('/__next')) {
-      const referer = req.get('Referer');
-      if (referer) {
-        try {
-          const url = new URL(referer);
-          if (phase1Routes.some(route => url.pathname === route || url.pathname.startsWith(route + '/'))) {
-            return phase1Proxy(req, res, next);
-          }
-        } catch (e) { /* ignore invalid referer */ }
-      }
-      return phase2Proxy(req, res, next);
-    }
-
-    // Explicit Phase 2 Routes
-    if (phase2Routes.some(route => req.path === route || req.path.startsWith(route + '/'))) {
-      return phase2Proxy(req, res, next);
-    }
-
-    // Explicit Phase 1 Routes
-    if (phase1Routes.some(route => req.path === route || req.path.startsWith(route + '/'))) {
-      return phase1Proxy(req, res, next);
-    }
-
-    next();
-  });
+const PUBLIC_DIR = path.join(__dirname, 'public');
 
 // --- Static Files (with cache-control headers for performance) ---
 // Cache immutable assets (JS/CSS/images) for 1 day; HTML for 1 hour to allow updates
-app.use(express.static(__dirname, {
+app.use(express.static(PUBLIC_DIR, {
   maxAge: '1d',
   setHeaders(res, filePath) {
     if (filePath.endsWith('.html')) {
@@ -1678,14 +1720,14 @@ app.use(express.static(__dirname, {
 }));
 
 // --- Explicit HTML Routes for clean URLs ---
-app.get('/gallery-contact', (req, res) => res.sendFile(path.join(__dirname, 'gallery-contact.html')));
-app.get('/goals-mission', (req, res) => res.sendFile(path.join(__dirname, 'goals-mission.html')));
-app.get('/community-page', (req, res) => res.sendFile(path.join(__dirname, 'community.html')));
-app.get('/impact', (req, res) => res.sendFile(path.join(__dirname, 'impact.html')));
-app.get('/leaderboard-page', (req, res) => res.sendFile(path.join(__dirname, 'leaderboard.html')));
+app.get('/gallery-contact', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'gallery-contact.html')));
+app.get('/goals-mission', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'goals-mission.html')));
+app.get('/community-page', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'community.html')));
+app.get('/impact', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'impact.html')));
+app.get('/leaderboard-page', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'leaderboard.html')));
 
 app.all('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+  res.sendFile(path.join(PUBLIC_DIR, 'index.html'));
 });
   
   // ============================================================
@@ -1725,11 +1767,16 @@ process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 // ============================================================
 createStartupBackup();  // FIX #3
 scanVerificationSessions = loadScanSessions(); // FIX #4
-console.log(`[Boot] Loaded ${scanVerificationSessions.size} pending scan session(s) from disk.`);
+if (process.env.NODE_ENV !== 'production' || process.env.VERCEL !== '1') {
+  app.listen(PORT, () => {
+    console.log(`EcoSort server running on http://localhost:${PORT}`);
+    console.log(`[Boot] Serving static Vanilla JS frontend (index.html)`);
+    console.log(`[Boot] Rate limiting: auth=${process.env.RATE_LIMIT_AUTH || 10}/min, chat=${process.env.RATE_LIMIT_CHAT || 20}/min, community=${process.env.RATE_LIMIT_COMMUNITY || 5}/min, contact=${process.env.RATE_LIMIT_CONTACT || 3}/min`);
+    if (process.env.TOKEN_BLACKLIST_ENABLED !== 'false') {
+      console.log(`[Boot] Token blacklist active. Graceful shutdown enabled.`);
+    }
+  });
+}
 
-app.listen(PORT, () => {
-  console.log(`EcoSort server running on http://localhost:${PORT}`);
-  console.log(`[Boot] Serving static Vanilla JS frontend (index.html)`);
-  console.log(`[Boot] Rate limiting: auth=10/min, chat=20/min, community=5/min, contact=3/min`);
-  console.log(`[Boot] Token blacklist active. Graceful shutdown enabled.`);
-});
+// Export the app for Vercel serverless functions
+module.exports = app;
