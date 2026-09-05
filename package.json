@@ -1,21 +1,25 @@
 {
-  "name": "ecowaste-root",
+  "name": "ecosort-ai",
   "version": "1.0.0",
-  "description": "Root package to start the EcoSort Next.js and PocketBase stack",
+  "private": true,
+  "description": "EcoSort AI full-stack app",
+  "main": "server.js",
   "scripts": {
-    "start": "node Ecowaste/start.js"
+    "start": "node start.js",
+    "dev": "node start.js"
   },
   "dependencies": {
-    "cors": "^2.8.5",
-    "http-proxy-middleware": "^4.1.1",
     "@google/genai": "^2.8.0",
     "bcryptjs": "^2.4.3",
+    "compression": "^1.8.1",
+    "cors": "^2.8.5",
     "dotenv": "^17.4.2",
     "express": "^4.21.2",
+    "express-rate-limit": "^8.6.2",
+    "helmet": "^8.3.0",
+    "http-proxy-middleware": "^4.1.1",
     "jsonwebtoken": "^9.0.2",
-    "pocketbase": "^0.22.0"
-  },
-  "devDependencies": {
-    "concurrently": "^10.0.3"
+    "pocketbase": "^0.22.0",
+    "zod": "^4.5.4"
   }
 }
