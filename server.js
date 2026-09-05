@@ -1,4 +1,4 @@
-try { require('dotenv').config(); } catch (e) {}
+﻿try { require('dotenv').config(); } catch (e) {}
 const express = require('express');
 const cors = require('cors');
 const compression = require('compression');
@@ -35,7 +35,7 @@ PLASTIC SCAN ANALYSIS
 When users upload images of plastic items: identify the item, estimate the plastic type (PET/HDPE/PVC/LDPE/PP/PS/Other), explain visible characteristics, estimate recyclability, suggest disposal and reuse, explain environmental impact. ALWAYS state a confidence level: High / Medium / Low. If uncertain, say so clearly and recommend checking recycling symbols or local guidelines. Never claim certainty when confidence is low.
 
 PLASTIC RECYCLING EXPERTISE
-Be highly knowledgeable about PET (1), HDPE (2), PVC (3), LDPE (4), PP (5), PS (6), Other (7) — identification, usage, recyclability, environmental impact, recycling methods, sorting, and upcycling.
+Be highly knowledgeable about PET (1), HDPE (2), PVC (3), LDPE (4), PP (5), PS (6), Other (7) â€” identification, usage, recyclability, environmental impact, recycling methods, sorting, and upcycling.
 
 SUSTAINABILITY EXPERTISE
 Climate change, circular economy, sustainable development, carbon footprint, biodiversity, water conservation, renewable energy, waste reduction, green tech, sustainable consumption. Be scientifically accurate; avoid exaggerated claims.
@@ -304,7 +304,7 @@ function sanitizeIncomingData(incoming) {
 }
 
 // ============================================================
-// Database Layer — Fixes #1, #2, #3, #4
+// Database Layer â€” Fixes #1, #2, #3, #4
 // ============================================================
 
 function ensureDb() {
@@ -546,14 +546,14 @@ setInterval(() => {
 async function verifyTokenCached(token) {
   const now = Date.now();
 
-  // Fast path — serve from cache
+  // Fast path â€” serve from cache
   if (tokenCache.has(token)) {
     const cached = tokenCache.get(token);
     if (now < cached.expiresAt) return cached.userId;
     tokenCache.delete(token);
   }
 
-  // Slow path — ask PocketBase with a strict timeout
+  // Slow path â€” ask PocketBase with a strict timeout
   const pbBase = process.env.PB_URL || 'http://127.0.0.1:8090';
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), PB_AUTH_TIMEOUT_MS);
@@ -575,11 +575,11 @@ async function verifyTokenCached(token) {
     if (pbErr.name !== 'AbortError') {
       console.error('[AUTH] PocketBase error:', pbErr.message);
     } else {
-      console.warn('[AUTH] PocketBase timed out — falling back to local JWT');
+      console.warn('[AUTH] PocketBase timed out â€” falling back to local JWT');
     }
   }
 
-  // Fallback — try local JWT verification (for tokens we issued ourselves)
+  // Fallback â€” try local JWT verification (for tokens we issued ourselves)
   try {
     const payload = jwt.verify(token, JWT_SECRET);
     const userId = payload.sub;
@@ -734,7 +734,7 @@ function normalizeContentsForGemini(messages) {
 // Express Setup
 // ============================================================
 
-// 0. Response compression (gzip/deflate) — must be first to compress all responses
+// 0. Response compression (gzip/deflate) â€” must be first to compress all responses
 app.use(compression());
 
 // 1. Secure HTTP Headers with proper CSP
@@ -756,7 +756,7 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false,
 }));
 
-// 2. CORS — whitelist all known frontend origins
+// 2. CORS â€” whitelist all known frontend origins
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:3001',
@@ -812,7 +812,7 @@ app.use((req, res, next) => {
 // Routes
 // ============================================================
 
-// ── Enhanced Health Check ────────────────────────────────────────
+// â”€â”€ Enhanced Health Check â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.get('/api/health', async (_req, res) => {
   const startMs = Date.now();
   const dbSizeBytes = (() => {
@@ -1097,7 +1097,7 @@ app.post('/api/auth/login', authRateLimit, async (req, res) => {
   }
 });
 
-// FIX #5: Logout endpoint — blacklists the current token
+// FIX #5: Logout endpoint â€” blacklists the current token
 app.post('/api/auth/logout', authMiddleware, (req, res) => {
   blacklistToken(req.authToken);
   return res.json({ ok: true, message: 'Logged out successfully' });
@@ -1229,7 +1229,7 @@ app.post('/api/chat', optionalAuthMiddleware, chatRateLimit, async (req, res) =>
 // Admin Portal API Endpoints
 // ============================================================
 
-// Admin role check middleware — verifies the authenticated user has ROLE_ADMIN in PocketBase
+// Admin role check middleware â€” verifies the authenticated user has ROLE_ADMIN in PocketBase
 async function adminGuard(req, res, next) {
   try {
     const authHeader = req.headers.authorization || '';
@@ -1265,7 +1265,7 @@ async function adminGuard(req, res, next) {
   }
 }
 
-// GET /api/admin/users — Returns all users combined with their userData (credits, history)
+// GET /api/admin/users â€” Returns all users combined with their userData (credits, history)
 app.get('/api/admin/users', authMiddleware, adminGuard, (req, res) => {
   const db = readDb();
   const users = (db.users || []).map(user => {
@@ -1285,7 +1285,7 @@ app.get('/api/admin/users', authMiddleware, adminGuard, (req, res) => {
   res.json({ users, total: users.length });
 });
 
-// DELETE /api/admin/users/:id — Removes a user and their data from db.json
+// DELETE /api/admin/users/:id â€” Removes a user and their data from db.json
 app.delete('/api/admin/users/:id', authMiddleware, adminGuard, (req, res) => {
   const db = readDb();
   const userId = req.params.id;
@@ -1299,7 +1299,7 @@ app.delete('/api/admin/users/:id', authMiddleware, adminGuard, (req, res) => {
   res.json({ ok: true, message: `User ${deletedUser.name} (${deletedUser.email}) deleted.` });
 });
 
-// GET /api/admin/stats — Returns aggregated platform stats for the admin dashboard
+// GET /api/admin/stats â€” Returns aggregated platform stats for the admin dashboard
 app.get('/api/admin/stats', authMiddleware, adminGuard, (req, res) => {
   const db = readDb();
   const allUserData = Object.values(db.userData || {});
@@ -1361,7 +1361,7 @@ app.get('/api/stats/global', async (_req, res) => {
       const pbData = await pbRes.json();
       pbUserCount = pbData.totalItems || 0;
     }
-  } catch { /* PocketBase offline — use db.json count */ }
+  } catch { /* PocketBase offline â€” use db.json count */ }
 
   const result = {
     totalUsers: Math.max(db.users.length, pbUserCount),
@@ -1713,202 +1713,7 @@ app.use(express.static(PUBLIC_DIR, {
   maxAge: '1d',
   setHeaders(res, filePath) {
     if (filePath.endsWith('.html')) {
-      // Don't aggressively cache HTML — allow updates to propagate within 1 hour
-      res.setHeader('Cache-Control', 'public, max-age=3600, must-revalidate');
-    }
-  }
-}));
-
-// --- Explicit HTML Routes for clean URLs ---
-app.get('/gallery-contact', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'gallery-contact.html')));
-app.get('/goals-mission', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'goals-mission.html')));
-app.get('/community-page', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'community.html')));
-app.get('/impact', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'impact.html')));
-app.get('/leaderboard-page', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'leaderboard.html')));
-
-app.all('*', (req, res) => {
-  res.sendFile(path.join(PUBLIC_DIR, 'index.html'));
-});
-  
-  // ============================================================
-  // FIX #10: Global Error Handlers
-// ============================================================
-process.on('uncaughtException', (err) => {
-  console.error('[FATAL] Uncaught Exception:', err);
-  flushDbSync();
-  process.exit(1);
-});
-
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('[FATAL] Unhandled Rejection at:', promise, 'reason:', reason);
-  flushDbSync();
-  process.exit(1);
-});
-
-// ============================================================
-// FIX #8: Graceful Shutdown
-// ============================================================
-let isShuttingDown = false;
-
-function gracefulShutdown(signal) {
-  if (isShuttingDown) return;
-  isShuttingDown = true;
-  console.log(`\n[Shutdown] Received ${signal}. Flushing database...`);
-  flushDbSync();
-  console.log('[Shutdown] Goodbye!');
-  process.exit(0);
-}
-  }
-});
-
-app.put('/api/pickups/:id/status', authMiddleware, (req, res) => {
-  const db = readDb();
-  const user = db.users.find(u => u.id === req.userId);
-  if (!user || user.role !== 'ROLE_COLLECTOR') {
-    return res.status(403).json({ error: 'Only collectors can update status' });
-  }
-  const pickup = db.pickups.find(p => p.id === req.params.id);
-  if (!pickup) return res.status(404).json({ error: 'Pickup not found' });
-  
-  const newStatus = req.body.status;
-  if (!['pending', 'accepted', 'completed'].includes(newStatus)) {
-    return res.status(400).json({ error: 'Invalid status' });
-  }
-  
-  pickup.status = newStatus;
-  if (newStatus === 'accepted') {
-    pickup.collectorId = user.id;
-    pickup.collectorName = user.name;
-  } else if (newStatus === 'completed' && !pickup.creditsAwarded) {
-    if (!db.userData[pickup.userId]) db.userData[pickup.userId] = defaultUserData();
-    if (!db.userData[pickup.collectorId]) db.userData[pickup.collectorId] = defaultUserData();
-
-    db.userData[pickup.userId].credits = (db.userData[pickup.userId].credits || 0) + USER_COMPLETION_CREDITS;
-    db.userData[pickup.collectorId].credits = (db.userData[pickup.collectorId].credits || 0) + COLLECTOR_COMPLETION_CREDITS;
-    pickup.creditsAwarded = true;
-  }
-  
-  writeDb(db);
-  if (typeof invalidateLeaderboardCache === 'function') invalidateLeaderboardCache();
-  res.json({ pickup });
-});
-
-// --- Rewards ---
-app.get('/api/rewards', authMiddleware, (req, res) => {
-  const db = readDb();
-  const user = db.users.find(u => u.id === req.userId);
-  if (!user) return res.status(404).json({ error: 'User not found' });
-
-  const rewards = Array.isArray(db.content?.rewards) ? db.content.rewards : [];
-  const availableRewards = rewards.filter(r => r.role === user.role);
-  
-  res.json({ rewards: availableRewards, credits: db.userData[user.id]?.credits || 0 });
-});
-
-app.post('/api/rewards/redeem', authMiddleware, (req, res) => {
-  const { rewardId } = req.body;
-  if (!rewardId) return res.status(400).json({ error: 'Reward ID is required' });
-
-  const db = readDb();
-  const user = db.users.find(u => u.id === req.userId);
-  if (!user) return res.status(404).json({ error: 'User not found' });
-
-  const rewards = Array.isArray(db.content?.rewards) ? db.content.rewards : [];
-  const reward = rewards.find(r => r.id === rewardId && r.role === user.role);
-
-  if (!reward) return res.status(404).json({ error: 'Reward not found or not available for your role' });
-  if (!reward.inStock) return res.status(400).json({ error: 'Reward is out of stock' });
-
-  let userData = db.userData[user.id];
-  if (!userData) {
-    userData = defaultUserData();
-    db.userData[user.id] = userData;
-  }
-
-  if (userData.credits < reward.cost) {
-    return res.status(400).json({ error: 'Insufficient credits' });
-  }
-
-  // Deduct credits and generate coupon code
-  userData.credits -= reward.cost;
-  const couponCode = crypto.randomBytes(4).toString('hex').toUpperCase() + '-' + crypto.randomBytes(4).toString('hex').toUpperCase();
-
-  const claimedItem = {
-    id: crypto.randomUUID(),
-    rewardId: reward.id,
-    title: reward.title,
-    cost: reward.cost,
-    couponCode,
-    validUntil: new Date(Date.now() + COUPON_VALIDITY_DAYS * 24 * 60 * 60 * 1000).toISOString(),
-    claimedAt: new Date().toISOString()
-  };
-
-  if (!Array.isArray(userData.claimedRewards)) userData.claimedRewards = [];
-  userData.claimedRewards.push(claimedItem);
-
-  writeDb(db);
-  if (typeof invalidateLeaderboardCache === 'function') invalidateLeaderboardCache();
-  res.json({ success: true, couponCode, newBalance: userData.credits, claimedItem });
-});
-
-app.get('/api/rewards/history', authMiddleware, (req, res) => {
-  const db = readDb();
-  const userData = db.userData[req.userId] || defaultUserData();
-  const history = Array.isArray(userData.claimedRewards) ? userData.claimedRewards : [];
-  res.json({ history });
-});
-
-app.post('/api/community/posts', communityRateLimit, handleCommunityPostsCreate);
-app.post('/community/posts', communityRateLimit, handleCommunityPostsCreate);
-
-// --- Contact ---
-app.post('/api/contact', contactRateLimit, (req, res) => {
-  const name = (req.body?.name || '').trim();
-  const email = (req.body?.email || '').trim().toLowerCase();
-  const message = (req.body?.message || '').trim();
-
-  if (!name || !email || !message) {
-    return res.status(400).json({ error: 'Name, email, and message are required' });
-  }
-
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailPattern.test(email)) {
-    return res.status(400).json({ error: 'Enter a valid email address' });
-  }
-
-  if (message.length < 10) {
-    return res.status(400).json({ error: 'Message must be at least 10 characters' });
-  }
-
-  const db = readDb();
-  const contact = {
-    id: crypto.randomUUID(),
-    name,
-    email,
-    message,
-    createdAt: new Date().toISOString()
-  };
-
-  db.contacts.unshift(contact);
-  if (db.contacts.length > MAX_CONTACTS) {
-    db.contacts = db.contacts.slice(0, MAX_CONTACTS);
-  }
-  writeDb(db);
-
-  return res.status(201).json({ ok: true, message: 'Message received' });
-});
-
-// --- Next.js proxy removed ---
-
-const PUBLIC_DIR = path.join(__dirname, 'public');
-
-// --- Static Files (with cache-control headers for performance) ---
-// Cache immutable assets (JS/CSS/images) for 1 day; HTML for 1 hour to allow updates
-app.use(express.static(PUBLIC_DIR, {
-  maxAge: '1d',
-  setHeaders(res, filePath) {
-    if (filePath.endsWith('.html')) {
-      // Don't aggressively cache HTML — allow updates to propagate within 1 hour
+      // Don't aggressively cache HTML â€” allow updates to propagate within 1 hour
       res.setHeader('Cache-Control', 'public, max-age=3600, must-revalidate');
     }
   }
