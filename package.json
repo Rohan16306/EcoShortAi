@@ -6,7 +6,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node start.js",
-    "dev": "node start.js"
+    "dev": "node start.js",
+    "build": "echo 'Static frontend - no build step needed'"
   },
   "dependencies": {
     "@google/genai": "^2.8.0",
@@ -21,5 +22,8 @@
     "jsonwebtoken": "^9.0.2",
     "pocketbase": "^0.22.0",
     "zod": "^4.5.4"
+  },
+  "devDependencies": {
+    "puppeteer": "^25.10.0"
   }
 }
