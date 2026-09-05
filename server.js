@@ -1758,6 +1758,201 @@ function gracefulShutdown(signal) {
   console.log('[Shutdown] Goodbye!');
   process.exit(0);
 }
+  }
+});
+
+app.put('/api/pickups/:id/status', authMiddleware, (req, res) => {
+  const db = readDb();
+  const user = db.users.find(u => u.id === req.userId);
+  if (!user || user.role !== 'ROLE_COLLECTOR') {
+    return res.status(403).json({ error: 'Only collectors can update status' });
+  }
+  const pickup = db.pickups.find(p => p.id === req.params.id);
+  if (!pickup) return res.status(404).json({ error: 'Pickup not found' });
+  
+  const newStatus = req.body.status;
+  if (!['pending', 'accepted', 'completed'].includes(newStatus)) {
+    return res.status(400).json({ error: 'Invalid status' });
+  }
+  
+  pickup.status = newStatus;
+  if (newStatus === 'accepted') {
+    pickup.collectorId = user.id;
+    pickup.collectorName = user.name;
+  } else if (newStatus === 'completed' && !pickup.creditsAwarded) {
+    if (!db.userData[pickup.userId]) db.userData[pickup.userId] = defaultUserData();
+    if (!db.userData[pickup.collectorId]) db.userData[pickup.collectorId] = defaultUserData();
+
+    db.userData[pickup.userId].credits = (db.userData[pickup.userId].credits || 0) + USER_COMPLETION_CREDITS;
+    db.userData[pickup.collectorId].credits = (db.userData[pickup.collectorId].credits || 0) + COLLECTOR_COMPLETION_CREDITS;
+    pickup.creditsAwarded = true;
+  }
+  
+  writeDb(db);
+  if (typeof invalidateLeaderboardCache === 'function') invalidateLeaderboardCache();
+  res.json({ pickup });
+});
+
+// --- Rewards ---
+app.get('/api/rewards', authMiddleware, (req, res) => {
+  const db = readDb();
+  const user = db.users.find(u => u.id === req.userId);
+  if (!user) return res.status(404).json({ error: 'User not found' });
+
+  const rewards = Array.isArray(db.content?.rewards) ? db.content.rewards : [];
+  const availableRewards = rewards.filter(r => r.role === user.role);
+  
+  res.json({ rewards: availableRewards, credits: db.userData[user.id]?.credits || 0 });
+});
+
+app.post('/api/rewards/redeem', authMiddleware, (req, res) => {
+  const { rewardId } = req.body;
+  if (!rewardId) return res.status(400).json({ error: 'Reward ID is required' });
+
+  const db = readDb();
+  const user = db.users.find(u => u.id === req.userId);
+  if (!user) return res.status(404).json({ error: 'User not found' });
+
+  const rewards = Array.isArray(db.content?.rewards) ? db.content.rewards : [];
+  const reward = rewards.find(r => r.id === rewardId && r.role === user.role);
+
+  if (!reward) return res.status(404).json({ error: 'Reward not found or not available for your role' });
+  if (!reward.inStock) return res.status(400).json({ error: 'Reward is out of stock' });
+
+  let userData = db.userData[user.id];
+  if (!userData) {
+    userData = defaultUserData();
+    db.userData[user.id] = userData;
+  }
+
+  if (userData.credits < reward.cost) {
+    return res.status(400).json({ error: 'Insufficient credits' });
+  }
+
+  // Deduct credits and generate coupon code
+  userData.credits -= reward.cost;
+  const couponCode = crypto.randomBytes(4).toString('hex').toUpperCase() + '-' + crypto.randomBytes(4).toString('hex').toUpperCase();
+
+  const claimedItem = {
+    id: crypto.randomUUID(),
+    rewardId: reward.id,
+    title: reward.title,
+    cost: reward.cost,
+    couponCode,
+    validUntil: new Date(Date.now() + COUPON_VALIDITY_DAYS * 24 * 60 * 60 * 1000).toISOString(),
+    claimedAt: new Date().toISOString()
+  };
+
+  if (!Array.isArray(userData.claimedRewards)) userData.claimedRewards = [];
+  userData.claimedRewards.push(claimedItem);
+
+  writeDb(db);
+  if (typeof invalidateLeaderboardCache === 'function') invalidateLeaderboardCache();
+  res.json({ success: true, couponCode, newBalance: userData.credits, claimedItem });
+});
+
+app.get('/api/rewards/history', authMiddleware, (req, res) => {
+  const db = readDb();
+  const userData = db.userData[req.userId] || defaultUserData();
+  const history = Array.isArray(userData.claimedRewards) ? userData.claimedRewards : [];
+  res.json({ history });
+});
+
+app.post('/api/community/posts', communityRateLimit, handleCommunityPostsCreate);
+app.post('/community/posts', communityRateLimit, handleCommunityPostsCreate);
+
+// --- Contact ---
+app.post('/api/contact', contactRateLimit, (req, res) => {
+  const name = (req.body?.name || '').trim();
+  const email = (req.body?.email || '').trim().toLowerCase();
+  const message = (req.body?.message || '').trim();
+
+  if (!name || !email || !message) {
+    return res.status(400).json({ error: 'Name, email, and message are required' });
+  }
+
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailPattern.test(email)) {
+    return res.status(400).json({ error: 'Enter a valid email address' });
+  }
+
+  if (message.length < 10) {
+    return res.status(400).json({ error: 'Message must be at least 10 characters' });
+  }
+
+  const db = readDb();
+  const contact = {
+    id: crypto.randomUUID(),
+    name,
+    email,
+    message,
+    createdAt: new Date().toISOString()
+  };
+
+  db.contacts.unshift(contact);
+  if (db.contacts.length > MAX_CONTACTS) {
+    db.contacts = db.contacts.slice(0, MAX_CONTACTS);
+  }
+  writeDb(db);
+
+  return res.status(201).json({ ok: true, message: 'Message received' });
+});
+
+// --- Next.js proxy removed ---
+
+const PUBLIC_DIR = path.join(__dirname, 'public');
+
+// --- Static Files (with cache-control headers for performance) ---
+// Cache immutable assets (JS/CSS/images) for 1 day; HTML for 1 hour to allow updates
+app.use(express.static(PUBLIC_DIR, {
+  maxAge: '1d',
+  setHeaders(res, filePath) {
+    if (filePath.endsWith('.html')) {
+      // Don't aggressively cache HTML — allow updates to propagate within 1 hour
+      res.setHeader('Cache-Control', 'public, max-age=3600, must-revalidate');
+    }
+  }
+}));
+
+// --- Explicit HTML Routes for clean URLs ---
+app.get('/gallery-contact', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'gallery-contact.html')));
+app.get('/goals-mission', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'goals-mission.html')));
+app.get('/community-page', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'community.html')));
+app.get('/impact', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'impact.html')));
+app.get('/leaderboard-page', (req, res) => res.sendFile(path.join(PUBLIC_DIR, 'leaderboard.html')));
+
+app.all('*', (req, res) => {
+  res.sendFile(path.join(PUBLIC_DIR, 'index.html'));
+});
+  
+  // ============================================================
+  // FIX #10: Global Error Handlers
+// ============================================================
+process.on('uncaughtException', (err) => {
+  console.error('[FATAL] Uncaught Exception:', err);
+  flushDbSync();
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[FATAL] Unhandled Rejection at:', promise, 'reason:', reason);
+  flushDbSync();
+  process.exit(1);
+});
+
+// ============================================================
+// FIX #8: Graceful Shutdown
+// ============================================================
+let isShuttingDown = false;
+
+function gracefulShutdown(signal) {
+  if (isShuttingDown) return;
+  isShuttingDown = true;
+  console.log(`\n[Shutdown] Received ${signal}. Flushing database...`);
+  flushDbSync();
+  console.log('[Shutdown] Goodbye!');
+  process.exit(0);
+}
 
 process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
@@ -1767,7 +1962,9 @@ process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
 // ============================================================
 createStartupBackup();  // FIX #3
 scanVerificationSessions = loadScanSessions(); // FIX #4
-if (process.env.NODE_ENV !== 'production' || process.env.VERCEL !== '1') {
+
+// Start server unless deployed as a Vercel serverless function
+if (process.env.VERCEL !== '1') {
   app.listen(PORT, () => {
     console.log(`EcoSort server running on http://localhost:${PORT}`);
     console.log(`[Boot] Serving static Vanilla JS frontend (index.html)`);

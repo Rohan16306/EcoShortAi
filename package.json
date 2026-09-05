@@ -23,7 +23,5 @@
     "pocketbase": "^0.22.0",
     "zod": "^4.5.4"
   },
-  "devDependencies": {
-    "puppeteer": "^25.10.0"
-  }
+  "devDependencies": {}
 }
