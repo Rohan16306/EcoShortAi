@@ -1,4 +1,4 @@
-﻿try { require('dotenv').config(); } catch (e) {}
+try { require('dotenv').config(); } catch (e) {}
 const express = require('express');
 const cors = require('cors');
 const compression = require('compression');
@@ -7,7 +7,6 @@ const path = require('path');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { createProxyMiddleware } = require('http-proxy-middleware');
 const { GoogleGenAI } = require('@google/genai');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
